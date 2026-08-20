@@ -1,0 +1,29 @@
+﻿# Backend (Python/FastAPI)
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.env
+backend/*.pyc
+backend/model/indobert/*
+!backend/model/indobert/.gitkeep
+backend/model/tokenizer/*
+!backend/model/tokenizer/.gitkeep
+
+# Dataset (jangan commit data mentah/besar, tapi tetap lacak struktur)
+dataset/raw/*
+!dataset/raw/.gitkeep
+dataset/processed/*
+!dataset/processed/.gitkeep
+dataset/training/*
+!dataset/training/.gitkeep
+
+# Frontend (Next.js)
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/npm-debug.log*
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
