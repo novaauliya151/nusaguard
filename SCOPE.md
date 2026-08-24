@@ -27,10 +27,11 @@ DATABASE:
 PostgreSQL
 
 API UTAMA:
-POST /analyze
+POST /api/analyze
 
 PRINSIP PRIVASI:
-- Data pesan dapat dikumpulkan untuk pengembangan dataset NusaGuard.
+- Analisis pesan bersifat ephemeral dan tidak disimpan otomatis.
+- Pesan hanya dapat masuk laporan/dataset melalui persetujuan eksplisit pengguna.
 - Identitas personal seperti nama, nomor telepon, alamat, email, rekening, OTP,
   dan informasi identitas lainnya wajib dianonimkan sebelum masuk dataset publik.
 - Dataset publik hanya berisi data yang telah melalui proses anonymization/de-identification.
