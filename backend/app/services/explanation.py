@@ -1,8 +1,8 @@
 from app.models.schemas import DetectedPattern
 
 def generate_explanation(patterns: list[DetectedPattern], kategori: str) -> str:
-    # TODO: ganti dengan generasi penjelasan berbasis pattern asli
-    return (
-        "Pesan menggunakan tekanan waktu dan permintaan data OTP "
-        "yang menyerupai modus social engineering."
-    )
+    if not patterns:
+        return "Tidak ada indikator rekayasa sosial yang terdeteksi dalam pesan."
+
+    detected = ", ".join(pattern.pattern for pattern in patterns)
+    return f"Pesan terdeteksi memiliki indikator: {detected}."

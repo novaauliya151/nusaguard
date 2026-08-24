@@ -9,7 +9,7 @@ Kontrak data antara:
 
 from enum import Enum
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # ---------------------------------------------------------
@@ -74,20 +74,8 @@ class DetectedPattern(BaseModel):
 
 
 class AnalyzeResponse(BaseModel):
-    kategori_dasar: KategoriDasar
-    kategori_nusaguard: KategoriNusaGuard
-    risk_level: RiskLevel
-    risk_score: float = Field(..., ge=0.0, le=1.0)
-    confidence: float = Field(
-        ..., ge=0.0, le=1.0, description="Confidence model IndoBERT terhadap prediksi ini"
-    )
-    detected_patterns: List[DetectedPattern] = []
-    explanation: str = Field(
-        ..., description="Penjelasan human-readable kenapa pesan ini diberi label tsb"
-    )
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "kategori_dasar": "spam",
                 "kategori_nusaguard": "Social Engineering",
@@ -102,7 +90,19 @@ class AnalyzeResponse(BaseModel):
                 "explanation": "Pesan menggunakan iming-iming hadiah dan tekanan waktu untuk mendorong pengguna segera melakukan tindakan.",
             }
         }
+    )
 
+    kategori_dasar: KategoriDasar
+    kategori_nusaguard: KategoriNusaGuard
+    risk_level: RiskLevel
+    risk_score: float = Field(..., ge=0.0, le=1.0)
+    confidence: float = Field(
+        ..., ge=0.0, le=1.0, description="Confidence model IndoBERT terhadap prediksi ini"
+    )
+    detected_patterns: List[DetectedPattern] = Field(default_factory=list)
+    explanation: str = Field(
+        ..., description="Penjelasan human-readable kenapa pesan ini diberi label tsb"
+    )
 
 # ---------------------------------------------------------
 # 4. SCHEMA UNTUK DATASET ROW (dipakai saat preprocessing)
