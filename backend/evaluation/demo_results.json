@@ -1,0 +1,78 @@
+{
+  "scope": "curated demo smoke test; not a held-out IndoBERT benchmark",
+  "model_source": "rules-fallback",
+  "samples": 10,
+  "accuracy": 1.0,
+  "results": [
+    {
+      "text": "Petugas bank meminta OTP agar rekening tidak diblokir. Kirim sekarang!",
+      "expected": "Social Engineering",
+      "predicted": "Social Engineering",
+      "confidence": 0.9,
+      "correct": true
+    },
+    {
+      "text": "Selamat Anda menang hadiah, klik https://bonus-akun.xyz sekarang",
+      "expected": "Phishing/Link Berbahaya",
+      "predicted": "Phishing/Link Berbahaya",
+      "confidence": 0.8,
+      "correct": true
+    },
+    {
+      "text": "Investasi profit 30 persen tanpa risiko, transfer hari ini",
+      "expected": "Penipuan Investasi",
+      "predicted": "Penipuan Investasi",
+      "confidence": 0.8,
+      "correct": true
+    },
+    {
+      "text": "Lowongan kerja paruh waktu, bayar biaya administrasi untuk interview",
+      "expected": "Penipuan Rekrutmen",
+      "predicted": "Penipuan Rekrutmen",
+      "confidence": 0.9,
+      "correct": true
+    },
+    {
+      "text": "Aku sayang kamu, tapi sedang butuh bantuan kirim uang",
+      "expected": "Penipuan Romansa",
+      "predicted": "Penipuan Romansa",
+      "confidence": 0.9,
+      "correct": true
+    },
+    {
+      "text": "Besok rapat kelompok dimulai pukul sembilan pagi",
+      "expected": "Aman",
+      "predicted": "Aman",
+      "confidence": 0.65,
+      "correct": true
+    },
+    {
+      "text": "Tolong beli makan siang kalau pulang dari kampus",
+      "expected": "Aman",
+      "predicted": "Aman",
+      "confidence": 0.65,
+      "correct": true
+    },
+    {
+      "text": "Admin meminta PIN dan password untuk verifikasi akun",
+      "expected": "Social Engineering",
+      "predicted": "Social Engineering",
+      "confidence": 0.8,
+      "correct": true
+    },
+    {
+      "text": "Cek tautan hadiah gratis di http://hadiah.example",
+      "expected": "Phishing/Link Berbahaya",
+      "predicted": "Phishing/Link Berbahaya",
+      "confidence": 0.8,
+      "correct": true
+    },
+    {
+      "text": "HRD membuka lowongan tetapi meminta transfer sebelum tes",
+      "expected": "Penipuan Rekrutmen",
+      "predicted": "Penipuan Rekrutmen",
+      "confidence": 0.8,
+      "correct": true
+    }
+  ]
+}

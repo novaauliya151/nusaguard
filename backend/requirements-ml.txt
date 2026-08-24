@@ -1,0 +1,7 @@
+-r requirements.txt
+accelerate
+datasets
+evaluate
+scikit-learn
+torch
+transformers

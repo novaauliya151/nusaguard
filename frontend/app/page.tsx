@@ -1,84 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import type { AnalyzeResponse } from "./types";
+import { useEffect, useState } from "react";
+import type { AnalyzeResponse, CategoryInfo } from "./types";
+
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const labels: Record<string,string> = { urgency:"Urgensi", authority:"Otoritas", fear:"Ketakutan", reward:"Imbalan", impersonation:"Penyamaran", credential_request:"Permintaan data" };
 
 export default function Home() {
-  const [message, setMessage] = useState("");
-  const [result, setResult] = useState<AnalyzeResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleAnalyze() {
-    if (!message.trim()) return;
-    setLoading(true);
-    setError(null);
-    setResult(null);
-
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/analyze`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, source: "manual_web" }),
-      });
-
-      if (!res.ok) throw new Error(`API error: ${res.status}`);
-      const data: AnalyzeResponse = await res.json();
-      setResult(data);
-    } catch (err) {
-      setError("Gagal menghubungi server. Pastikan backend sedang berjalan.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">NusaGuard — Cek Pesan</h1>
-
-        <textarea
-          className="w-full border rounded-lg p-3 h-32"
-          placeholder="Tempel pesan WhatsApp yang mencurigakan di sini..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-
-        <button
-          onClick={handleAnalyze}
-          disabled={loading}
-          className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
-        >
-          {loading ? "Menganalisis..." : "Analisis Pesan"}
-        </button>
-
-        {error && <p className="mt-4 text-red-600">{error}</p>}
-
-        {result && (
-          <div className="mt-6 border rounded-lg p-4 bg-white">
-            <p className="font-semibold">
-              Risk Level: <span>{result.risk_level}</span> ({Math.round(result.risk_score * 100)}/100)
-            </p>
-            <p>Kategori: {result.kategori_nusaguard}</p>
-            <p className="text-sm text-gray-600 mt-1">
-              Confidence model: {Math.round(result.confidence * 100)}%
-            </p>
-
-            <div className="mt-3">
-              <p className="font-medium">Indikator N-SEAE:</p>
-              <ul className="text-sm mt-1 space-y-1">
-                {result.detected_patterns.map((p) => (
-                  <li key={p.pattern}>
-                    {p.pattern}: {Math.round((p.weight ?? 0) * 100)}%
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <p className="mt-3 text-sm">{result.explanation}</p>
-          </div>
-        )}
-      </div>
-    </main>
-  );
+  const [message,setMessage]=useState(""); const [result,setResult]=useState<AnalyzeResponse|null>(null);
+  const [categories,setCategories]=useState<CategoryInfo[]>([]); const [loading,setLoading]=useState(false);
+  const [error,setError]=useState<string|null>(null); const [large,setLarge]=useState(false); const [contrast,setContrast]=useState(false);
+  useEffect(()=>{ fetch(`${API}/api/categories`).then(r=>r.ok?r.json():[]).then(setCategories).catch(()=>setCategories([])); },[]);
+  async function analyze(){ if(!message.trim())return; setLoading(true);setError(null);setResult(null); try{const r=await fetch(`${API}/api/analyze`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:message,source:"manual_web"})});if(!r.ok)throw new Error();setResult(await r.json())}catch{setError("API belum dapat dijangkau. Periksa NEXT_PUBLIC_API_URL dan status backend.")}finally{setLoading(false)} }
+  return <div className={`${large?"large":""} ${contrast?"contrast":""}`}>
+    <header><a className="brand" href="#top"><span>NG</span>NusaGuard</a><nav><a href="#analisis">Analisis</a><a href="#edukasi">Kenali modus</a><a href="#privasi">Privasi</a></nav><div className="access"><button onClick={()=>setLarge(v=>!v)} aria-pressed={large}>A+</button><button onClick={()=>setContrast(v=>!v)} aria-pressed={contrast}>◐</button></div></header>
+    <main id="top">
+      <section className="hero"><div><p className="eyebrow">AI ANTI-PENIPUAN BERBAHASA INDONESIA</p><h1>Berhenti sejenak.<br/><em>Periksa pesannya.</em></h1><p className="lead">NusaGuard membaca pola manipulasi dalam pesan mencurigakan dan memberi alasan yang bisa kamu pahami—sebelum kamu klik atau transfer.</p><a className="primary" href="#analisis">Periksa pesan sekarang →</a></div><div className="signal" aria-hidden><div className="orbit one"/><div className="orbit two"/><div className="shield">N</div><span className="ping p1"/><span className="ping p2"/></div></section>
+      <section id="analisis" className="analyzer"><div className="section-title"><p className="eyebrow">PEMERIKSAAN EPHEMERAL</p><h2>Tempel pesan mencurigakan</h2><p>Isi pesan dikirim untuk dianalisis dan tidak disimpan sebagai histori.</p></div><div className="workspace"><div className="input-card"><label htmlFor="message">Isi pesan WhatsApp / SMS</label><textarea id="message" maxLength={5000} value={message} onChange={e=>setMessage(e.target.value)} placeholder="Contoh: Selamat! Anda mendapat hadiah. Segera kirim OTP..."/><div className="input-meta"><span>{message.length}/5000</span><button className="primary" onClick={analyze} disabled={loading||!message.trim()}>{loading?"Menganalisis…":"Analisis pesan →"}</button></div>{error&&<p className="error" role="alert">{error}</p>}</div>
+      <div className={`result-card ${result?result.risk_level.toLowerCase():"empty"}`}>{!result?<div className="empty-state"><div className="radar">⌁</div><h3>Hasil akan muncul di sini</h3><p>Enam indikator N-SEAE diperiksa secara transparan.</p></div>:<><div className="risk-head"><div><span className="badge">RISIKO {result.risk_level}</span><h3>{result.category}</h3><small>Model: {result.model_source}</small></div><div className="score">{Math.round(result.risk_score*100)}<small>/100</small></div></div><p>{result.explanation}</p><div className="bars">{Object.entries(result.nseae_scores).map(([key,value])=><div key={key}><span>{labels[key]??key}</span><i><b style={{width:`${value*100}%`}}/></i><strong>{Math.round(value*100)}</strong></div>)}</div><div className="recommend"><b>Langkah aman</b><p>{result.recommendation}</p></div></>}</div></div></section>
+      <section id="edukasi" className="education"><div className="section-title"><p className="eyebrow">KENALI SEBELUM TERKENA</p><h2>Lima modus yang perlu diwaspadai</h2></div><div className="category-grid">{categories.map((item,index)=><article key={item.slug}><span>0{index+1}</span><h3>{item.name}</h3><p>{item.description}</p><strong>Tanda umum</strong><p>{item.examples[0]}</p><strong>Pencegahan</strong><ul>{item.prevention.map(x=><li key={x}>{x}</li>)}</ul></article>)}</div></section>
+      <section id="privasi" className="privacy"><p className="eyebrow">PRIVASI SEJAK AWAL</p><h2>Pesanmu lewat, bukan menetap.</h2><div><p>Analisis berlangsung di memori. Teks tidak masuk histori, log, atau dataset otomatis.</p><p>Laporan modus baru hanya disimpan jika kamu memilih mengirim dan memberi persetujuan eksplisit.</p><p>NusaGuard tidak membaca database WhatsApp, kontak, nomor telepon, atau histori percakapan.</p></div></section>
+    </main><footer><span>NusaGuard · Prototype kompetisi</span><span>IndoBERT + N-SEAE · FastAPI · Next.js · Android</span></footer>
+  </div>;
 }
