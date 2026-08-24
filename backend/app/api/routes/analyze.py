@@ -1,10 +1,11 @@
 from fastapi import APIRouter
 from app.models.schemas import AnalyzeRequest, AnalyzeResponse, RiskLevel
-from app.services.predictor import predict_category
+from app.services.explanation import generate_explanation, recommendation_for
 from app.services.nseae import analyze_nseae
-from app.services.explanation import generate_explanation
+from app.services.predictor import predict_category
+from app.services.store import store
 
-router = APIRouter()
+router = APIRouter(tags=["analysis"])
 
 def score_to_risk_level(score: float) -> RiskLevel:
     if score >= 0.7:
@@ -14,18 +15,10 @@ def score_to_risk_level(score: float) -> RiskLevel:
     return RiskLevel.LOW
 
 @router.post("/analyze", response_model=AnalyzeResponse)
-def analyze(payload: AnalyzeRequest):
-    kategori_dasar, kategori_nusaguard, confidence = predict_category(payload.message)
-    patterns = analyze_nseae(payload.message)
-    risk_score = sum(p.weight or 0 for p in patterns)
-    explanation = generate_explanation(patterns, kategori_nusaguard.value)
-
-    return AnalyzeResponse(
-        kategori_dasar=kategori_dasar,
-        kategori_nusaguard=kategori_nusaguard,
-        risk_level=score_to_risk_level(risk_score),
-        risk_score=round(min(risk_score, 1.0), 2),
-        confidence=confidence,
-        detected_patterns=patterns,
-        explanation=explanation,
-    )
+def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
+    basic, category, confidence, model_source = predict_category(payload.text)
+    patterns, scores = analyze_nseae(payload.text)
+    risk_score = round(min(sum(scores.values()), 1.0), 2)
+    level = score_to_risk_level(risk_score)
+    store.increment(category.value)
+    return AnalyzeResponse(kategori_dasar=basic, category=category, risk_level=level, risk_score=risk_score, confidence=confidence, nseae_scores=scores, detected_patterns=patterns, explanation=generate_explanation(patterns, category.value), recommendation=recommendation_for(level), model_source=model_source)
