@@ -1,0 +1,12 @@
+[
+  {"text":"Petugas bank meminta OTP agar rekening tidak diblokir. Kirim sekarang!","expected":"Social Engineering"},
+  {"text":"Selamat Anda menang hadiah, klik https://bonus-akun.xyz sekarang","expected":"Phishing/Link Berbahaya"},
+  {"text":"Investasi profit 30 persen tanpa risiko, transfer hari ini","expected":"Penipuan Investasi"},
+  {"text":"Lowongan kerja paruh waktu, bayar biaya administrasi untuk interview","expected":"Penipuan Rekrutmen"},
+  {"text":"Aku sayang kamu, tapi sedang butuh bantuan kirim uang","expected":"Penipuan Romansa"},
+  {"text":"Besok rapat kelompok dimulai pukul sembilan pagi","expected":"Aman"},
+  {"text":"Tolong beli makan siang kalau pulang dari kampus","expected":"Aman"},
+  {"text":"Admin meminta PIN dan password untuk verifikasi akun","expected":"Social Engineering"},
+  {"text":"Cek tautan hadiah gratis di http://hadiah.example","expected":"Phishing/Link Berbahaya"},
+  {"text":"HRD membuka lowongan tetapi meminta transfer sebelum tes","expected":"Penipuan Rekrutmen"}
+]
