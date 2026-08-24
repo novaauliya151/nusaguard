@@ -1,9 +1,11 @@
 ﻿# Backend (Python/FastAPI)
 backend/venv/
 backend/.venv/
+backend/.venv-ml/
 backend/__pycache__/
 backend/**/__pycache__/
 backend/.env
+backend/*.db
 backend/*.pyc
 backend/model/indobert/*
 !backend/model/indobert/.gitkeep
