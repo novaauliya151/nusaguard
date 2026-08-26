@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
@@ -64,7 +64,27 @@ class StatsResponse(BaseModel):
     total_analyzed: int
     category_counts: dict[str, int]
 
+class AdminReport(BaseModel):
+    id: str
+    text: str
+    category_suggested: KategoriNusaGuard
+    status: Literal["pending", "reviewed", "rejected"]
+    created_at: datetime
+
+class AdminReportUpdate(BaseModel):
+    status: Literal["reviewed", "rejected"]
+
+class AdminDashboardResponse(BaseModel):
+    total_analyzed: int
+    category_counts: dict[str, int]
+    reports_total: int
+    reports_pending: int
+    recent_reports: list[AdminReport]
+    model_status: str
+    privacy_mode: str
+
 class DatasetRow(BaseModel):
     kategori: KategoriDasar
     pesan: str
     kategori_nusaguard: KategoriNusaGuard
+
