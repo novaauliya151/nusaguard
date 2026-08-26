@@ -35,6 +35,10 @@ npm run dev
 
 Set `ADMIN_API_KEY` pada environment backend, lalu buka `http://localhost:3000/admin` dan masukkan nilai kunci yang sama. Dashboard hanya menampilkan statistik agregat dan laporan yang dikirim pengguna dengan persetujuan; isi analisis biasa tetap tidak disimpan.
 
+### Akun pengguna dan role
+
+Pengguna dapat mendaftar melalui `http://localhost:3000/register`, masuk melalui `/login`, lalu memakai `/dashboard`. Password disimpan sebagai hash PBKDF2 dan sesi database berlaku tujuh hari. Role yang tersedia adalah `user`, `analyst`, `moderator`, dan `admin`; pengelolaannya tersedia pada menu **Manajemen pengguna** di dashboard admin. Analisis tanpa login tetap tersedia pada halaman publik.
+
 ## Model and measured results
 
 The verified base model is `indobenchmark/indobert-base-p1`. Run `backend/training/train_indobert.py` on a CUDA-capable machine to create `backend/model/indobert/evaluation.json`. Until that artifact exists, responses honestly return `model_source: rules-fallback`.
