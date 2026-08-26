@@ -50,6 +50,10 @@ def test_admin_dashboard_requires_key_and_supports_moderation(monkeypatch) -> No
     dashboard = client.get("/api/admin/dashboard", headers=headers)
     assert dashboard.status_code == 200
     assert dashboard.json()["reports_pending"] >= 1
+    assert dashboard.json()["database_connected"] is True
+    assert dashboard.json()["database_engine"] in {"sqlite", "postgresql"}
+    assert isinstance(dashboard.json()["daily_stats"], list)
+    assert isinstance(dashboard.json()["source_counts"], dict)
 
     report_id = created.json()["id"]
     updated = client.patch(f"/api/admin/reports/{report_id}", headers=headers, json={"status": "reviewed"})
