@@ -1,7 +1,9 @@
 import os
+import hashlib
+import secrets
 import threading
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import create_engine, text
 
@@ -13,6 +15,8 @@ class Store:
             db.execute(text("CREATE TABLE IF NOT EXISTS reports (id VARCHAR(36) PRIMARY KEY, text TEXT NOT NULL, category_suggested VARCHAR(80) NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'pending', created_at TIMESTAMP NOT NULL)"))
             db.execute(text("CREATE TABLE IF NOT EXISTS stats (category VARCHAR(80) PRIMARY KEY, count INTEGER NOT NULL DEFAULT 0)"))
             db.execute(text("CREATE TABLE IF NOT EXISTS stats_daily (day VARCHAR(10) NOT NULL, category VARCHAR(80) NOT NULL, source VARCHAR(30) NOT NULL, count INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(day,category,source))"))
+            db.execute(text("CREATE TABLE IF NOT EXISTS users (id VARCHAR(36) PRIMARY KEY, name VARCHAR(80) NOT NULL, email VARCHAR(160) NOT NULL UNIQUE, password_hash VARCHAR(256) NOT NULL, role VARCHAR(20) NOT NULL DEFAULT 'user', is_active BOOLEAN NOT NULL DEFAULT TRUE, created_at TIMESTAMP NOT NULL)"))
+            db.execute(text("CREATE TABLE IF NOT EXISTS user_sessions (token_hash VARCHAR(64) PRIMARY KEY, user_id VARCHAR(36) NOT NULL, expires_at TIMESTAMP NOT NULL, created_at TIMESTAMP NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id))"))
             columns = {row[1] for row in db.execute(text("PRAGMA table_info(reports)"))} if url.startswith("sqlite") else set()
             if columns and "status" not in columns:
                 db.execute(text("ALTER TABLE reports ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'pending'"))
@@ -52,6 +56,67 @@ class Store:
         with self.lock, self.engine.begin() as db:
             result = db.execute(text("UPDATE reports SET status=:status WHERE id=:id"), {"status": status, "id": report_id})
         return result.rowcount > 0
+
+    @staticmethod
+    def _password_hash(password: str, salt: str | None = None) -> str:
+        salt = salt or secrets.token_hex(16)
+        digest = hashlib.pbkdf2_hmac("sha256", password.encode(), bytes.fromhex(salt), 210_000).hex()
+        return f"pbkdf2_sha256${salt}${digest}"
+
+    @classmethod
+    def _password_valid(cls, password: str, encoded: str) -> bool:
+        try:
+            _, salt, _ = encoded.split("$", 2)
+            return secrets.compare_digest(cls._password_hash(password, salt), encoded)
+        except ValueError:
+            return False
+
+    def create_user(self, name: str, email: str, password: str, role: str = "user") -> dict | None:
+        user_id, created = str(uuid.uuid4()), datetime.now(timezone.utc)
+        try:
+            with self.lock, self.engine.begin() as db:
+                db.execute(text("INSERT INTO users(id,name,email,password_hash,role,is_active,created_at) VALUES (:id,:name,:email,:password,:role,:active,:created)"), {"id":user_id,"name":name,"email":email.casefold(),"password":self._password_hash(password),"role":role,"active":True,"created":created})
+        except Exception as exc:
+            if "unique" in str(exc).casefold() or "duplicate" in str(exc).casefold():
+                return None
+            raise
+        return self.get_user(user_id)
+
+    def get_user(self, user_id: str) -> dict | None:
+        with self.engine.connect() as db:
+            row = db.execute(text("SELECT id,name,email,role,is_active,created_at FROM users WHERE id=:id"), {"id":user_id}).mappings().first()
+        return dict(row) if row else None
+
+    def authenticate(self, email: str, password: str) -> tuple[str, dict] | None:
+        with self.engine.connect() as db:
+            row = db.execute(text("SELECT * FROM users WHERE email=:email"), {"email":email.casefold()}).mappings().first()
+        if not row or not row["is_active"] or not self._password_valid(password, row["password_hash"]):
+            return None
+        token, now = secrets.token_urlsafe(32), datetime.now(timezone.utc)
+        with self.lock, self.engine.begin() as db:
+            db.execute(text("INSERT INTO user_sessions(token_hash,user_id,expires_at,created_at) VALUES (:token,:user,:expires,:created)"), {"token":hashlib.sha256(token.encode()).hexdigest(),"user":row["id"],"expires":now+timedelta(days=7),"created":now})
+        return token, self.get_user(row["id"])
+
+    def user_from_token(self, token: str) -> dict | None:
+        digest, now = hashlib.sha256(token.encode()).hexdigest(), datetime.now(timezone.utc)
+        with self.engine.connect() as db:
+            row = db.execute(text("SELECT u.id,u.name,u.email,u.role,u.is_active,u.created_at FROM user_sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=:token AND s.expires_at>:now AND u.is_active=TRUE"), {"token":digest,"now":now}).mappings().first()
+        return dict(row) if row else None
+
+    def list_users(self) -> list[dict]:
+        with self.engine.connect() as db:
+            rows = db.execute(text("SELECT id,name,email,role,is_active,created_at FROM users ORDER BY created_at DESC")).mappings().all()
+        return [dict(row) for row in rows]
+
+    def update_user(self, user_id: str, role: str | None, is_active: bool | None) -> dict | None:
+        updates, params = [], {"id":user_id}
+        if role is not None: updates.append("role=:role"); params["role"] = role
+        if is_active is not None: updates.append("is_active=:active"); params["active"] = is_active
+        if not updates: return self.get_user(user_id)
+        with self.lock, self.engine.begin() as db:
+            db.execute(text(f"UPDATE users SET {','.join(updates)} WHERE id=:id"), params)
+            if is_active is False: db.execute(text("DELETE FROM user_sessions WHERE user_id=:id"), {"id":user_id})
+        return self.get_user(user_id)
 
 store = Store()
 
