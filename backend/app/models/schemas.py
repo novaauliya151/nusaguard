@@ -82,6 +82,10 @@ class AdminDashboardResponse(BaseModel):
     recent_reports: list[AdminReport]
     model_status: str
     privacy_mode: str
+    daily_stats: list[dict[str, object]]
+    source_counts: dict[str, int]
+    database_engine: str
+    database_connected: bool
 
 class DatasetRow(BaseModel):
     kategori: KategoriDasar
