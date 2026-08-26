@@ -87,6 +87,36 @@ class AdminDashboardResponse(BaseModel):
     database_engine: str
     database_connected: bool
 
+class UserPublic(BaseModel):
+    id: str
+    name: str
+    email: str
+    role: Literal["user", "analyst", "moderator", "admin"]
+    permissions: list[str]
+    is_active: bool
+    created_at: datetime
+
+class RegisterRequest(BaseModel):
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=80)]
+    email: Annotated[str, StringConstraints(strip_whitespace=True, min_length=5, max_length=160, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+    password: Annotated[str, StringConstraints(min_length=8, max_length=128)]
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserPublic
+
+class UserCreateRequest(RegisterRequest):
+    role: Literal["user", "analyst", "moderator", "admin"] = "user"
+
+class UserUpdateRequest(BaseModel):
+    role: Literal["user", "analyst", "moderator", "admin"] | None = None
+    is_active: bool | None = None
+
 class DatasetRow(BaseModel):
     kategori: KategoriDasar
     pesan: str
