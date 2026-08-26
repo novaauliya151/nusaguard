@@ -17,6 +17,7 @@ dataset/raw/*
 !dataset/raw/.gitkeep
 dataset/processed/*
 !dataset/processed/.gitkeep
+!dataset/processed/nusaguard_balanced_synthetic.csv
 dataset/training/*
 !dataset/training/.gitkeep
 
