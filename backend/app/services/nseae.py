@@ -7,7 +7,7 @@ INDICATORS: dict[str, tuple[float, tuple[str, ...]]] = {
     "fear": (0.20, (r"\bdiblokir\b", r"\bditangkap\b", r"\bdenda\b", r"\bbermasalah\b", r"\bdinonaktifkan\b")),
     "reward": (0.20, (r"\bhadiah\b", r"\bbonus\b", r"\bmenang\b", r"\bgratis\b", r"\bkomisi\b")),
     "impersonation": (0.15, (r"\bsaya dari\b", r"\batas nama\b", r"\bmengaku\b", r"\badmin\b")),
-    "credential_request": (0.40, (r"\botp\b", r"\bpin\b", r"\bpassword\b", r"\bkata sandi\b", r"\bnomor rekening\b")),
+    "credential_request": (0.40, (r"\botp\b", r"\bpin\b", r"\bpassword\b", r"\bkata sandi\b", r"\bnomor rekening\b", r"\.apk\b")),
 }
 
 def analyze_nseae(text: str) -> tuple[list[DetectedPattern], dict[str, float]]:
