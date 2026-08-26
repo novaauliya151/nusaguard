@@ -21,15 +21,19 @@ def require_admin(x_api_key: str | None = Header(default=None)) -> None:
 @router.get("/dashboard", response_model=AdminDashboardResponse, dependencies=[])
 def dashboard(x_api_key: str | None = Header(default=None)) -> AdminDashboardResponse:
     require_admin(x_api_key)
-    total, counts, reports_total, reports_pending, reports = store.admin_dashboard()
+    snapshot = store.admin_dashboard()
     return AdminDashboardResponse(
-        total_analyzed=total,
-        category_counts=counts,
-        reports_total=reports_total,
-        reports_pending=reports_pending,
-        recent_reports=[AdminReport(**item) for item in reports],
+        total_analyzed=snapshot["total"],
+        category_counts=snapshot["counts"],
+        reports_total=snapshot["reports_total"],
+        reports_pending=snapshot["reports_pending"],
+        recent_reports=[AdminReport(**item) for item in snapshot["reports"]],
         model_status="IndoBERT" if _pipeline() is not None else "Rules fallback",
         privacy_mode="Ephemeral — isi analisis tidak disimpan",
+        daily_stats=snapshot["daily"],
+        source_counts=snapshot["sources"],
+        database_engine=snapshot["database_engine"],
+        database_connected=True,
     )
 
 
