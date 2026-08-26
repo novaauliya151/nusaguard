@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from app.main import app
+from uuid import uuid4
 
 client = TestClient(app)
 
@@ -59,4 +60,29 @@ def test_admin_dashboard_requires_key_and_supports_moderation(monkeypatch) -> No
     updated = client.patch(f"/api/admin/reports/{report_id}", headers=headers, json={"status": "reviewed"})
     assert updated.status_code == 200
     assert updated.json()["status"] == "reviewed"
+
+
+def test_user_registration_login_and_role_management(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_API_KEY", "test-admin-secret")
+    email = f"user-{uuid4().hex[:8]}@example.com"
+    registered = client.post("/api/auth/register", json={"name": "Pengguna Uji", "email": email, "password": "rahasia123"})
+    assert registered.status_code == 201
+    assert registered.json()["user"]["role"] == "user"
+    assert "analyze" in registered.json()["user"]["permissions"]
+
+    token = registered.json()["access_token"]
+    profile = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert profile.status_code == 200
+    assert profile.json()["email"] == email
+
+    headers = {"X-API-Key": "test-admin-secret"}
+    users = client.get("/api/admin/users", headers=headers)
+    target = next(item for item in users.json() if item["email"] == email)
+    promoted = client.patch(f"/api/admin/users/{target['id']}", headers=headers, json={"role": "analyst"})
+    assert promoted.status_code == 200
+    assert "view_aggregate_stats" in promoted.json()["permissions"]
+
+    login = client.post("/api/auth/login", json={"email": email, "password": "rahasia123"})
+    assert login.status_code == 200
+    assert login.json()["user"]["role"] == "analyst"
 

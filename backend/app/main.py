@@ -3,13 +3,13 @@ import os
 import time
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import admin, analyze, report, statistics
+from app.api.routes import admin, analyze, auth, report, statistics
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("nusaguard")
 app = FastAPI(title="NusaGuard API", version="1.0.0", description="Analisis pesan ephemeral: isi pesan tidak dicatat dalam log atau histori analisis.")
 origins = [item.strip() for item in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if item.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PATCH"], allow_headers=["Content-Type", "X-API-Key"])
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PATCH"], allow_headers=["Content-Type", "X-API-Key", "Authorization"])
 
 @app.middleware("http")
 async def metadata_logging(request: Request, call_next):
@@ -26,4 +26,5 @@ app.include_router(analyze.router, prefix="/api")
 app.include_router(report.router, prefix="/api")
 app.include_router(statistics.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
 
