@@ -10,6 +10,7 @@ Prototype anti-penipuan berbahasa Indonesia: pesan manual dari web atau teks not
 - PostgreSQL reports/aggregate statistics (`DATABASE_URL`), SQLite local fallback
 - Flutter client + native Kotlin `NotificationListenerService` source
 - IndoBERT fine-tuning/evaluation pipeline
+- Balanced synthetic development dataset: 500 samples for each of six categories, with provenance/review metadata
 - Docker/Render blueprint and GitHub Actions
 
 The analyzed message is never stored. Only an explicitly consented `/api/report` submission stores text. Logs contain method, path, status, and response time—not message bodies, contacts, or phone numbers.
