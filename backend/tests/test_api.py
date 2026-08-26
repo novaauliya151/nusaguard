@@ -34,3 +34,25 @@ def test_wedding_invitation_apk_variations_are_phishing() -> None:
         assert body["category"] == "Phishing/Link Berbahaya"
         assert body["risk_level"] == "HIGH"
         assert body["risk_score"] >= 0.7
+
+
+def test_admin_dashboard_requires_key_and_supports_moderation(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_API_KEY", "test-admin-secret")
+    assert client.get("/api/admin/dashboard").status_code == 401
+    assert client.get("/api/admin/dashboard", headers={"X-API-Key": "wrong"}).status_code == 401
+
+    created = client.post("/api/report", json={
+        "text": "Undangan palsu untuk ditinjau admin",
+        "category_suggested": "Phishing/Link Berbahaya",
+        "consent": True,
+    })
+    headers = {"X-API-Key": "test-admin-secret"}
+    dashboard = client.get("/api/admin/dashboard", headers=headers)
+    assert dashboard.status_code == 200
+    assert dashboard.json()["reports_pending"] >= 1
+
+    report_id = created.json()["id"]
+    updated = client.patch(f"/api/admin/reports/{report_id}", headers=headers, json={"status": "reviewed"})
+    assert updated.status_code == 200
+    assert updated.json()["status"] == "reviewed"
+
