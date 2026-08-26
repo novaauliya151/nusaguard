@@ -31,6 +31,10 @@ npm ci
 npm run dev
 ```
 
+### Dashboard admin
+
+Set `ADMIN_API_KEY` pada environment backend, lalu buka `http://localhost:3000/admin` dan masukkan nilai kunci yang sama. Dashboard hanya menampilkan statistik agregat dan laporan yang dikirim pengguna dengan persetujuan; isi analisis biasa tetap tidak disimpan.
+
 ## Model and measured results
 
 The verified base model is `indobenchmark/indobert-base-p1`. Run `backend/training/train_indobert.py` on a CUDA-capable machine to create `backend/model/indobert/evaluation.json`. Until that artifact exists, responses honestly return `model_source: rules-fallback`.
@@ -54,3 +58,4 @@ Live deployment, an Android APK, and a real WhatsApp device demonstration requir
 - Send a controlled WhatsApp test message containing urgency + OTP; show the warning notification.
 - Open education and privacy sections.
 - State the actual held-out accuracy/F1 from `evaluation.json`, not the proposal target.
+
