@@ -24,5 +24,6 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     classifier_floor = 0.70 if basic.value == "spam" else 0.0
     risk_score = round(min(max(nseae_score, classifier_floor), 1.0), 2)
     level = score_to_risk_level(risk_score)
-    store.increment(category.value)
+    store.increment(category.value, payload.source or "manual_web")
     return AnalyzeResponse(kategori_dasar=basic, category=category, risk_level=level, risk_score=risk_score, confidence=confidence, nseae_scores=scores, detected_patterns=patterns, explanation=generate_explanation(patterns, category.value), recommendation=recommendation_for(level), model_source=model_source)
+
