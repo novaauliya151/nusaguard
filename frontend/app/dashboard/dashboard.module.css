@@ -5,8 +5,8 @@
 .logo{display:flex;align-items:center;gap:10px;font:600 19px Georgia}
 .logo span{display:grid;place-items:center;width:39px;height:39px;background:#b9ef68;color:#17312c;border-radius:11px;font:bold 12px Arial}
 .shell aside nav{display:flex;flex-direction:column;gap:7px;margin-top:60px}
-.shell aside nav a{padding:13px;border-radius:6px;color:#95a9a3;font-size:12px}
-.shell aside nav a:hover,.shell aside nav .active{background:#1c3b35;color:#fff}
+.shell aside nav a,.shell aside nav button{padding:13px;border:0;background:transparent;border-radius:6px;color:#95a9a3;font:12px Arial;text-align:left;cursor:pointer}
+.shell aside nav a:hover,.shell aside nav button:hover,.shell aside nav .active{background:#1c3b35;color:#fff}
 .account{margin-top:auto;border-top:1px solid #35504a;padding-top:20px;display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:8px}
 .account i{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#b9ef68;color:#17312c;font:10px Arial}
 .account div{display:flex;flex-direction:column}
@@ -23,10 +23,11 @@
 .hero h2{font:500 clamp(2.7rem,5vw,5rem)/.95 Georgia;margin:15px 0}
 .hero h2 em{color:#517b69}
 .hero>div>p:not(.kicker){max-width:600px;line-height:1.6;color:#536c62}
-.hero a{display:inline-block;background:#17312c;color:#fff;padding:13px 17px;border-radius:5px;font-size:11px;font-weight:bold;margin-top:10px}
+.hero button{display:inline-block;border:0;background:#17312c;color:#fff;padding:13px 17px;border-radius:5px;font-size:11px;font-weight:bold;margin-top:10px;cursor:pointer}
 .shield{display:grid;place-items:center;width:160px;height:185px;background:#17312c;color:#b9ef68;clip-path:polygon(50% 0,100% 20%,87% 78%,50% 100%,13% 78%,0 20%);font:600 70px Georgia}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
-.cards article{background:#fff;border:1px solid #dce1da;border-radius:9px;padding:22px}
+.cards button{background:#fff;border:1px solid #dce1da;border-radius:9px;padding:22px;text-align:left;color:inherit;cursor:pointer;transition:transform .15s,border-color .15s}
+.cards button:hover{transform:translateY(-3px);border-color:#8eaa98}
 .cards span{font:italic 20px Georgia;color:#789087}
 .cards h3{font:500 17px Georgia}
 .cards p{font-size:10px;color:#71817b}
