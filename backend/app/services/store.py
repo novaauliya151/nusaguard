@@ -1,5 +1,6 @@
 import os
 import hashlib
+import json
 import secrets
 import threading
 import uuid
@@ -17,6 +18,8 @@ class Store:
             db.execute(text("CREATE TABLE IF NOT EXISTS stats_daily (day VARCHAR(10) NOT NULL, category VARCHAR(80) NOT NULL, source VARCHAR(30) NOT NULL, count INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(day,category,source))"))
             db.execute(text("CREATE TABLE IF NOT EXISTS users (id VARCHAR(36) PRIMARY KEY, name VARCHAR(80) NOT NULL, email VARCHAR(160) NOT NULL UNIQUE, password_hash VARCHAR(256) NOT NULL, role VARCHAR(20) NOT NULL DEFAULT 'user', is_active BOOLEAN NOT NULL DEFAULT TRUE, created_at TIMESTAMP NOT NULL)"))
             db.execute(text("CREATE TABLE IF NOT EXISTS user_sessions (token_hash VARCHAR(64) PRIMARY KEY, user_id VARCHAR(36) NOT NULL, expires_at TIMESTAMP NOT NULL, created_at TIMESTAMP NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id))"))
+            db.execute(text("CREATE TABLE IF NOT EXISTS education_items (id VARCHAR(36) PRIMARY KEY, title VARCHAR(120) NOT NULL, category VARCHAR(80) NOT NULL, description TEXT NOT NULL, warning_signs TEXT NOT NULL, prevention TEXT NOT NULL, is_published BOOLEAN NOT NULL DEFAULT TRUE, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL)"))
+            db.execute(text("CREATE TABLE IF NOT EXISTS public_dataset (id VARCHAR(36) PRIMARY KEY, report_id VARCHAR(36) NOT NULL UNIQUE, text_anonymized TEXT NOT NULL, category VARCHAR(80) NOT NULL, provenance VARCHAR(50) NOT NULL, reviewed BOOLEAN NOT NULL DEFAULT TRUE, created_at TIMESTAMP NOT NULL, FOREIGN KEY(report_id) REFERENCES reports(id))"))
             columns = {row[1] for row in db.execute(text("PRAGMA table_info(reports)"))} if url.startswith("sqlite") else set()
             if columns and "status" not in columns:
                 db.execute(text("ALTER TABLE reports ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'pending'"))
@@ -56,6 +59,11 @@ class Store:
         with self.lock, self.engine.begin() as db:
             result = db.execute(text("UPDATE reports SET status=:status WHERE id=:id"), {"status": status, "id": report_id})
         return result.rowcount > 0
+
+    def get_report(self, report_id: str) -> dict | None:
+        with self.engine.connect() as db:
+            row = db.execute(text("SELECT id,text,category_suggested,status,created_at FROM reports WHERE id=:id"), {"id":report_id}).mappings().first()
+        return dict(row) if row else None
 
     @staticmethod
     def _password_hash(password: str, salt: str | None = None) -> str:
@@ -117,6 +125,48 @@ class Store:
             db.execute(text(f"UPDATE users SET {','.join(updates)} WHERE id=:id"), params)
             if is_active is False: db.execute(text("DELETE FROM user_sessions WHERE user_id=:id"), {"id":user_id})
         return self.get_user(user_id)
+
+    def education(self, published_only: bool = True) -> list[dict]:
+        clause = " WHERE is_published=TRUE" if published_only else ""
+        with self.engine.connect() as db:
+            rows = db.execute(text(f"SELECT * FROM education_items{clause} ORDER BY updated_at DESC")).mappings().all()
+        return [{**dict(row), "warning_signs": json.loads(row["warning_signs"]), "prevention": json.loads(row["prevention"])} for row in rows]
+
+    def save_education(self, item_id: str | None, payload: dict) -> dict:
+        now, item_id = datetime.now(timezone.utc), item_id or str(uuid.uuid4())
+        params = {**payload, "warning_signs":json.dumps(payload["warning_signs"]), "prevention":json.dumps(payload["prevention"]), "id": item_id, "created": now, "updated": now}
+        with self.lock, self.engine.begin() as db:
+            exists = db.execute(text("SELECT id FROM education_items WHERE id=:id"), {"id":item_id}).first()
+            if exists:
+                db.execute(text("UPDATE education_items SET title=:title,category=:category,description=:description,warning_signs=:warning_signs,prevention=:prevention,is_published=:is_published,updated_at=:updated WHERE id=:id"), params)
+            else:
+                db.execute(text("INSERT INTO education_items(id,title,category,description,warning_signs,prevention,is_published,created_at,updated_at) VALUES (:id,:title,:category,:description,:warning_signs,:prevention,:is_published,:created,:updated)"), params)
+        return next(row for row in self.education(False) if row["id"] == item_id)
+
+    def delete_education(self, item_id: str) -> bool:
+        with self.lock, self.engine.begin() as db:
+            result = db.execute(text("DELETE FROM education_items WHERE id=:id"), {"id":item_id})
+        return result.rowcount > 0
+
+    def publish_report_dataset(self, report_id: str, anonymized: str) -> dict | None:
+        now = datetime.now(timezone.utc)
+        with self.lock, self.engine.begin() as db:
+            report = db.execute(text("SELECT category_suggested FROM reports WHERE id=:id AND status='reviewed'"), {"id":report_id}).mappings().first()
+            if not report: return None
+            existing = db.execute(text("SELECT id FROM public_dataset WHERE report_id=:id"), {"id":report_id}).first()
+            if not existing:
+                db.execute(text("INSERT INTO public_dataset(id,report_id,text_anonymized,category,provenance,reviewed,created_at) VALUES (:dataset_id,:report_id,:content,:category,'consented_user_report',TRUE,:created)"), {"dataset_id":str(uuid.uuid4()),"report_id":report_id,"content":anonymized,"category":report["category_suggested"],"created":now})
+        return self.dataset_by_report(report_id)
+
+    def dataset_by_report(self, report_id: str) -> dict | None:
+        with self.engine.connect() as db:
+            row = db.execute(text("SELECT id,text_anonymized,category,provenance,reviewed,created_at FROM public_dataset WHERE report_id=:id"), {"id":report_id}).mappings().first()
+        return dict(row) if row else None
+
+    def public_dataset(self) -> list[dict]:
+        with self.engine.connect() as db:
+            rows = db.execute(text("SELECT id,text_anonymized,category,provenance,reviewed,created_at FROM public_dataset ORDER BY created_at DESC")).mappings().all()
+        return [dict(row) for row in rows]
 
 store = Store()
 
