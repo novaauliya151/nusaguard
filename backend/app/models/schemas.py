@@ -117,6 +117,27 @@ class UserUpdateRequest(BaseModel):
     role: Literal["user", "analyst", "moderator", "admin"] | None = None
     is_active: bool | None = None
 
+class EducationItemRequest(BaseModel):
+    title: Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=120)]
+    category: KategoriNusaGuard
+    description: Annotated[str, StringConstraints(strip_whitespace=True, min_length=10, max_length=1000)]
+    warning_signs: list[str] = Field(min_length=1, max_length=10)
+    prevention: list[str] = Field(min_length=1, max_length=10)
+    is_published: bool = True
+
+class EducationItem(EducationItemRequest):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+class PublicDatasetRow(BaseModel):
+    id: str
+    text_anonymized: str
+    category: KategoriNusaGuard
+    provenance: str
+    reviewed: bool
+    created_at: datetime
+
 class DatasetRow(BaseModel):
     kategori: KategoriDasar
     pesan: str

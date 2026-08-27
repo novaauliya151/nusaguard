@@ -86,3 +86,30 @@ def test_user_registration_login_and_role_management(monkeypatch) -> None:
     assert login.status_code == 200
     assert login.json()["user"]["role"] == "analyst"
 
+
+def test_dynamic_education_and_anonymized_dataset(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_API_KEY", "test-admin-secret")
+    headers = {"X-API-Key": "test-admin-secret"}
+    education = client.post("/api/admin/education", headers=headers, json={
+        "title": "Waspada Undangan APK",
+        "category": "Phishing/Link Berbahaya",
+        "description": "File undangan APK dapat memasang aplikasi berbahaya.",
+        "warning_signs": ["Berkas berakhiran .apk"],
+        "prevention": ["Jangan memasang APK dari pesan"],
+        "is_published": True,
+    })
+    assert education.status_code == 201
+    assert any(item["title"] == "Waspada Undangan APK" for item in client.get("/api/education").json())
+
+    report = client.post("/api/report", json={
+        "text": "Hubungi saya 081234567890 atau test@example.com, penipu kirim undangan.apk",
+        "category_suggested": "Phishing/Link Berbahaya",
+        "consent": True,
+    }).json()
+    assert client.patch(f"/api/admin/reports/{report['id']}", headers=headers, json={"status":"reviewed"}).status_code == 200
+    processed = client.post(f"/api/admin/reports/{report['id']}/dataset", headers=headers)
+    assert processed.status_code == 201
+    assert "081234567890" not in processed.json()["text_anonymized"]
+    assert "test@example.com" not in processed.json()["text_anonymized"]
+    assert client.get("/api/dataset").status_code == 200
+

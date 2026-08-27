@@ -39,6 +39,14 @@ Set `ADMIN_API_KEY` pada environment backend, lalu buka `http://localhost:3000/a
 
 Pengguna dapat mendaftar melalui `http://localhost:3000/register`, masuk melalui `/login`, lalu memakai `/dashboard`. Password disimpan sebagai hash PBKDF2 dan sesi database berlaku tujuh hari. Role yang tersedia adalah `user`, `analyst`, `moderator`, dan `admin`; pengelolaannya tersedia pada menu **Manajemen pengguna** di dashboard admin. Analisis tanpa login tetap tersedia pada halaman publik.
 
+### Edukasi, laporan, dan dataset publik
+
+- `/education`: edukasi modus dinamis yang dikelola admin.
+- `/report`: laporan sukarela dengan consent eksplisit dan larangan menyertakan identitas pribadi.
+- `/dataset`: laporan `reviewed` yang sudah dianonimkan dan dapat diunduh sebagai CSV.
+
+Admin mengelola edukasi melalui menu **Edukasi modus**. Laporan hanya dapat diproses ke dataset setelah ditinjau; email, nomor telepon, akun, tautan, nomor sensitif, dan alamat yang terdeteksi diganti placeholder sebelum publikasi. Identitas akun pelapor tidak dikaitkan dengan laporan.
+
 ## Model and measured results
 
 The verified base model is `indobenchmark/indobert-base-p1`. Run `backend/training/train_indobert.py` on a CUDA-capable machine to create `backend/model/indobert/evaluation.json`. Until that artifact exists, responses honestly return `model_source: rules-fallback`.

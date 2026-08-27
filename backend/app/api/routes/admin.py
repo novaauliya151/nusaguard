@@ -4,7 +4,8 @@ import secrets
 from fastapi import APIRouter, Header, HTTPException
 
 from app.api.routes.auth import public_user
-from app.models.schemas import AdminDashboardResponse, AdminReport, AdminReportUpdate, UserCreateRequest, UserPublic, UserUpdateRequest
+from app.api.routes.content import anonymize_report
+from app.models.schemas import AdminDashboardResponse, AdminReport, AdminReportUpdate, EducationItem, EducationItemRequest, PublicDatasetRow, UserCreateRequest, UserPublic, UserUpdateRequest
 from app.services.predictor import _pipeline
 from app.services.store import store
 
@@ -68,4 +69,37 @@ def update_user(user_id: str, payload: UserUpdateRequest, x_api_key: str | None 
     if not user:
         raise HTTPException(status_code=404, detail="Pengguna tidak ditemukan.")
     return public_user(user)
+
+
+@router.get("/education", response_model=list[EducationItem])
+def education_items(x_api_key: str | None = Header(default=None)) -> list[EducationItem]:
+    require_admin(x_api_key)
+    return [EducationItem(**item) for item in store.education(False)]
+
+
+@router.post("/education", response_model=EducationItem, status_code=201)
+def create_education(payload: EducationItemRequest, x_api_key: str | None = Header(default=None)) -> EducationItem:
+    require_admin(x_api_key)
+    return EducationItem(**store.save_education(None, payload.model_dump(mode="json")))
+
+
+@router.patch("/education/{item_id}", response_model=EducationItem)
+def update_education(item_id: str, payload: EducationItemRequest, x_api_key: str | None = Header(default=None)) -> EducationItem:
+    require_admin(x_api_key)
+    return EducationItem(**store.save_education(item_id, payload.model_dump(mode="json")))
+
+
+@router.delete("/education/{item_id}", status_code=204)
+def delete_education(item_id: str, x_api_key: str | None = Header(default=None)) -> None:
+    require_admin(x_api_key)
+    if not store.delete_education(item_id): raise HTTPException(404, "Konten tidak ditemukan.")
+
+
+@router.post("/reports/{report_id}/dataset", response_model=PublicDatasetRow, status_code=201)
+def process_report(report_id: str, x_api_key: str | None = Header(default=None)) -> PublicDatasetRow:
+    require_admin(x_api_key)
+    report = store.get_report(report_id)
+    if not report or report["status"] != "reviewed": raise HTTPException(400, "Laporan harus ditinjau sebelum masuk dataset.")
+    row = store.publish_report_dataset(report_id, anonymize_report(report["text"]))
+    return PublicDatasetRow(**row)
 
