@@ -28,7 +28,14 @@ def _pipeline():
     default_path = Path(__file__).resolve().parents[2] / "model" / "indobert"
     model_path = Path(os.getenv("NUSAGUARD_MODEL_PATH", str(default_path)))
     if not (model_path / "config.json").exists():
-        return None
+        model_repo = os.getenv("NUSAGUARD_MODEL_REPO")
+        if not model_repo:
+            return None
+        try:
+            from huggingface_hub import snapshot_download
+            snapshot_download(repo_id=model_repo, revision=os.getenv("NUSAGUARD_MODEL_REVISION", "main"), local_dir=model_path)
+        except Exception:
+            return None
     from transformers import pipeline
     return pipeline("text-classification", model=str(model_path), tokenizer=str(model_path), top_k=1)
 

@@ -1,0 +1,5 @@
+"use client";
+import {useEffect,useState} from "react";
+const KEY="nusaguard_accessibility";
+function savedValue(name:"large"|"contrast"){if(typeof window==="undefined")return false;try{return Boolean(JSON.parse(localStorage.getItem(KEY)??"{}")[name])}catch{return false}}
+export default function AccessibilityControls(){const[large,setLarge]=useState(()=>savedValue("large")),[contrast,setContrast]=useState(()=>savedValue("contrast"));useEffect(()=>{document.documentElement.classList.toggle("large",large);document.documentElement.classList.toggle("contrast",contrast)},[large,contrast]);function apply(nextLarge:boolean,nextContrast:boolean){setLarge(nextLarge);setContrast(nextContrast);localStorage.setItem(KEY,JSON.stringify({large:nextLarge,contrast:nextContrast}))}return <div className="global-access" aria-label="Pengaturan aksesibilitas"><button onClick={()=>apply(!large,contrast)} aria-pressed={large} title="Ubah ukuran teks">A+</button><button onClick={()=>apply(large,!contrast)} aria-pressed={contrast} title="Ubah kontras">◐</button></div>}
