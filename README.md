@@ -53,6 +53,19 @@ The verified base model is `indobenchmark/indobert-base-p1`. Run `backend/traini
 
 `backend/evaluation/demo_results.json` records the current curated ten-message demo smoke test. It is not a held-out model benchmark and must never be presented as IndoBERT accuracy.
 
+### IndoBERT + N-SEAE fusion
+
+N-SEAE now scores multiple linguistic signals per indicator, aggregates cross-indicator synergy, recognizes protective/negated contexts, and can rerank an IndoBERT result when the psychological evidence conflicts with the model. API responses expose `model_confidence`, `nseae_risk_score`, and `fusion_applied` so the intervention remains auditable.
+
+Run the reproducible development ablation with:
+
+```bash
+cd backend
+.venv-ml/Scripts/python evaluation/evaluate_nseae_ablation.py
+```
+
+`backend/evaluation/nseae_ablation_results.json` compares IndoBERT alone with IndoBERT + N-SEAE on a curated 24-message challenge set. This small challenge set is useful for regression testing, not a held-out real-world benchmark or a production accuracy claim.
+
 ## Deploy
 
 1. Create a Render Blueprint from `render.yaml`; set `CORS_ORIGINS` to the final web origin.
@@ -70,4 +83,5 @@ Live deployment, an Android APK, and a real WhatsApp device demonstration requir
 - Send a controlled WhatsApp test message containing urgency + OTP; show the warning notification.
 - Open education and privacy sections.
 - State the actual held-out accuracy/F1 from `evaluation.json`, not the proposal target.
+
 

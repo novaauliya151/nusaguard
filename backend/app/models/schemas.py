@@ -38,6 +38,9 @@ class AnalyzeResponse(BaseModel):
     risk_level: RiskLevel
     risk_score: float = Field(ge=0, le=1)
     confidence: float = Field(ge=0, le=1)
+    model_confidence: float = Field(ge=0, le=1)
+    nseae_risk_score: float = Field(ge=0, le=1)
+    fusion_applied: bool
     nseae_scores: dict[str, float]
     detected_patterns: list[DetectedPattern] = Field(default_factory=list)
     explanation: str
@@ -142,4 +145,5 @@ class DatasetRow(BaseModel):
     kategori: KategoriDasar
     pesan: str
     kategori_nusaguard: KategoriNusaGuard
+
 

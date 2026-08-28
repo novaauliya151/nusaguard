@@ -3,6 +3,7 @@ import re
 from functools import lru_cache
 from pathlib import Path
 from app.models.schemas import KategoriDasar, KategoriNusaGuard
+from app.services.nseae import aggregate_nseae_risk, has_protective_context
 
 KEYWORDS = {
     KategoriNusaGuard.PHISHING: (
@@ -31,21 +32,60 @@ def _pipeline():
     from transformers import pipeline
     return pipeline("text-classification", model=str(model_path), tokenizer=str(model_path), top_k=1)
 
-def predict_category(text: str) -> tuple[KategoriDasar, KategoriNusaGuard, float, str]:
+def predict_probabilities(text: str) -> tuple[dict[KategoriNusaGuard, float] | None, str]:
     classifier = _pipeline()
+    if not classifier:
+        return None, "rules-fallback"
+    rows = classifier(text, truncation=True, max_length=256, top_k=None)
+    return {KategoriNusaGuard(row["label"]): float(row["score"]) for row in rows}, "indobert"
+
+
+def predict_category(text: str) -> tuple[KategoriDasar, KategoriNusaGuard, float, str]:
+    probabilities, source = predict_probabilities(text)
     normalized = text.casefold()
-    if classifier:
-        result = classifier(text, truncation=True, max_length=256)[0][0]
-        label = KategoriNusaGuard(result["label"])
+    if probabilities:
+        label, confidence = max(probabilities.items(), key=lambda item: item[1])
         # Critical, explicit indicators remain deterministic safety guards around
         # the learned model, particularly while training data is still synthetic.
         if ".apk" in normalized or "http://" in normalized or "https://" in normalized:
             label = KategoriNusaGuard.PHISHING
         elif any(term in normalized for term in ("kirim otp", "minta otp", "kirim pin", "minta pin", "kirim password", "minta password")):
             label = KategoriNusaGuard.SOCIAL_ENGINEERING
-        return (KategoriDasar.HAM if label is KategoriNusaGuard.AMAN else KategoriDasar.SPAM, label, float(result["score"]), "indobert")
+        return (KategoriDasar.HAM if label is KategoriNusaGuard.AMAN else KategoriDasar.SPAM, label, confidence, source)
     label, count = max(((label, sum(_contains_term(normalized, term) for term in terms)) for label, terms in KEYWORDS.items()), key=lambda item: item[1])
     if count == 0:
         return KategoriDasar.HAM, KategoriNusaGuard.AMAN, 0.65, "rules-fallback"
     return KategoriDasar.SPAM, label, min(0.60 + count * 0.10, 0.90), "rules-fallback"
+
+
+def predict_category_with_fusion(text: str, nseae_scores: dict[str, float]) -> tuple[KategoriDasar, KategoriNusaGuard, float, str, bool, float]:
+    probabilities, source = predict_probabilities(text)
+    risk = aggregate_nseae_risk(nseae_scores)
+    if not probabilities:
+        basic, label, confidence, fallback_source = predict_category(text)
+        return basic, label, confidence, fallback_source, False, confidence
+
+    baseline_label, model_confidence = max(probabilities.items(), key=lambda item: item[1])
+    label, fusion_applied = baseline_label, False
+    normalized = text.casefold()
+    active_indicators = sum(score > 0 for score in nseae_scores.values())
+    if baseline_label is not KategoriNusaGuard.AMAN and has_protective_context(text) and (risk < 0.50 or active_indicators <= 1):
+        label, fusion_applied = KategoriNusaGuard.AMAN, True
+    elif ".apk" in normalized or "http://" in normalized or "https://" in normalized:
+        label, fusion_applied = KategoriNusaGuard.PHISHING, baseline_label is not KategoriNusaGuard.PHISHING
+    elif any(term in normalized for term in ("kirim otp", "minta otp", "kirim pin", "minta pin", "kirim password", "minta password")):
+        label, fusion_applied = KategoriNusaGuard.SOCIAL_ENGINEERING, baseline_label is not KategoriNusaGuard.SOCIAL_ENGINEERING
+    elif baseline_label is KategoriNusaGuard.AMAN and risk >= 0.55:
+        suspicious = {candidate: score for candidate, score in probabilities.items() if candidate is not KategoriNusaGuard.AMAN}
+        label = max(suspicious.items(), key=lambda item: item[1])[0]
+        fusion_applied = True
+
+    if label is baseline_label:
+        confidence = min(1.0, 0.85 * model_confidence + 0.15 * risk) if label is not KategoriNusaGuard.AMAN else model_confidence
+    elif label is KategoriNusaGuard.AMAN and fusion_applied:
+        confidence = max(probabilities[label], 1.0 - risk)
+    else:
+        confidence = max(probabilities[label], risk * 0.75)
+    basic = KategoriDasar.HAM if label is KategoriNusaGuard.AMAN else KategoriDasar.SPAM
+    return basic, label, round(confidence, 4), "indobert+nseae", fusion_applied, model_confidence
 

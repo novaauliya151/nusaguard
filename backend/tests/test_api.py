@@ -11,7 +11,10 @@ def test_analyze_is_ephemeral_and_returns_complete_contract() -> None:
     assert body["risk_level"] == "HIGH"
     assert len(body["nseae_scores"]) == 6
     assert body["recommendation"]
-    assert body["model_source"] in {"indobert", "rules-fallback"}
+    assert body["model_source"] in {"indobert+nseae", "rules-fallback"}
+    assert 0 <= body["model_confidence"] <= 1
+    assert 0 <= body["nseae_risk_score"] <= 1
+    assert isinstance(body["fusion_applied"], bool)
 
 def test_report_requires_explicit_consent() -> None:
     response = client.post("/api/report", json={"text": "contoh", "category_suggested": "Social Engineering", "consent": False})
@@ -36,6 +39,15 @@ def test_wedding_invitation_apk_variations_are_phishing() -> None:
         assert body["category"] == "Phishing/Link Berbahaya"
         assert body["risk_level"] == "HIGH"
         assert body["risk_score"] >= 0.7
+
+
+def test_protective_warning_is_not_flagged_as_fraud() -> None:
+    response = client.post("/api/analyze", json={"text": "Jangan pernah kirim OTP, PIN, atau kata sandi kepada siapa pun."})
+    body = response.json()
+    assert response.status_code == 200
+    assert body["category"] == "Aman"
+    if body["model_source"] == "indobert+nseae":
+        assert body["fusion_applied"] is True
 
 
 def test_admin_dashboard_requires_key_and_supports_moderation(monkeypatch) -> None:
