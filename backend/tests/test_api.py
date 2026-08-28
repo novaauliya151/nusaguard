@@ -11,7 +11,7 @@ def test_analyze_is_ephemeral_and_returns_complete_contract() -> None:
     assert body["risk_level"] == "HIGH"
     assert len(body["nseae_scores"]) == 6
     assert body["recommendation"]
-    assert body["model_source"] in {"indobert+nseae", "rules-fallback"}
+    assert body["model_source"] in {"indobert+nseae", "rules-fallback", "rules-fallback+nseae"}
     assert 0 <= body["model_confidence"] <= 1
     assert 0 <= body["nseae_risk_score"] <= 1
     assert isinstance(body["fusion_applied"], bool)
@@ -43,13 +43,19 @@ def test_wedding_invitation_apk_variations_are_phishing() -> None:
         assert body["risk_score"] >= 0.7
 
 
-def test_protective_warning_is_not_flagged_as_fraud() -> None:
-    response = client.post("/api/analyze", json={"text": "Jangan pernah kirim OTP, PIN, atau kata sandi kepada siapa pun."})
-    body = response.json()
-    assert response.status_code == 200
-    assert body["category"] == "Aman"
-    if body["model_source"] == "indobert+nseae":
+def test_protective_warning_is_not_flagged_as_fraud(monkeypatch, tmp_path) -> None:
+    from app.services.predictor import _pipeline
+    monkeypatch.setenv("NUSAGUARD_MODEL_PATH", str(tmp_path / "missing-model"))
+    _pipeline.cache_clear()
+    try:
+        response = client.post("/api/analyze", json={"text": "Jangan pernah kirim OTP, PIN, atau kata sandi kepada siapa pun."})
+        body = response.json()
+        assert response.status_code == 200
+        assert body["category"] == "Aman"
+        assert body["model_source"] == "rules-fallback+nseae"
         assert body["fusion_applied"] is True
+    finally:
+        _pipeline.cache_clear()
 
 
 def test_admin_dashboard_requires_key_and_supports_moderation(monkeypatch) -> None:
@@ -127,4 +133,12 @@ def test_dynamic_education_and_anonymized_dataset(monkeypatch) -> None:
     assert "081234567890" not in processed.json()["text_anonymized"]
     assert "test@example.com" not in processed.json()["text_anonymized"]
     assert client.get("/api/dataset").status_code == 200
+
+
+def test_dataset_collections_are_described_separately() -> None:
+    info = client.get("/api/dataset/info")
+    assert info.status_code == 200
+    assert info.json()["development_samples"] == 3000
+    assert info.json()["development_samples_per_category"] == 500
+    assert info.json()["development_downloadable"] is False
 

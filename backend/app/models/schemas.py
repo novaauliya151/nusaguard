@@ -146,6 +146,15 @@ class PublicDatasetRow(BaseModel):
     reviewed: bool
     created_at: datetime
 
+class DatasetCollectionInfo(BaseModel):
+    public_samples: int
+    development_samples: int
+    development_categories: int
+    development_samples_per_category: int
+    public_collection: str
+    development_collection: str
+    development_downloadable: bool
+
 class DatasetRow(BaseModel):
     kategori: KategoriDasar
     pesan: str

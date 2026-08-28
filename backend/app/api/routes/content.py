@@ -2,7 +2,7 @@ import re
 
 from fastapi import APIRouter
 
-from app.models.schemas import EducationItem, PublicDatasetRow
+from app.models.schemas import DatasetCollectionInfo, EducationItem, PublicDatasetRow
 from app.services.store import store
 
 router = APIRouter(tags=["public-content"])
@@ -26,4 +26,17 @@ def education() -> list[EducationItem]:
 @router.get("/dataset", response_model=list[PublicDatasetRow])
 def dataset() -> list[PublicDatasetRow]:
     return [PublicDatasetRow(**item) for item in store.public_dataset()]
+
+
+@router.get("/dataset/info", response_model=DatasetCollectionInfo)
+def dataset_info() -> DatasetCollectionInfo:
+    return DatasetCollectionInfo(
+        public_samples=len(store.public_dataset()),
+        development_samples=3000,
+        development_categories=6,
+        development_samples_per_category=500,
+        public_collection="Laporan sukarela yang telah mendapat persetujuan, ditinjau admin, dan dianonimkan.",
+        development_collection="Dataset sintetis untuk pelatihan dan evaluasi pengembangan model; bukan laporan masyarakat.",
+        development_downloadable=False,
+    )
 
