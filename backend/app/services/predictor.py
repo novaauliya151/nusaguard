@@ -24,7 +24,8 @@ def _contains_term(text: str, term: str) -> bool:
 
 @lru_cache(maxsize=1)
 def _pipeline():
-    model_path = Path(os.getenv("NUSAGUARD_MODEL_PATH", "model/indobert"))
+    default_path = Path(__file__).resolve().parents[2] / "model" / "indobert"
+    model_path = Path(os.getenv("NUSAGUARD_MODEL_PATH", str(default_path)))
     if not (model_path / "config.json").exists():
         return None
     from transformers import pipeline
@@ -32,12 +33,19 @@ def _pipeline():
 
 def predict_category(text: str) -> tuple[KategoriDasar, KategoriNusaGuard, float, str]:
     classifier = _pipeline()
+    normalized = text.casefold()
     if classifier:
         result = classifier(text, truncation=True, max_length=256)[0][0]
         label = KategoriNusaGuard(result["label"])
+        # Critical, explicit indicators remain deterministic safety guards around
+        # the learned model, particularly while training data is still synthetic.
+        if ".apk" in normalized or "http://" in normalized or "https://" in normalized:
+            label = KategoriNusaGuard.PHISHING
+        elif any(term in normalized for term in ("kirim otp", "minta otp", "kirim pin", "minta pin", "kirim password", "minta password")):
+            label = KategoriNusaGuard.SOCIAL_ENGINEERING
         return (KategoriDasar.HAM if label is KategoriNusaGuard.AMAN else KategoriDasar.SPAM, label, float(result["score"]), "indobert")
-    normalized = text.casefold()
     label, count = max(((label, sum(_contains_term(normalized, term) for term in terms)) for label, terms in KEYWORDS.items()), key=lambda item: item[1])
     if count == 0:
         return KategoriDasar.HAM, KategoriNusaGuard.AMAN, 0.65, "rules-fallback"
     return KategoriDasar.SPAM, label, min(0.60 + count * 0.10, 0.90), "rules-fallback"
+
