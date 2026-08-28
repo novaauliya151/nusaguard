@@ -1,0 +1,287 @@
+{
+  "scope": "Curated 24-message challenge set; not a held-out real-world benchmark.",
+  "samples": 24,
+  "baseline_indobert": {
+    "accuracy_multiclass": 0.8333333333333334,
+    "f1_macro_multiclass": 0.8472527472527472,
+    "f1_macro_binary": 0.8417582417582418,
+    "binary_report": {
+      "aman": {
+        "precision": 1.0,
+        "recall": 0.625,
+        "f1-score": 0.7692307692307693,
+        "support": 8.0
+      },
+      "penipuan": {
+        "precision": 0.8421052631578947,
+        "recall": 1.0,
+        "f1-score": 0.9142857142857143,
+        "support": 16.0
+      },
+      "accuracy": 0.875,
+      "macro avg": {
+        "precision": 0.9210526315789473,
+        "recall": 0.8125,
+        "f1-score": 0.8417582417582418,
+        "support": 24.0
+      },
+      "weighted avg": {
+        "precision": 0.8947368421052632,
+        "recall": 0.875,
+        "f1-score": 0.865934065934066,
+        "support": 24.0
+      }
+    }
+  },
+  "indobert_plus_nseae": {
+    "accuracy_multiclass": 0.9583333333333334,
+    "f1_macro_multiclass": 0.9481481481481481,
+    "f1_macro_binary": 1.0,
+    "binary_report": {
+      "aman": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 8.0
+      },
+      "penipuan": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 16.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 24.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 24.0
+      }
+    }
+  },
+  "fusion_applied_count": 3,
+  "details": [
+    {
+      "text": "Dalam 10 menit akun ditutup permanen. Saya dari bank, berikan kode verifikasi yang baru masuk.",
+      "expected": "Social Engineering",
+      "baseline": "Social Engineering",
+      "fused": "Social Engineering",
+      "fusion_applied": false,
+      "model_confidence": 0.9944,
+      "fused_confidence": 0.9953
+    },
+    {
+      "text": "Ini mama pakai nomor baru. Cepat transfer sebelum toko tutup ya.",
+      "expected": "Social Engineering",
+      "baseline": "Social Engineering",
+      "fused": "Social Engineering",
+      "fusion_applied": false,
+      "model_confidence": 0.9961,
+      "fused_confidence": 0.8915
+    },
+    {
+      "text": "Pihak kepolisian menemukan pelanggaran. Kirim foto KTP sekarang agar tidak diproses hukum.",
+      "expected": "Social Engineering",
+      "baseline": "Social Engineering",
+      "fused": "Social Engineering",
+      "fusion_applied": false,
+      "model_confidence": 0.9906,
+      "fused_confidence": 0.992
+    },
+    {
+      "text": "CS resmi BCA meminta kamu masukkan PIN untuk membatalkan pemblokiran.",
+      "expected": "Social Engineering",
+      "baseline": "Social Engineering",
+      "fused": "Social Engineering",
+      "fusion_applied": false,
+      "model_confidence": 0.9957,
+      "fused_confidence": 0.9862
+    },
+    {
+      "text": "Kesempatan terakhir klaim voucher, unduh Lampiran_Undangan.apk.",
+      "expected": "Phishing/Link Berbahaya",
+      "baseline": "Phishing/Link Berbahaya",
+      "fused": "Phishing/Link Berbahaya",
+      "fusion_applied": false,
+      "model_confidence": 0.9949,
+      "fused_confidence": 0.9538
+    },
+    {
+      "text": "Periksa dokumen perkara melalui https://verifikasi-akun.invalid sebelum tengah malam.",
+      "expected": "Phishing/Link Berbahaya",
+      "baseline": "Phishing/Link Berbahaya",
+      "fused": "Phishing/Link Berbahaya",
+      "fusion_applied": false,
+      "model_confidence": 0.9789,
+      "fused_confidence": 0.8321
+    },
+    {
+      "text": "Peta lokasi resepsi ada pada file Foto Pernikahan.apk, silakan buka.",
+      "expected": "Phishing/Link Berbahaya",
+      "baseline": "Phishing/Link Berbahaya",
+      "fused": "Phishing/Link Berbahaya",
+      "fusion_applied": false,
+      "model_confidence": 0.9835,
+      "fused_confidence": 0.8819
+    },
+    {
+      "text": "Return tetap tanpa risiko, modal Rp500.000 menjadi dua kali lipat hari ini.",
+      "expected": "Penipuan Investasi",
+      "baseline": "Penipuan Investasi",
+      "fused": "Penipuan Investasi",
+      "fusion_applied": false,
+      "model_confidence": 0.9954,
+      "fused_confidence": 0.8944
+    },
+    {
+      "text": "Robot trading rahasia menjamin pasti untung. Kesempatan terakhir bergabung.",
+      "expected": "Penipuan Investasi",
+      "baseline": "Penipuan Investasi",
+      "fused": "Penipuan Investasi",
+      "fusion_applied": false,
+      "model_confidence": 0.9957,
+      "fused_confidence": 0.8918
+    },
+    {
+      "text": "Profit harian sudah dijamin admin, transfer modal sekarang juga.",
+      "expected": "Penipuan Investasi",
+      "baseline": "Penipuan Investasi",
+      "fused": "Penipuan Investasi",
+      "fusion_applied": false,
+      "model_confidence": 0.9958,
+      "fused_confidence": 0.8897
+    },
+    {
+      "text": "Lowongan tugas online, komisi besar. Bayar aktivasi akun agar kursi tidak diberikan orang lain.",
+      "expected": "Penipuan Rekrutmen",
+      "baseline": "Penipuan Rekrutmen",
+      "fused": "Penipuan Rekrutmen",
+      "fusion_applied": false,
+      "model_confidence": 0.9961,
+      "fused_confidence": 0.8551
+    },
+    {
+      "text": "HRD meminta biaya seragam hari ini sebelum surat kerja diterbitkan.",
+      "expected": "Penipuan Rekrutmen",
+      "baseline": "Penipuan Rekrutmen",
+      "fused": "Penipuan Rekrutmen",
+      "fusion_applied": false,
+      "model_confidence": 0.9958,
+      "fused_confidence": 0.8555
+    },
+    {
+      "text": "Kerja dari rumah dengan penghasilan harian, setor deposit untuk mulai tugas.",
+      "expected": "Penipuan Rekrutmen",
+      "baseline": "Penipuan Rekrutmen",
+      "fused": "Penipuan Rekrutmen",
+      "fusion_applied": false,
+      "model_confidence": 0.9899,
+      "fused_confidence": 0.8546
+    },
+    {
+      "text": "Cintaku, paket hadiah pernikahan tertahan bea cukai. Tolong kirim uang dendanya.",
+      "expected": "Penipuan Romansa",
+      "baseline": "Penipuan Romansa",
+      "fused": "Penipuan Romansa",
+      "fusion_applied": false,
+      "model_confidence": 0.9961,
+      "fused_confidence": 0.8869
+    },
+    {
+      "text": "Aku ingin menikah denganmu, tetapi sekarang butuh bantuan biaya rumah sakit.",
+      "expected": "Penipuan Romansa",
+      "baseline": "Penipuan Romansa",
+      "fused": "Penipuan Romansa",
+      "fusion_applied": false,
+      "model_confidence": 0.9968,
+      "fused_confidence": 0.863
+    },
+    {
+      "text": "Teman dekat dari aplikasi kencan meminta transfer darurat untuk tiket bertemu.",
+      "expected": "Penipuan Romansa",
+      "baseline": "Social Engineering",
+      "fused": "Social Engineering",
+      "fusion_applied": false,
+      "model_confidence": 0.7305,
+      "fused_confidence": 0.6209
+    },
+    {
+      "text": "Besok rapat kelompok dimulai pukul sembilan pagi.",
+      "expected": "Aman",
+      "baseline": "Aman",
+      "fused": "Aman",
+      "fusion_applied": false,
+      "model_confidence": 0.9962,
+      "fused_confidence": 0.9962
+    },
+    {
+      "text": "Bonus internet gratis sudah otomatis masuk ke paket pelanggan.",
+      "expected": "Aman",
+      "baseline": "Penipuan Investasi",
+      "fused": "Aman",
+      "fusion_applied": true,
+      "model_confidence": 0.8905,
+      "fused_confidence": 0.892
+    },
+    {
+      "text": "Petugas kampus akan hadir dalam seminar literasi digital hari ini.",
+      "expected": "Aman",
+      "baseline": "Aman",
+      "fused": "Aman",
+      "fusion_applied": false,
+      "model_confidence": 0.9949,
+      "fused_confidence": 0.9949
+    },
+    {
+      "text": "Jangan pernah kirim OTP, PIN, atau kata sandi kepada siapa pun.",
+      "expected": "Aman",
+      "baseline": "Social Engineering",
+      "fused": "Aman",
+      "fusion_applied": true,
+      "model_confidence": 0.9963,
+      "fused_confidence": 0.561
+    },
+    {
+      "text": "Bank mengumumkan jadwal pemeliharaan aplikasi melalui situs resminya.",
+      "expected": "Aman",
+      "baseline": "Aman",
+      "fused": "Aman",
+      "fusion_applied": false,
+      "model_confidence": 0.4854,
+      "fused_confidence": 0.4854
+    },
+    {
+      "text": "Hadiah lomba sekolah dapat diambil di ruang guru dengan membawa kartu peserta.",
+      "expected": "Aman",
+      "baseline": "Aman",
+      "fused": "Aman",
+      "fusion_applied": false,
+      "model_confidence": 0.9948,
+      "fused_confidence": 0.9948
+    },
+    {
+      "text": "Saya dari panitia resmi dan ingin mengonfirmasi jadwal acara besok.",
+      "expected": "Aman",
+      "baseline": "Aman",
+      "fused": "Aman",
+      "fusion_applied": false,
+      "model_confidence": 0.9939,
+      "fused_confidence": 0.9939
+    },
+    {
+      "text": "Lowongan magang diumumkan melalui laman karier perusahaan tanpa biaya.",
+      "expected": "Aman",
+      "baseline": "Penipuan Rekrutmen",
+      "fused": "Aman",
+      "fusion_applied": true,
+      "model_confidence": 0.9913,
+      "fused_confidence": 1.0
+    }
+  ]
+}

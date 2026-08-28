@@ -1,16 +1,11 @@
 from app.models.schemas import KategoriNusaGuard
-from app.services.predictor import _pipeline, predict_category
+from app.services.predictor import predict_category
 
 
-def test_pin_does_not_match_inside_regular_word(monkeypatch, tmp_path) -> None:
-    monkeypatch.setenv("NUSAGUARD_MODEL_PATH", str(tmp_path / "missing-model"))
-    _pipeline.cache_clear()
-    try:
-        _, category, _, source = predict_category("Jadwal konsultasi dipindah ke hari Rabu.")
-        assert source == "rules-fallback"
-        assert category is KategoriNusaGuard.AMAN
-    finally:
-        _pipeline.cache_clear()
+def test_pin_does_not_match_inside_regular_word() -> None:
+    _, category, _, source = predict_category("Jadwal konsultasi dipindah ke hari Rabu.")
+    assert source == "rules-fallback"
+    assert category is KategoriNusaGuard.AMAN
 
 
 def test_representative_fraud_categories() -> None:
@@ -22,4 +17,3 @@ def test_representative_fraud_categories() -> None:
     }
     for message, expected in cases.items():
         assert predict_category(message)[1] is expected
-

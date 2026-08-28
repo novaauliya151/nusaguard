@@ -1,8 +1,7 @@
-# Backend (Python/FastAPI)
+﻿# Backend (Python/FastAPI)
 backend/venv/
 backend/.venv/
 backend/.venv-ml/
-backend/.cache/
 backend/__pycache__/
 backend/**/__pycache__/
 backend/.env
@@ -33,4 +32,3 @@ frontend/.npm-cache/
 .vscode/
 .DS_Store
 Thumbs.db
-

@@ -5,6 +5,3 @@ pytest
 httpx
 sqlalchemy
 psycopg[binary]
-torch
-transformers
-
