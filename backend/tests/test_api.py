@@ -24,6 +24,7 @@ def test_public_content_endpoints() -> None:
 
 def test_wedding_invitation_apk_variations_are_phishing() -> None:
     messages = [
+        "Undangan pernikahan.apk mohon dibuka",
         "Halo kak, detail waktu dan lokasi ada di Undangan Pernikahan.apk. Ditunggu kehadirannya!",
         "Kepada Yth. Bapak/Ibu, kami lampirkan Undangan_Digital_Pernikahan.apk. Mohon diunduh untuk melihat peta lokasi.",
         "Kami mengundang Anda ke pesta pernikahan. Buka Foto Undangan.apk untuk info lengkapnya.",
@@ -112,4 +113,5 @@ def test_dynamic_education_and_anonymized_dataset(monkeypatch) -> None:
     assert "081234567890" not in processed.json()["text_anonymized"]
     assert "test@example.com" not in processed.json()["text_anonymized"]
     assert client.get("/api/dataset").status_code == 200
+
 
