@@ -1,0 +1,23 @@
+"use client";
+import Link from "next/link";
+import {useEffect,useMemo,useState} from "react";
+import styles from "./statistics.module.css";
+
+const API=process.env.NEXT_PUBLIC_API_URL??"http://127.0.0.1:8001";
+const labels=["Phishing/Link Berbahaya","Social Engineering","Penipuan Investasi","Penipuan Rekrutmen","Penipuan Romansa","Aman"];
+type Stats={total_analyzed:number;category_counts:Record<string,number>;month_total:number;month_category_counts:Record<string,number>;top_category_this_month:string|null;daily_stats:{day:string;count:number}[];updated_at:string};
+
+export default function Statistics(){
+ const[data,setData]=useState<Stats|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState("");
+ async function load(){setLoading(true);setError("");try{const r=await fetch(`${API}/api/stats`,{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status}`);setData(await r.json())}catch{setError("Statistik belum dapat dimuat. Pastikan backend NusaGuard aktif, lalu coba lagi.")}finally{setLoading(false)}}
+ useEffect(()=>{let active=true;fetch(`${API}/api/stats`,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()}).then(body=>{if(active)setData(body)}).catch(()=>{if(active)setError("Statistik belum dapat dimuat. Pastikan backend NusaGuard aktif, lalu coba lagi.")}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[]);
+ const rows=useMemo(()=>labels.map(name=>({name,count:data?.month_category_counts[name]??0})).sort((a,b)=>b.count-a.count),[data]);
+ const max=Math.max(...rows.map(x=>x.count),1),maxDaily=Math.max(...(data?.daily_stats.map(x=>x.count)??[1]),1);
+ return <main className={styles.page}><header className={styles.header}><Link className={styles.brand} href="/"><span>NG</span>NusaGuard</Link><nav><Link href="/education">Edukasi</Link><Link href="/report">Lapor penipuan</Link><Link href="/dataset">Dataset publik</Link><Link href="/login">Masuk</Link></nav></header>
+ <section className={styles.hero}><p className={styles.kicker}>STATISTIK PUBLIK · TANPA LOGIN</p><h1>Lihat pola.<br/>Lebih cepat waspada.</h1><p>Angka agregat dari analisis NusaGuard. Isi pesan, identitas, dan histori pengguna tidak ditampilkan atau disimpan pada statistik ini.</p></section>
+ {loading?<Status title="Memuat statistik…" detail="Menghubungkan ke backend NusaGuard."/>:error?<Status title="Statistik tidak tersedia" detail={error} action={load}/>:data&&<><section className={styles.metrics}><article><span>TOTAL PESAN DIANALISIS</span><strong>{data.total_analyzed.toLocaleString("id-ID")}</strong><p>Akumulasi seluruh analisis</p></article><article><span>ANALISIS BULAN INI</span><strong>{data.month_total.toLocaleString("id-ID")}</strong><p>{new Intl.DateTimeFormat("id-ID",{month:"long",year:"numeric"}).format(new Date())}</p></article><article className={styles.highlight}><span>MODUS TERBANYAK BULAN INI</span><strong>{data.top_category_this_month??"Belum ada data"}</strong><p>Dihitung dari kategori hasil analisis</p></article></section>
+ <section className={styles.panels}><article className={styles.panel}><div className={styles.panelHead}><div><span>DISTRIBUSI BULAN INI</span><h2>Kategori yang terdeteksi</h2></div><b>{data.month_total} analisis</b></div><div className={styles.bars}>{rows.map(row=><div key={row.name}><label><span>{row.name}</span><b>{row.count}</b></label><i><em style={{width:`${row.count/max*100}%`}}/></i></div>)}</div></article><article className={styles.panel}><div className={styles.panelHead}><div><span>14 HARI TERAKHIR</span><h2>Aktivitas analisis</h2></div></div>{data.daily_stats.length?<div className={styles.chart}>{data.daily_stats.map(row=><div key={row.day}><b style={{height:`${Math.max(row.count/maxDaily*100,5)}%`}} title={`${row.count} analisis`}/><span>{new Date(`${row.day}T00:00:00`).toLocaleDateString("id-ID",{day:"2-digit",month:"short"})}</span></div>)}</div>:<p className={styles.noData}>Belum ada aktivitas analisis dalam statistik harian.</p>}</article></section>
+ <aside className={styles.privacy}><b>Privasi tetap dijaga</b><p>Halaman ini hanya membaca jumlah agregat per kategori dan hari. Tidak ada teks pesan, nama, nomor telepon, email, atau akun pengguna.</p><small>Diperbarui {new Date(data.updated_at).toLocaleString("id-ID")}</small></aside></>}
+ <footer className={styles.footer}><span>NusaGuard · Statistik Publik</span><span>Agregat anonim · dapat diakses tanpa login</span></footer></main>
+}
+function Status({title,detail,action}:{title:string;detail:string;action?:()=>void}){return <section className={styles.status}><span>◎</span><h2>{title}</h2><p>{detail}</p>{action&&<button onClick={action}>Coba lagi</button>}</section>}

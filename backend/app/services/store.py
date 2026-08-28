@@ -33,6 +33,14 @@ class Store:
         with self.engine.connect() as db:
             counts={row.category:row.count for row in db.execute(text("SELECT category,count FROM stats"))}
         return sum(counts.values()), counts
+    def public_statistics(self) -> dict:
+        total, counts = self.stats()
+        month_prefix = datetime.now(timezone.utc).strftime("%Y-%m")
+        with self.engine.connect() as db:
+            month_rows = db.execute(text("SELECT category,SUM(count) AS count FROM stats_daily WHERE day LIKE :month GROUP BY category ORDER BY count DESC"), {"month": f"{month_prefix}%"}).mappings().all()
+            daily_rows = db.execute(text("SELECT day,SUM(count) AS count FROM stats_daily GROUP BY day ORDER BY day DESC LIMIT 14")).mappings().all()
+        month_counts = {row["category"]: row["count"] for row in month_rows}
+        return {"total": total, "counts": counts, "month_total": sum(month_counts.values()), "month_counts": month_counts, "top_category": month_rows[0]["category"] if month_rows else None, "daily": list(reversed([dict(row) for row in daily_rows])), "updated_at": datetime.now(timezone.utc)}
     def report(self, content: str, category: str) -> tuple[str, datetime]:
         report_id, created = str(uuid.uuid4()), datetime.now(timezone.utc)
         with self.lock, self.engine.begin() as db:

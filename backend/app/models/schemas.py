@@ -66,6 +66,11 @@ class ReportResponse(BaseModel):
 class StatsResponse(BaseModel):
     total_analyzed: int
     category_counts: dict[str, int]
+    month_total: int
+    month_category_counts: dict[str, int]
+    top_category_this_month: str | None
+    daily_stats: list[dict[str, object]]
+    updated_at: datetime
 
 class AdminReport(BaseModel):
     id: str
@@ -145,5 +150,4 @@ class DatasetRow(BaseModel):
     kategori: KategoriDasar
     pesan: str
     kategori_nusaguard: KategoriNusaGuard
-
 
