@@ -22,7 +22,9 @@ def test_report_requires_explicit_consent() -> None:
 
 def test_public_content_endpoints() -> None:
     assert len(client.get("/api/categories").json()) == 5
-    assert client.get("/api/stats").status_code == 200
+    stats = client.get("/api/stats")
+    assert stats.status_code == 200
+    assert {"total_analyzed", "category_counts", "month_total", "month_category_counts", "top_category_this_month", "daily_stats", "updated_at"} <= stats.json().keys()
 
 
 def test_wedding_invitation_apk_variations_are_phishing() -> None:
@@ -125,5 +127,4 @@ def test_dynamic_education_and_anonymized_dataset(monkeypatch) -> None:
     assert "081234567890" not in processed.json()["text_anonymized"]
     assert "test@example.com" not in processed.json()["text_anonymized"]
     assert client.get("/api/dataset").status_code == 200
-
 
