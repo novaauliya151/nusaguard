@@ -63,6 +63,10 @@ def predict_category_with_fusion(text: str, nseae_scores: dict[str, float]) -> t
     risk = aggregate_nseae_risk(nseae_scores)
     if not probabilities:
         basic, label, confidence, fallback_source = predict_category(text)
+        normalized = text.casefold()
+        active_indicators = sum(score > 0 for score in nseae_scores.values())
+        if label is not KategoriNusaGuard.AMAN and has_protective_context(text) and ".apk" not in normalized and "http://" not in normalized and "https://" not in normalized and (risk < 0.50 or active_indicators <= 1):
+            return KategoriDasar.HAM, KategoriNusaGuard.AMAN, round(max(1.0 - risk, 0.65), 4), "rules-fallback+nseae", True, confidence
         return basic, label, confidence, fallback_source, False, confidence
 
     baseline_label, model_confidence = max(probabilities.items(), key=lambda item: item[1])
@@ -88,4 +92,3 @@ def predict_category_with_fusion(text: str, nseae_scores: dict[str, float]) -> t
         confidence = max(probabilities[label], risk * 0.75)
     basic = KategoriDasar.HAM if label is KategoriNusaGuard.AMAN else KategoriDasar.SPAM
     return basic, label, round(confidence, 4), "indobert+nseae", fusion_applied, model_confidence
-
