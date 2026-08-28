@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./accessibility.css";
+import AccessibilityControls from "./accessibility-controls";
 
 export const metadata: Metadata = {
   title: "NusaGuard — Periksa Sebelum Percaya",
@@ -9,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="id" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">{children}<AccessibilityControls/></body>
     </html>
   );
 }

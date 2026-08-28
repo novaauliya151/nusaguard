@@ -22,6 +22,7 @@ def test_report_requires_explicit_consent() -> None:
 
 def test_public_content_endpoints() -> None:
     assert len(client.get("/api/categories").json()) == 5
+    assert len(client.get("/api/education").json()) >= 6
     stats = client.get("/api/stats")
     assert stats.status_code == 200
     assert {"total_analyzed", "category_counts", "month_total", "month_category_counts", "top_category_this_month", "daily_stats", "updated_at"} <= stats.json().keys()

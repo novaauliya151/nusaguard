@@ -8,6 +8,15 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import create_engine, text
 
+DEFAULT_EDUCATION = [
+    ("seed-phishing", "Waspada tautan dan APK palsu", "Phishing/Link Berbahaya", "Penipu menyamarkan tautan atau file APK sebagai undangan, paket, dan layanan resmi.", ["Domain asing atau file .apk", "Meminta segera membuka tautan"], ["Buka aplikasi resmi secara mandiri", "Jangan memasang APK dari pesan"]),
+    ("seed-social", "Jaga OTP, PIN, dan kata sandi", "Social Engineering", "Pelaku menyamar sebagai petugas untuk meminta kredensial rahasia.", ["Meminta OTP atau PIN", "Mengancam akun akan diblokir"], ["Jangan pernah membagikan kredensial", "Hubungi kanal resmi"]),
+    ("seed-investment", "Kenali investasi tidak masuk akal", "Penipuan Investasi", "Janji keuntungan pasti dan tekanan transfer cepat merupakan tanda utama penipuan investasi.", ["Profit pasti tanpa risiko", "Diminta transfer ke rekening pribadi"], ["Periksa izin OJK", "Hindari keputusan karena tekanan"]),
+    ("seed-recruitment", "Lowongan resmi tidak meminta biaya", "Penipuan Rekrutmen", "Lowongan palsu sering meminta biaya administrasi, seragam, atau data sensitif sebelum wawancara.", ["Membayar sebelum proses seleksi", "Email bukan domain perusahaan"], ["Verifikasi melalui situs perusahaan", "Jangan membayar proses rekrutmen"]),
+    ("seed-romance", "Waspada manipulasi hubungan daring", "Penipuan Romansa", "Pelaku membangun kedekatan lalu menciptakan keadaan darurat untuk meminta uang.", ["Belum pernah bertemu", "Berulang kali meminta bantuan uang"], ["Verifikasi identitas", "Diskusikan dengan orang tepercaya"]),
+    ("seed-safe", "Ciri pesan yang lebih aman", "Aman", "Pesan edukasi mengingatkan pengguna agar tidak membagikan data dan mengarahkan ke kanal resmi tanpa tekanan.", ["Tidak meminta kredensial", "Tidak menyuruh membuka tautan asing"], ["Tetap verifikasi pengirim", "Gunakan aplikasi resmi"]),
+]
+
 class Store:
     def __init__(self) -> None:
         url = os.getenv("DATABASE_URL", "sqlite:///nusaguard.db").replace("postgres://", "postgresql+psycopg://", 1)
@@ -23,6 +32,9 @@ class Store:
             columns = {row[1] for row in db.execute(text("PRAGMA table_info(reports)"))} if url.startswith("sqlite") else set()
             if columns and "status" not in columns:
                 db.execute(text("ALTER TABLE reports ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'pending'"))
+            now = datetime.now(timezone.utc)
+            for item_id, title, category, description, signs, prevention in DEFAULT_EDUCATION:
+                db.execute(text("INSERT INTO education_items(id,title,category,description,warning_signs,prevention,is_published,created_at,updated_at) SELECT :id,:title,:category,:description,:signs,:prevention,TRUE,:now,:now WHERE NOT EXISTS (SELECT 1 FROM education_items WHERE id=:id)"), {"id":item_id,"title":title,"category":category,"description":description,"signs":json.dumps(signs),"prevention":json.dumps(prevention),"now":now})
     def increment(self, category: str, source: str = "unknown") -> None:
         day = datetime.now(timezone.utc).date().isoformat()
         safe_source = source[:30] if source else "unknown"
