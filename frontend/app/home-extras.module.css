@@ -1,1 +1,12 @@
-.register{padding:10px 15px;border:1px solid #82938b;border-radius:7px}.examples{margin:13px 0 5px}.examples>span{display:block;font-size:9px;font-weight:800;letter-spacing:.1em;color:#6d7e77;margin-bottom:8px}.examples div{display:flex;gap:7px;flex-wrap:wrap}.examples button{border:1px solid #c6d0c7;background:#eef2eb;color:#28473e;border-radius:20px;padding:7px 11px;font-size:9px;cursor:pointer}.examples button:hover{background:#dce9d4;border-color:#7e9a8f}
+.register {
+  padding: 10px 15px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--ink);
+}
+
+.examples { margin: 13px 0 5px; }
+.examples > span { display: block; margin-bottom: 8px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+.examples div { display: flex; gap: 7px; flex-wrap: wrap; }
+.examples button { border: 1px solid var(--border); background: var(--surface); color: var(--ink); border-radius: 20px; padding: 7px 11px; font-size: 9px; cursor: pointer; }
+.examples button:hover { background: color-mix(in srgb, var(--lime) 22%, var(--surface)); }
