@@ -1,4 +1,4 @@
-# Backend (Python/FastAPI)
+﻿# Backend (Python/FastAPI)
 backend/venv/
 backend/.venv/
 backend/.venv-ml/
@@ -34,3 +34,28 @@ frontend/.npm-cache/
 .DS_Store
 Thumbs.db
 
+# Flutter build artifacts
+android/build/
+android/.dart_tool/
+android/.flutter-plugins
+android/.flutter-plugins-dependencies
+android/.packages
+android/.pub-cache/
+android/.pub/
+
+# Platform yang nggak kepake
+android/ios/
+android/linux/
+android/macos/
+android/windows/
+android/web/
+
+# File IDE
+android/*.iml
+android/.idea/
+
+# Cache/config tambahan (nested di dalam folder platform android/android/)
+android/android/.gradle/
+android/android/local.properties
+android/android/*.log
+android/android/*.iml
