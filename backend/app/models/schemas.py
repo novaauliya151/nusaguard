@@ -106,9 +106,15 @@ class UserPublic(BaseModel):
     id: str
     name: str
     email: str
-    role: Literal["user", "analyst", "moderator", "admin"]
+    role: str
     permissions: list[str]
     is_active: bool
+    status: str = "active"
+    avatar: str | None = None
+    must_change_password: bool = False
+    last_login_at: datetime | None = None
+    created_by: str | None = None
+    updated_at: datetime | None = None
     created_at: datetime
 
 class RegisterRequest(BaseModel):
@@ -126,14 +132,32 @@ class AuthResponse(BaseModel):
     user: UserPublic
 
 class UserCreateRequest(RegisterRequest):
-    role: Literal["user", "analyst", "moderator", "admin"] = "user"
+    role: str = Field(default="user", min_length=2, max_length=40)
+    status: Literal["active", "suspended", "inactive"] = "active"
+    must_change_password: bool = True
+    confirm_password: str | None = None
 
 class UserUpdateRequest(BaseModel):
     name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=80)] | None = None
     email: Annotated[str, StringConstraints(strip_whitespace=True, min_length=5, max_length=160, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")] | None = None
     password: Annotated[str, StringConstraints(min_length=8, max_length=128)] | None = None
-    role: Literal["user", "analyst", "moderator", "admin"] | None = None
+    role: str | None = Field(default=None, min_length=2, max_length=40)
     is_active: bool | None = None
+    status: Literal["active", "suspended", "inactive"] | None = None
+    avatar: str | None = Field(default=None, max_length=500)
+    must_change_password: bool | None = None
+    suspension_reason: str | None = Field(default=None, max_length=500)
+
+class PasswordResetRequest(BaseModel):
+    password: Annotated[str, StringConstraints(min_length=10, max_length=128)]
+    confirm_password: Annotated[str, StringConstraints(min_length=10, max_length=128)]
+    must_change_password: bool = True
+
+class RoleRequest(BaseModel):
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=80)]
+    slug: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=40)]
+    description: str | None = Field(default=None, max_length=500)
+    permissions: list[str] = Field(default_factory=list, max_length=100)
 
 class EducationItemRequest(BaseModel):
     title: Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=120)]
@@ -142,6 +166,18 @@ class EducationItemRequest(BaseModel):
     warning_signs: list[str] = Field(min_length=1, max_length=10)
     prevention: list[str] = Field(min_length=1, max_length=10)
     is_published: bool = True
+    slug: str | None = Field(default=None, max_length=160)
+    summary: str | None = Field(default=None, max_length=500)
+    content: str | None = Field(default=None, max_length=20000)
+    anonymized_example: str | None = Field(default=None, max_length=5000)
+    response_steps: list[str] = Field(default_factory=list, max_length=20)
+    thumbnail: str | None = Field(default=None, max_length=500)
+    image_alt: str | None = Field(default=None, max_length=240)
+    meta_title: str | None = Field(default=None, max_length=160)
+    meta_description: str | None = Field(default=None, max_length=500)
+    status: Literal["draft", "scheduled", "published", "archived"] = "published"
+    published_at: datetime | None = None
+    display_order: int = Field(default=0, ge=0, le=10000)
 
 class EducationItem(EducationItemRequest):
     id: str

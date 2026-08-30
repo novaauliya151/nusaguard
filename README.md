@@ -33,6 +33,19 @@ npm run dev
 
 ### Dashboard admin
 
+Migrasi admin bersifat idempoten dan mempertahankan data lama. Untuk instalasi baru, gunakan environment variable agar kredensial tidak ditulis di source code:
+
+```powershell
+cd backend
+$env:INITIAL_ADMIN_NAME="Super Admin NusaGuard"
+$env:INITIAL_ADMIN_EMAIL="admin@example.com"
+$env:INITIAL_ADMIN_PASSWORD="password-kuat-minimal-10-karakter"
+.\.venv\Scripts\python.exe -m scripts.migrate_admin
+.\.venv\Scripts\python.exe -m scripts.seed_admin
+```
+
+Role internal utama adalah `super_admin`, `validator`, dan `content_editor`. Role lama tetap dikenali untuk kompatibilitas. Permission granular disimpan pada tabel `permissions` dan `role_permissions`, diperiksa ulang oleh setiap endpoint backend, dan digunakan frontend untuk menyaring menu. Login dibatasi lima kegagalan per alamat/IP selama 15 menit; logout, pemblokiran, dan reset password mencabut sesi yang relevan. Penghapusan pengguna memakai soft delete dan Super Admin terakhir dilindungi.
+
 Buat akun admin awal dari terminal backend:
 
 ```bash

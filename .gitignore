@@ -8,6 +8,8 @@ backend/**/__pycache__/
 backend/.env
 backend/*.db
 backend/*.pyc
+backend/uploads/*
+!backend/uploads/.gitkeep
 backend/model/indobert/*
 !backend/model/indobert/.gitkeep
 backend/model/tokenizer/*
