@@ -116,6 +116,19 @@ def test_user_registration_login_and_role_management() -> None:
     assert login.status_code == 200
     assert login.json()["user"]["role"] == "analyst"
 
+    managed_email = f"managed-{uuid4().hex[:8]}@example.com"
+    created_by_admin = client.post("/api/admin/users", headers=headers, json={"name": "Managed User", "email": managed_email, "password": "password123", "role": "user"})
+    assert created_by_admin.status_code == 201
+    managed_id = created_by_admin.json()["id"]
+    updated_email = f"updated-{uuid4().hex[:8]}@example.com"
+    edited = client.patch(f"/api/admin/users/{managed_id}", headers=headers, json={"name": "Updated User", "email": updated_email, "password": "password456", "role": "moderator", "is_active": False})
+    assert edited.status_code == 200
+    assert edited.json()["name"] == "Updated User"
+    assert edited.json()["email"] == updated_email
+    assert edited.json()["role"] == "moderator"
+    assert edited.json()["is_active"] is False
+    assert client.delete(f"/api/admin/users/{managed_id}", headers=headers).status_code == 204
+
 
 def test_dynamic_education_and_anonymized_dataset() -> None:
     headers = auth_headers()

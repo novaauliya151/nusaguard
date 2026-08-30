@@ -41,6 +41,8 @@ Buat akun admin awal dari terminal backend:
 
 User dan admin masuk melalui halaman yang sama, `http://localhost:3000/login`. Backend membaca role dari database: user diarahkan ke `/dashboard`, sedangkan admin diarahkan ke `/admin`. Tidak ada pilihan role pada formulir login dan seluruh endpoint `/api/admin/*` memverifikasi bearer token serta role admin pada setiap permintaan. Dashboard hanya menampilkan statistik agregat dan laporan yang dikirim pengguna dengan persetujuan; isi analisis biasa tetap tidak disimpan.
 
+Setiap area admin memiliki route dan file halaman terpisah: `/admin` untuk dashboard, `/admin/users` untuk manajemen pengguna, serta `/admin/reports`, `/admin/education`, `/admin/categories`, `/admin/model`, `/admin/roadmap`, dan `/admin/system`. Manajemen pengguna menyediakan pencarian, filter, pembuatan melalui modal, edit profil/password/role, aktivasi atau pemblokiran, dan penghapusan akun.
+
 ### Akun pengguna dan role
 
 Pengguna dapat mendaftar melalui `http://localhost:3000/register`, masuk melalui `/login`, lalu memakai `/dashboard`. Registrasi publik selalu menghasilkan role `user`; role tidak pernah dipercaya dari input frontend. Password disimpan sebagai hash PBKDF2 dan sesi database berlaku tujuh hari. Role yang tersedia adalah `user`, `analyst`, `moderator`, dan `admin`; pengelolaannya tersedia pada menu **Manajemen pengguna** di dashboard admin. Analisis tanpa login tetap tersedia pada halaman publik.

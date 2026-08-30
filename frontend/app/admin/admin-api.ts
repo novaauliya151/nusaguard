@@ -1,0 +1,6 @@
+export const API=process.env.NEXT_PUBLIC_API_URL??"http://localhost:8000";
+export type AdminUser={id:string;name:string;email:string;role:"user"|"analyst"|"moderator"|"admin";permissions:string[];is_active:boolean;created_at:string};
+export type Report={id:string;text:string;category_suggested:string;status:"pending"|"reviewed"|"rejected";created_at:string};
+export type Dashboard={total_analyzed:number;category_counts:Record<string,number>;reports_total:number;reports_pending:number;recent_reports:Report[];model_status:string;privacy_mode:string;daily_stats:{day:string;count:number}[];source_counts:Record<string,number>;database_engine:string;database_connected:boolean};
+export function authHeaders(json=false):HeadersInit{const token=localStorage.getItem("nusaguard_token")??"";return json?{"Content-Type":"application/json",Authorization:`Bearer ${token}`}:{Authorization:`Bearer ${token}`}}
+export async function adminFetch<T>(path:string,init:RequestInit={}):Promise<T>{const response=await fetch(`${API}${path}`,{...init,headers:{...authHeaders(Boolean(init.body)),...init.headers}});if(!response.ok){const body=await response.json().catch(()=>({}));throw new Error(body.detail??"Permintaan admin gagal.")}if(response.status===204)return undefined as T;return response.json()}

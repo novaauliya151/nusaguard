@@ -141,8 +141,11 @@ class Store:
             rows = db.execute(text("SELECT id,name,email,role,is_active,created_at FROM users ORDER BY created_at DESC")).mappings().all()
         return [dict(row) for row in rows]
 
-    def update_user(self, user_id: str, role: str | None, is_active: bool | None) -> dict | None:
+    def update_user(self, user_id: str, role: str | None, is_active: bool | None, name: str | None = None, email: str | None = None, password: str | None = None) -> dict | None:
         updates, params = [], {"id":user_id}
+        if name is not None: updates.append("name=:name"); params["name"] = name
+        if email is not None: updates.append("email=:email"); params["email"] = email.casefold()
+        if password is not None: updates.append("password_hash=:password"); params["password"] = self._password_hash(password)
         if role is not None: updates.append("role=:role"); params["role"] = role
         if is_active is not None: updates.append("is_active=:active"); params["active"] = is_active
         if not updates: return self.get_user(user_id)
@@ -150,6 +153,12 @@ class Store:
             db.execute(text(f"UPDATE users SET {','.join(updates)} WHERE id=:id"), params)
             if is_active is False: db.execute(text("DELETE FROM user_sessions WHERE user_id=:id"), {"id":user_id})
         return self.get_user(user_id)
+
+    def delete_user(self, user_id: str) -> bool:
+        with self.lock, self.engine.begin() as db:
+            db.execute(text("DELETE FROM user_sessions WHERE user_id=:id"), {"id": user_id})
+            result = db.execute(text("DELETE FROM users WHERE id=:id"), {"id": user_id})
+        return result.rowcount > 0
 
     def education(self, published_only: bool = True) -> list[dict]:
         clause = " WHERE is_published=TRUE" if published_only else ""

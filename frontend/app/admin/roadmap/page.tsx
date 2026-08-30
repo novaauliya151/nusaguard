@@ -1,0 +1,3 @@
+import styles from "../admin.module.css";
+const roadmap=[["01","Scope & arsitektur"],["02","Dataset"],["03","AI & N-SEAE"],["04","Backend API"],["05","Web frontend"],["06","Android"],["07","QA & deployment"]];
+export default function RoadmapPage(){return <><div className={styles.sectionHead}><div><span>PROPOSAL EXECUTION</span><h2>Roadmap pengembangan Day 1–7</h2></div></div><div className={styles.roadmap}>{roadmap.map(([day,title],i)=><article key={day}><span>{day}</span><div><small>DAY {day}</small><h3>{title}</h3></div><b className={i<5?styles.done:i===5?styles.progress:styles.verify}>{i<5?"SELESAI":i===5?"PERLU UJI PERANGKAT":"PERLU DEPLOY"}</b></article>)}</div></>}
