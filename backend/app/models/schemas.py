@@ -58,6 +58,8 @@ class ReportRequest(BaseModel):
     text: MessageText
     category_suggested: KategoriNusaGuard
     consent: bool
+    source: str | None = Field(default="public_form", max_length=50)
+    additional_notes: str | None = Field(default=None, max_length=1000)
 
 class ReportResponse(BaseModel):
     id: str
@@ -76,7 +78,7 @@ class AdminReport(BaseModel):
     id: str
     text: str
     category_suggested: KategoriNusaGuard
-    status: Literal["pending", "reviewed", "rejected"]
+    status: Literal["pending", "reviewed", "in_review", "approved", "rejected", "needs_anonymization", "dataset_candidate"]
     created_at: datetime
 
 class AdminReportUpdate(BaseModel):
@@ -94,6 +96,11 @@ class AdminDashboardResponse(BaseModel):
     source_counts: dict[str, int]
     database_engine: str
     database_connected: bool
+    analyses_today: int
+    analyses_this_month: int
+    reports_reviewed: int
+    candidates_total: int
+    education_published: int
 
 class UserPublic(BaseModel):
     id: str
@@ -148,6 +155,36 @@ class PublicDatasetRow(BaseModel):
     provenance: str
     reviewed: bool
     created_at: datetime
+
+class ReportValidationRequest(BaseModel):
+    status: Literal["pending", "in_review", "approved", "rejected", "needs_anonymization", "dataset_candidate"] | None = None
+    correct_category: KategoriNusaGuard | None = None
+    validation_notes: str | None = Field(default=None, max_length=2000)
+    is_duplicate: bool | None = None
+    admin_result: str | None = Field(default=None, max_length=2000)
+
+class DatasetCandidateRequest(BaseModel):
+    report_id: str | None = None
+    text_anonymized: MessageText
+    category: KategoriNusaGuard
+    source: str = "manual_admin"
+    data_type: Literal["primer", "sekunder", "sintetis"] = "primer"
+    validation_status: Literal["pending", "approved", "rejected", "verified"] = "pending"
+    split: Literal["train", "validation", "test"] | None = None
+    validator: str | None = None
+    notes: str | None = None
+    is_duplicate: bool = False
+    is_archived: bool = False
+    nseae_validation: dict[str, bool] = Field(default_factory=dict)
+
+class DatasetCandidate(DatasetCandidateRequest):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+class PasswordChangeRequest(BaseModel):
+    current_password: Annotated[str, StringConstraints(min_length=8, max_length=128)]
+    new_password: Annotated[str, StringConstraints(min_length=8, max_length=128)]
 
 class DatasetCollectionInfo(BaseModel):
     public_samples: int

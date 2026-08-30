@@ -8,5 +8,5 @@ router = APIRouter(tags=["reports"])
 def create_report(payload: ReportRequest) -> ReportResponse:
     if not payload.consent:
         raise HTTPException(400, "Persetujuan diperlukan untuk menyimpan laporan secara sukarela.")
-    report_id, created_at = store.report(payload.text, payload.category_suggested.value)
+    report_id, created_at = store.report(payload.text, payload.category_suggested.value, payload.source, payload.additional_notes)
     return ReportResponse(id=report_id, created_at=created_at)
