@@ -122,6 +122,9 @@ class UserCreateRequest(RegisterRequest):
     role: Literal["user", "analyst", "moderator", "admin"] = "user"
 
 class UserUpdateRequest(BaseModel):
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=80)] | None = None
+    email: Annotated[str, StringConstraints(strip_whitespace=True, min_length=5, max_length=160, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")] | None = None
+    password: Annotated[str, StringConstraints(min_length=8, max_length=128)] | None = None
     role: Literal["user", "analyst", "moderator", "admin"] | None = None
     is_active: bool | None = None
 

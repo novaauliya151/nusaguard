@@ -58,10 +58,24 @@ def create_user(payload: UserCreateRequest, authorization: str | None = Header(d
 @router.patch("/users/{user_id}", response_model=UserPublic)
 def update_user(user_id: str, payload: UserUpdateRequest, authorization: str | None = Header(default=None)) -> UserPublic:
     require_admin(authorization)
-    user = store.update_user(user_id, payload.role, payload.is_active)
+    try:
+        user = store.update_user(user_id, payload.role, payload.is_active, payload.name, payload.email, payload.password)
+    except Exception as exc:
+        if "unique" in str(exc).casefold() or "duplicate" in str(exc).casefold():
+            raise HTTPException(status_code=409, detail="Email sudah digunakan.") from exc
+        raise
     if not user:
         raise HTTPException(status_code=404, detail="Pengguna tidak ditemukan.")
     return public_user(user)
+
+
+@router.delete("/users/{user_id}", status_code=204)
+def delete_user(user_id: str, authorization: str | None = Header(default=None)) -> None:
+    admin = require_admin(authorization)
+    if admin["id"] == user_id:
+        raise HTTPException(status_code=400, detail="Admin tidak dapat menghapus akun yang sedang digunakan.")
+    if not store.delete_user(user_id):
+        raise HTTPException(status_code=404, detail="Pengguna tidak ditemukan.")
 
 
 @router.get("/education", response_model=list[EducationItem])
