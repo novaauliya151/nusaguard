@@ -29,9 +29,19 @@ class Store:
             db.execute(text("CREATE TABLE IF NOT EXISTS user_sessions (token_hash VARCHAR(64) PRIMARY KEY, user_id VARCHAR(36) NOT NULL, expires_at TIMESTAMP NOT NULL, created_at TIMESTAMP NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id))"))
             db.execute(text("CREATE TABLE IF NOT EXISTS education_items (id VARCHAR(36) PRIMARY KEY, title VARCHAR(120) NOT NULL, category VARCHAR(80) NOT NULL, description TEXT NOT NULL, warning_signs TEXT NOT NULL, prevention TEXT NOT NULL, is_published BOOLEAN NOT NULL DEFAULT TRUE, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL)"))
             db.execute(text("CREATE TABLE IF NOT EXISTS public_dataset (id VARCHAR(36) PRIMARY KEY, report_id VARCHAR(36) NOT NULL UNIQUE, text_anonymized TEXT NOT NULL, category VARCHAR(80) NOT NULL, provenance VARCHAR(50) NOT NULL, reviewed BOOLEAN NOT NULL DEFAULT TRUE, created_at TIMESTAMP NOT NULL, FOREIGN KEY(report_id) REFERENCES reports(id))"))
+            db.execute(text("CREATE TABLE IF NOT EXISTS dataset_candidates (id VARCHAR(36) PRIMARY KEY, report_id VARCHAR(36), text_anonymized TEXT NOT NULL, category VARCHAR(80) NOT NULL, source VARCHAR(50) NOT NULL DEFAULT 'community_report', data_type VARCHAR(20) NOT NULL DEFAULT 'primer', validation_status VARCHAR(20) NOT NULL DEFAULT 'pending', split VARCHAR(20), validator VARCHAR(160), notes TEXT, is_duplicate BOOLEAN NOT NULL DEFAULT FALSE, is_archived BOOLEAN NOT NULL DEFAULT FALSE, nseae_validation TEXT NOT NULL DEFAULT '{}', created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL)"))
+            db.execute(text("CREATE TABLE IF NOT EXISTS admin_activity_logs (id VARCHAR(36) PRIMARY KEY, admin_email VARCHAR(160) NOT NULL, action VARCHAR(80) NOT NULL, object_type VARCHAR(50) NOT NULL, object_id VARCHAR(36), detail TEXT, created_at TIMESTAMP NOT NULL)"))
             columns = {row[1] for row in db.execute(text("PRAGMA table_info(reports)"))} if url.startswith("sqlite") else set()
             if columns and "status" not in columns:
                 db.execute(text("ALTER TABLE reports ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'pending'"))
+            if columns:
+                report_columns = {row[1] for row in db.execute(text("PRAGMA table_info(reports)"))}
+                additions = {"source":"VARCHAR(50)","additional_notes":"TEXT","correct_category":"VARCHAR(80)","validation_notes":"TEXT","is_duplicate":"BOOLEAN NOT NULL DEFAULT FALSE","admin_result":"TEXT"}
+                for column, definition in additions.items():
+                    if column not in report_columns: db.execute(text(f"ALTER TABLE reports ADD COLUMN {column} {definition}"))
+            elif url.startswith("postgresql"):
+                additions = {"source":"VARCHAR(50)","additional_notes":"TEXT","correct_category":"VARCHAR(80)","validation_notes":"TEXT","is_duplicate":"BOOLEAN NOT NULL DEFAULT FALSE","admin_result":"TEXT"}
+                for column, definition in additions.items(): db.execute(text(f"ALTER TABLE reports ADD COLUMN IF NOT EXISTS {column} {definition}"))
             now = datetime.now(timezone.utc)
             for item_id, title, category, description, signs, prevention in DEFAULT_EDUCATION:
                 db.execute(text("INSERT INTO education_items(id,title,category,description,warning_signs,prevention,is_published,created_at,updated_at) SELECT :id,:title,:category,:description,:signs,:prevention,TRUE,:now,:now WHERE NOT EXISTS (SELECT 1 FROM education_items WHERE id=:id)"), {"id":item_id,"title":title,"category":category,"description":description,"signs":json.dumps(signs),"prevention":json.dumps(prevention),"now":now})
@@ -53,10 +63,10 @@ class Store:
             daily_rows = db.execute(text("SELECT day,SUM(count) AS count FROM stats_daily GROUP BY day ORDER BY day DESC LIMIT 14")).mappings().all()
         month_counts = {row["category"]: row["count"] for row in month_rows}
         return {"total": total, "counts": counts, "month_total": sum(month_counts.values()), "month_counts": month_counts, "top_category": month_rows[0]["category"] if month_rows else None, "daily": list(reversed([dict(row) for row in daily_rows])), "updated_at": datetime.now(timezone.utc)}
-    def report(self, content: str, category: str) -> tuple[str, datetime]:
+    def report(self, content: str, category: str, source: str | None = None, additional_notes: str | None = None) -> tuple[str, datetime]:
         report_id, created = str(uuid.uuid4()), datetime.now(timezone.utc)
         with self.lock, self.engine.begin() as db:
-            db.execute(text("INSERT INTO reports(id,text,category_suggested,created_at) VALUES (:id,:content,:category,:created)"), {"id":report_id,"content":content,"category":category,"created":created})
+            db.execute(text("INSERT INTO reports(id,text,category_suggested,source,additional_notes,created_at) VALUES (:id,:content,:category,:source,:notes,:created)"), {"id":report_id,"content":content,"category":category,"source":source,"notes":additional_notes,"created":created})
         return report_id, created
 
     def admin_dashboard(self, limit: int = 100) -> dict:
@@ -67,12 +77,21 @@ class Store:
             rows = db.execute(text("SELECT id,text,category_suggested,status,created_at FROM reports ORDER BY created_at DESC LIMIT :limit"), {"limit": limit}).mappings().all()
             daily = db.execute(text("SELECT day,SUM(count) AS count FROM stats_daily GROUP BY day ORDER BY day DESC LIMIT 14")).mappings().all()
             sources = db.execute(text("SELECT source,SUM(count) AS count FROM stats_daily GROUP BY source ORDER BY count DESC")).mappings().all()
+            reports_reviewed = db.execute(text("SELECT COUNT(*) FROM reports WHERE status IN ('reviewed','approved','dataset_candidate')")).scalar_one()
+            candidates_total = db.execute(text("SELECT COUNT(*) FROM dataset_candidates WHERE is_archived=FALSE")).scalar_one()
+            education_published = db.execute(text("SELECT COUNT(*) FROM education_items WHERE is_published=TRUE")).scalar_one()
+            today = datetime.now(timezone.utc).date().isoformat()
+            month = today[:7]
+            today_total = db.execute(text("SELECT COALESCE(SUM(count),0) FROM stats_daily WHERE day=:day"), {"day":today}).scalar_one()
+            month_total = db.execute(text("SELECT COALESCE(SUM(count),0) FROM stats_daily WHERE day LIKE :month"), {"month":f"{month}%"}).scalar_one()
         return {
             "total": total, "counts": counts, "reports_total": reports_total,
             "reports_pending": reports_pending, "reports": [dict(row) for row in rows],
             "daily": list(reversed([dict(row) for row in daily])),
             "sources": {row["source"]: row["count"] for row in sources},
             "database_engine": self.engine.url.get_backend_name(),
+            "reports_reviewed": reports_reviewed, "candidates_total": candidates_total,
+            "education_published": education_published, "today_total": today_total, "month_total": month_total,
         }
 
     def update_report_status(self, report_id: str, status: str) -> bool:
@@ -80,9 +99,17 @@ class Store:
             result = db.execute(text("UPDATE reports SET status=:status WHERE id=:id"), {"status": status, "id": report_id})
         return result.rowcount > 0
 
+    def validate_report(self, report_id: str, payload: dict) -> dict | None:
+        fields={key:value for key,value in payload.items() if value is not None}
+        if not fields:return self.get_report(report_id)
+        fields["id"]=report_id
+        with self.lock,self.engine.begin() as db:
+            result=db.execute(text("UPDATE reports SET "+",".join(f"{key}=:{key}" for key in fields if key!="id")+" WHERE id=:id"),fields)
+        return self.get_report(report_id) if result.rowcount else None
+
     def get_report(self, report_id: str) -> dict | None:
         with self.engine.connect() as db:
-            row = db.execute(text("SELECT id,text,category_suggested,status,created_at FROM reports WHERE id=:id"), {"id":report_id}).mappings().first()
+            row = db.execute(text("SELECT * FROM reports WHERE id=:id"), {"id":report_id}).mappings().first()
         return dict(row) if row else None
 
     @staticmethod
@@ -185,7 +212,7 @@ class Store:
     def publish_report_dataset(self, report_id: str, anonymized: str) -> dict | None:
         now = datetime.now(timezone.utc)
         with self.lock, self.engine.begin() as db:
-            report = db.execute(text("SELECT category_suggested FROM reports WHERE id=:id AND status='reviewed'"), {"id":report_id}).mappings().first()
+            report = db.execute(text("SELECT category_suggested FROM reports WHERE id=:id AND status IN ('reviewed','approved')"), {"id":report_id}).mappings().first()
             if not report: return None
             existing = db.execute(text("SELECT id FROM public_dataset WHERE report_id=:id"), {"id":report_id}).first()
             if not existing:
@@ -201,6 +228,35 @@ class Store:
         with self.engine.connect() as db:
             rows = db.execute(text("SELECT id,text_anonymized,category,provenance,reviewed,created_at FROM public_dataset ORDER BY created_at DESC")).mappings().all()
         return [dict(row) for row in rows]
+
+    def candidates(self) -> list[dict]:
+        with self.engine.connect() as db: rows=db.execute(text("SELECT * FROM dataset_candidates WHERE is_archived=FALSE ORDER BY created_at DESC")).mappings().all()
+        return [{**dict(row),"nseae_validation":json.loads(row["nseae_validation"] or "{}")} for row in rows]
+
+    def save_candidate(self, candidate_id: str | None, payload: dict) -> dict:
+        now=datetime.now(timezone.utc);candidate_id=candidate_id or str(uuid.uuid4());data={**payload,"id":candidate_id,"created":now,"updated":now,"nseae_validation":json.dumps(payload.get("nseae_validation",{}))}
+        with self.lock,self.engine.begin() as db:
+            exists=db.execute(text("SELECT id FROM dataset_candidates WHERE id=:id"),{"id":candidate_id}).first()
+            if exists: db.execute(text("UPDATE dataset_candidates SET text_anonymized=:text_anonymized,category=:category,source=:source,data_type=:data_type,validation_status=:validation_status,split=:split,validator=:validator,notes=:notes,is_duplicate=:is_duplicate,is_archived=:is_archived,nseae_validation=:nseae_validation,updated_at=:updated WHERE id=:id"),data)
+            else: db.execute(text("INSERT INTO dataset_candidates(id,report_id,text_anonymized,category,source,data_type,validation_status,split,validator,notes,is_duplicate,is_archived,nseae_validation,created_at,updated_at) VALUES(:id,:report_id,:text_anonymized,:category,:source,:data_type,:validation_status,:split,:validator,:notes,:is_duplicate,:is_archived,:nseae_validation,:created,:updated)"),data)
+        return next(row for row in self.candidates() if row["id"]==candidate_id)
+
+    def archive_candidate(self,candidate_id:str)->bool:
+        with self.lock,self.engine.begin() as db: result=db.execute(text("UPDATE dataset_candidates SET is_archived=TRUE,updated_at=:now WHERE id=:id"),{"id":candidate_id,"now":datetime.now(timezone.utc)})
+        return result.rowcount>0
+
+    def add_activity(self,admin_email:str,action:str,object_type:str,object_id:str|None=None,detail:str|None=None)->None:
+        with self.lock,self.engine.begin() as db: db.execute(text("INSERT INTO admin_activity_logs(id,admin_email,action,object_type,object_id,detail,created_at) VALUES(:id,:admin,:action,:type,:object,:detail,:created)"),{"id":str(uuid.uuid4()),"admin":admin_email,"action":action,"type":object_type,"object":object_id,"detail":detail,"created":datetime.now(timezone.utc)})
+
+    def activities(self,limit:int=100)->list[dict]:
+        with self.engine.connect() as db: rows=db.execute(text("SELECT * FROM admin_activity_logs ORDER BY created_at DESC LIMIT :limit"),{"limit":limit}).mappings().all()
+        return [dict(row) for row in rows]
+
+    def change_password(self,user_id:str,current_password:str,new_password:str)->bool:
+        with self.engine.connect() as db: row=db.execute(text("SELECT password_hash FROM users WHERE id=:id"),{"id":user_id}).mappings().first()
+        if not row or not self._password_valid(current_password,row["password_hash"]):return False
+        with self.lock,self.engine.begin() as db: db.execute(text("UPDATE users SET password_hash=:password WHERE id=:id"),{"password":self._password_hash(new_password),"id":user_id})
+        return True
 
 store = Store()
 

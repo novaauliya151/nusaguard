@@ -2,7 +2,7 @@ from fastapi import APIRouter, Header, HTTPException
 
 from app.api.routes.auth import bearer_admin, public_user
 from app.api.routes.content import anonymize_report
-from app.models.schemas import AdminDashboardResponse, AdminReport, AdminReportUpdate, EducationItem, EducationItemRequest, PublicDatasetRow, UserCreateRequest, UserPublic, UserUpdateRequest
+from app.models.schemas import AdminDashboardResponse, AdminReport, AdminReportUpdate, DatasetCandidate, DatasetCandidateRequest, EducationItem, EducationItemRequest, PasswordChangeRequest, PublicDatasetRow, ReportValidationRequest, UserCreateRequest, UserPublic, UserUpdateRequest
 from app.services.predictor import _pipeline
 from app.services.store import store
 
@@ -29,7 +29,27 @@ def dashboard(authorization: str | None = Header(default=None)) -> AdminDashboar
         source_counts=snapshot["sources"],
         database_engine=snapshot["database_engine"],
         database_connected=True,
+        analyses_today=snapshot["today_total"], analyses_this_month=snapshot["month_total"],
+        reports_reviewed=snapshot["reports_reviewed"], candidates_total=snapshot["candidates_total"],
+        education_published=snapshot["education_published"],
     )
+
+
+@router.get("/reports/{report_id}")
+def report_detail(report_id: str, authorization: str | None = Header(default=None)) -> dict:
+    require_admin(authorization)
+    report = store.get_report(report_id)
+    if not report: raise HTTPException(404, "Laporan tidak ditemukan.")
+    return report
+
+
+@router.patch("/reports/{report_id}/validate")
+def validate_report(report_id: str, payload: ReportValidationRequest, authorization: str | None = Header(default=None)) -> dict:
+    admin = require_admin(authorization)
+    report = store.validate_report(report_id, payload.model_dump())
+    if not report: raise HTTPException(404, "Laporan tidak ditemukan.")
+    store.add_activity(admin["email"], "validate_report", "report", report_id, payload.status)
+    return report
 
 
 @router.patch("/reports/{report_id}", response_model=AdminReportUpdate)
@@ -104,9 +124,47 @@ def delete_education(item_id: str, authorization: str | None = Header(default=No
 
 @router.post("/reports/{report_id}/dataset", response_model=PublicDatasetRow, status_code=201)
 def process_report(report_id: str, authorization: str | None = Header(default=None)) -> PublicDatasetRow:
-    require_admin(authorization)
+    admin = require_admin(authorization)
     report = store.get_report(report_id)
-    if not report or report["status"] != "reviewed": raise HTTPException(400, "Laporan harus ditinjau sebelum masuk dataset.")
+    if not report or report["status"] not in {"reviewed", "approved"}: raise HTTPException(400, "Laporan harus disetujui sebelum masuk dataset.")
     row = store.publish_report_dataset(report_id, anonymize_report(report["text"]))
+    candidate = store.save_candidate(None, {"report_id":report_id,"text_anonymized":anonymize_report(report["text"]),"category":report.get("correct_category") or report["category_suggested"],"source":"community_report","data_type":"primer","validation_status":"pending","split":None,"validator":admin["email"],"notes":report.get("validation_notes"),"is_duplicate":False,"is_archived":False,"nseae_validation":{}})
+    store.validate_report(report_id, {"status":"dataset_candidate"})
+    store.add_activity(admin["email"], "create_candidate", "dataset_candidate", candidate["id"], report_id)
     return PublicDatasetRow(**row)
+
+
+@router.get("/candidates", response_model=list[DatasetCandidate])
+def candidates(authorization: str | None = Header(default=None)) -> list[DatasetCandidate]:
+    require_admin(authorization)
+    return [DatasetCandidate(**item) for item in store.candidates()]
+
+
+@router.post("/candidates", response_model=DatasetCandidate, status_code=201)
+def create_candidate(payload: DatasetCandidateRequest, authorization: str | None = Header(default=None)) -> DatasetCandidate:
+    admin=require_admin(authorization);item=store.save_candidate(None,{**payload.model_dump(),"validator":payload.validator or admin["email"]});store.add_activity(admin["email"],"create_candidate","dataset_candidate",item["id"]);return DatasetCandidate(**item)
+
+
+@router.patch("/candidates/{candidate_id}", response_model=DatasetCandidate)
+def update_candidate(candidate_id: str, payload: DatasetCandidateRequest, authorization: str | None = Header(default=None)) -> DatasetCandidate:
+    admin=require_admin(authorization);item=store.save_candidate(candidate_id,{**payload.model_dump(),"validator":payload.validator or admin["email"]});store.add_activity(admin["email"],"update_candidate","dataset_candidate",candidate_id);return DatasetCandidate(**item)
+
+
+@router.delete("/candidates/{candidate_id}", status_code=204)
+def archive_candidate(candidate_id: str, authorization: str | None = Header(default=None)) -> None:
+    admin=require_admin(authorization)
+    if not store.archive_candidate(candidate_id):raise HTTPException(404,"Kandidat tidak ditemukan.")
+    store.add_activity(admin["email"],"archive_candidate","dataset_candidate",candidate_id)
+
+
+@router.get("/activities")
+def activities(authorization: str | None = Header(default=None)) -> list[dict]:
+    require_admin(authorization);return store.activities()
+
+
+@router.post("/profile/password", status_code=204)
+def change_password(payload: PasswordChangeRequest, authorization: str | None = Header(default=None)) -> None:
+    admin=require_admin(authorization)
+    if not store.change_password(admin["id"],payload.current_password,payload.new_password):raise HTTPException(400,"Password lama tidak sesuai.")
+    store.add_activity(admin["email"],"change_password","admin_profile",admin["id"])
 

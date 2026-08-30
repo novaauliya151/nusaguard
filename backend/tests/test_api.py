@@ -163,3 +163,28 @@ def test_dataset_collections_are_described_separately() -> None:
     assert info.json()["development_samples_per_category"] == 500
     assert info.json()["development_downloadable"] is False
 
+
+def test_admin_candidate_workflow_and_activity_log() -> None:
+    headers = auth_headers()
+    created = client.post("/api/admin/candidates", headers=headers, json={
+        "text_anonymized": "Segera kirim [KREDENSIAL] ke petugas palsu",
+        "category": "Social Engineering",
+        "source": "manual_test",
+        "data_type": "primer",
+        "validation_status": "pending",
+        "split": None,
+        "notes": "Perlu validasi",
+        "is_duplicate": False,
+        "is_archived": False,
+        "nseae_validation": {"urgency": True, "credential_request": True},
+    })
+    assert created.status_code == 201
+    candidate_id = created.json()["id"]
+    updated = client.patch(f"/api/admin/candidates/{candidate_id}", headers=headers, json={**created.json(), "validation_status": "verified", "split": "train"})
+    assert updated.status_code == 200
+    assert updated.json()["validation_status"] == "verified"
+    assert updated.json()["split"] == "train"
+    assert any(item["id"] == candidate_id for item in client.get("/api/admin/candidates", headers=headers).json())
+    assert client.get("/api/admin/activities", headers=headers).status_code == 200
+    assert client.delete(f"/api/admin/candidates/{candidate_id}", headers=headers).status_code == 204
+
