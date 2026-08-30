@@ -143,6 +143,50 @@ def test_dynamic_education_and_anonymized_dataset() -> None:
     assert education.status_code == 201
     assert any(item["title"] == "Waspada Undangan APK" for item in client.get("/api/education").json())
 
+
+def test_admin_route_requires_authentication_and_permission() -> None:
+    assert client.get("/api/admin/users").status_code == 401
+    editor = auth_headers("content_editor")
+    assert client.get("/api/admin/users", headers=editor).status_code == 403
+    assert client.get("/api/admin/education", headers=editor).status_code == 200
+
+
+def test_suspended_account_cannot_login_and_session_is_revoked() -> None:
+    admin = auth_headers()
+    email = f"blocked-{uuid4().hex[:8]}@example.com"
+    created = client.post("/api/admin/users", headers=admin, json={"name":"Blocked User","email":email,"password":"password123","confirm_password":"password123","role":"validator"})
+    assert created.status_code == 201
+    token = client.post("/api/auth/login", json={"email":email,"password":"password123"}).json()["access_token"]
+    blocked = client.patch(f"/api/admin/users/{created.json()['id']}", headers=admin, json={"status":"suspended","suspension_reason":"Pengujian"})
+    assert blocked.status_code == 200
+    assert client.get("/api/auth/me", headers={"Authorization":f"Bearer {token}"}).status_code == 401
+    assert client.post("/api/auth/login", json={"email":email,"password":"password123"}).status_code == 401
+
+
+def test_nseae_human_validation_is_stored_separately() -> None:
+    headers = auth_headers()
+    candidate = client.post("/api/admin/candidates", headers=headers, json={"text_anonymized":"Segera verifikasi melalui kanal resmi.","category":"Social Engineering","source":"test","data_type":"primer","validation_status":"pending","split":"train","notes":"uji","is_duplicate":False,"is_archived":False,"nseae_validation":{"urgency":True}})
+    assert candidate.status_code == 201
+    indicators = ["urgency","authority","fear","reward","impersonation","credential_request"]
+    payload = {"validations":[{"indicator":name,"ai_score":0.8 if name=="urgency" else 0,"human_validation":"detected" if name=="urgency" else "not_detected","detected_evidence":"segera" if name=="urgency" else "","notes":""} for name in indicators]}
+    saved = client.put(f"/api/admin/nseae-validations/{candidate.json()['id']}", headers=headers, json=payload)
+    assert saved.status_code == 200
+    assert len(saved.json()) == 6
+    unchanged = client.get("/api/admin/candidates", headers=headers).json()
+    row = next(item for item in unchanged if item["id"] == candidate.json()["id"])
+    assert row["nseae_validation"] == {"urgency": True}
+
+
+def test_education_draft_and_dataset_export_are_privacy_safe() -> None:
+    headers = auth_headers()
+    draft = client.post("/api/admin/education", headers=headers, json={"title":"Draft Edukasi Aman","category":"Aman","description":"Konten edukasi ini masih berupa draft internal.","warning_signs":["Tidak meminta data"],"prevention":["Tetap verifikasi"],"is_published":False,"status":"draft"})
+    assert draft.status_code == 201
+    assert draft.json()["status"] == "draft"
+    assert not any(item["id"] == draft.json()["id"] for item in client.get("/api/education").json())
+    exported = client.get("/api/admin/candidates/export", headers=headers)
+    assert exported.status_code == 200
+    assert "text_anonymized" in exported.text.splitlines()[0]
+
     report = client.post("/api/report", json={
         "text": "Hubungi saya 081234567890 atau test@example.com, penipu kirim undangan.apk",
         "category_suggested": "Phishing/Link Berbahaya",

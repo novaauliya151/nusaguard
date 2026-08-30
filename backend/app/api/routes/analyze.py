@@ -1,9 +1,10 @@
+import time
 from fastapi import APIRouter
 from app.models.schemas import AnalyzeRequest, AnalyzeResponse, RiskLevel
 from app.services.explanation import generate_explanation, recommendation_for
 from app.services.nseae import aggregate_nseae_risk, analyze_nseae
 from app.services.predictor import predict_category_with_fusion
-from app.services.store import store
+from app.services.store import admin_domain, store
 
 router = APIRouter(tags=["analysis"])
 
@@ -16,6 +17,7 @@ def score_to_risk_level(score: float) -> RiskLevel:
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
+    started = time.perf_counter()
     patterns, scores = analyze_nseae(payload.text)
     basic, category, confidence, model_source, fusion_applied, model_confidence = predict_category_with_fusion(payload.text, scores)
     nseae_score = aggregate_nseae_risk(scores)
@@ -25,6 +27,7 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     risk_score = round(min(max(nseae_score, classifier_floor), 1.0), 2)
     level = score_to_risk_level(risk_score)
     store.increment(category.value, payload.source or "manual_web")
+    admin_domain.record_analysis(category.value, level.value, "success", (time.perf_counter()-started)*1000, [name for name, score in scores.items() if score > 0], model_source)
     return AnalyzeResponse(kategori_dasar=basic, category=category, risk_level=level, risk_score=risk_score, confidence=confidence, model_confidence=model_confidence, nseae_risk_score=nseae_score, fusion_applied=fusion_applied, nseae_scores=scores, detected_patterns=patterns, explanation=generate_explanation(patterns, category.value), recommendation=recommendation_for(level), model_source=model_source)
 
 

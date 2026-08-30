@@ -1,6 +1,7 @@
 import os
 import hashlib
 import json
+import re
 import secrets
 import threading
 import uuid
@@ -139,28 +140,29 @@ class Store:
 
     def get_user(self, user_id: str) -> dict | None:
         with self.engine.connect() as db:
-            row = db.execute(text("SELECT id,name,email,role,is_active,created_at FROM users WHERE id=:id"), {"id":user_id}).mappings().first()
+            row = db.execute(text("SELECT id,name,email,role,is_active,status,avatar,must_change_password,last_login_at,created_by,created_at,updated_at,deleted_at FROM users WHERE id=:id AND deleted_at IS NULL"), {"id":user_id}).mappings().first()
         return dict(row) if row else None
 
     def get_user_by_email(self, email: str) -> dict | None:
         with self.engine.connect() as db:
-            row = db.execute(text("SELECT id,name,email,role,is_active,created_at FROM users WHERE email=:email"), {"email": email.casefold()}).mappings().first()
+            row = db.execute(text("SELECT id,name,email,role,is_active,status,avatar,must_change_password,last_login_at,created_by,created_at,updated_at,deleted_at FROM users WHERE email=:email AND deleted_at IS NULL"), {"email": email.casefold()}).mappings().first()
         return dict(row) if row else None
 
     def authenticate(self, email: str, password: str) -> tuple[str, dict] | None:
         with self.engine.connect() as db:
             row = db.execute(text("SELECT * FROM users WHERE email=:email"), {"email":email.casefold()}).mappings().first()
-        if not row or not row["is_active"] or not self._password_valid(password, row["password_hash"]):
+        if not row or row.get("deleted_at") or not row["is_active"] or row.get("status", "active") != "active" or not self._password_valid(password, row["password_hash"]):
             return None
         token, now = secrets.token_urlsafe(32), datetime.now(timezone.utc)
         with self.lock, self.engine.begin() as db:
             db.execute(text("INSERT INTO user_sessions(token_hash,user_id,expires_at,created_at) VALUES (:token,:user,:expires,:created)"), {"token":hashlib.sha256(token.encode()).hexdigest(),"user":row["id"],"expires":now+timedelta(days=7),"created":now})
+            db.execute(text("UPDATE users SET last_login_at=:now,updated_at=:now WHERE id=:id"), {"now": now, "id": row["id"]})
         return token, self.get_user(row["id"])
 
     def user_from_token(self, token: str) -> dict | None:
         digest, now = hashlib.sha256(token.encode()).hexdigest(), datetime.now(timezone.utc)
         with self.engine.connect() as db:
-            row = db.execute(text("SELECT u.id,u.name,u.email,u.role,u.is_active,u.created_at FROM user_sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=:token AND s.expires_at>:now AND u.is_active=TRUE"), {"token":digest,"now":now}).mappings().first()
+            row = db.execute(text("SELECT u.id,u.name,u.email,u.role,u.is_active,u.status,u.avatar,u.must_change_password,u.last_login_at,u.created_by,u.created_at,u.updated_at,u.deleted_at FROM user_sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=:token AND s.expires_at>:now AND u.is_active=TRUE AND u.status='active' AND u.deleted_at IS NULL"), {"token":digest,"now":now}).mappings().first()
         return dict(row) if row else None
 
     def list_users(self) -> list[dict]:
@@ -188,25 +190,30 @@ class Store:
         return result.rowcount > 0
 
     def education(self, published_only: bool = True) -> list[dict]:
-        clause = " WHERE is_published=TRUE" if published_only else ""
+        clause = " WHERE is_published=TRUE AND deleted_at IS NULL" if published_only else " WHERE deleted_at IS NULL"
         with self.engine.connect() as db:
             rows = db.execute(text(f"SELECT * FROM education_items{clause} ORDER BY updated_at DESC")).mappings().all()
-        return [{**dict(row), "warning_signs": json.loads(row["warning_signs"]), "prevention": json.loads(row["prevention"])} for row in rows]
+        return [{**dict(row), "warning_signs": json.loads(row["warning_signs"]), "prevention": json.loads(row["prevention"]), "response_steps": json.loads(row.get("response_steps") or "[]")} for row in rows]
 
     def save_education(self, item_id: str | None, payload: dict) -> dict:
         now, item_id = datetime.now(timezone.utc), item_id or str(uuid.uuid4())
-        params = {**payload, "warning_signs":json.dumps(payload["warning_signs"]), "prevention":json.dumps(payload["prevention"]), "id": item_id, "created": now, "updated": now}
+        supplied_slug = payload.get("slug")
+        slug = supplied_slug or "-".join(re.findall(r"[a-z0-9]+", payload["title"].casefold()))
+        params = {**payload, "slug":slug, "warning_signs":json.dumps(payload["warning_signs"]), "prevention":json.dumps(payload["prevention"]), "response_steps":json.dumps(payload.get("response_steps", [])), "published_at":payload.get("published_at") or (now if payload.get("status")=="published" else None), "id": item_id, "created": now, "updated": now}
         with self.lock, self.engine.begin() as db:
+            if db.execute(text("SELECT id FROM education_items WHERE slug=:slug AND id<>:id AND deleted_at IS NULL"), {"slug":slug,"id":item_id}).first():
+                if supplied_slug: raise ValueError("Slug konten sudah digunakan.")
+                slug=f"{slug}-{item_id[:8]}";params["slug"]=slug
             exists = db.execute(text("SELECT id FROM education_items WHERE id=:id"), {"id":item_id}).first()
             if exists:
-                db.execute(text("UPDATE education_items SET title=:title,category=:category,description=:description,warning_signs=:warning_signs,prevention=:prevention,is_published=:is_published,updated_at=:updated WHERE id=:id"), params)
+                db.execute(text("UPDATE education_items SET title=:title,slug=:slug,category=:category,description=:description,summary=:summary,content=:content,warning_signs=:warning_signs,anonymized_example=:anonymized_example,prevention=:prevention,response_steps=:response_steps,thumbnail=:thumbnail,image_alt=:image_alt,meta_title=:meta_title,meta_description=:meta_description,status=:status,published_at=:published_at,display_order=:display_order,is_published=:is_published,updated_at=:updated WHERE id=:id"), params)
             else:
-                db.execute(text("INSERT INTO education_items(id,title,category,description,warning_signs,prevention,is_published,created_at,updated_at) VALUES (:id,:title,:category,:description,:warning_signs,:prevention,:is_published,:created,:updated)"), params)
+                db.execute(text("INSERT INTO education_items(id,title,slug,category,description,summary,content,warning_signs,anonymized_example,prevention,response_steps,thumbnail,image_alt,meta_title,meta_description,status,published_at,display_order,is_published,created_at,updated_at) VALUES (:id,:title,:slug,:category,:description,:summary,:content,:warning_signs,:anonymized_example,:prevention,:response_steps,:thumbnail,:image_alt,:meta_title,:meta_description,:status,:published_at,:display_order,:is_published,:created,:updated)"), params)
         return next(row for row in self.education(False) if row["id"] == item_id)
 
     def delete_education(self, item_id: str) -> bool:
         with self.lock, self.engine.begin() as db:
-            result = db.execute(text("DELETE FROM education_items WHERE id=:id"), {"id":item_id})
+            result = db.execute(text("UPDATE education_items SET deleted_at=:now,is_published=FALSE,status='archived',updated_at=:now WHERE id=:id"), {"id":item_id,"now":datetime.now(timezone.utc)})
         return result.rowcount > 0
 
     def publish_report_dataset(self, report_id: str, anonymized: str) -> dict | None:
@@ -255,8 +262,20 @@ class Store:
     def change_password(self,user_id:str,current_password:str,new_password:str)->bool:
         with self.engine.connect() as db: row=db.execute(text("SELECT password_hash FROM users WHERE id=:id"),{"id":user_id}).mappings().first()
         if not row or not self._password_valid(current_password,row["password_hash"]):return False
-        with self.lock,self.engine.begin() as db: db.execute(text("UPDATE users SET password_hash=:password WHERE id=:id"),{"password":self._password_hash(new_password),"id":user_id})
+        with self.lock,self.engine.begin() as db: db.execute(text("UPDATE users SET password_hash=:password,must_change_password=FALSE,updated_at=:now WHERE id=:id"),{"password":self._password_hash(new_password),"id":user_id,"now":datetime.now(timezone.utc)})
         return True
 
+    def revoke_token(self, token: str) -> bool:
+        digest = hashlib.sha256(token.encode()).hexdigest()
+        with self.lock, self.engine.begin() as db:
+            result = db.execute(text("DELETE FROM user_sessions WHERE token_hash=:token"), {"token": digest})
+        return result.rowcount > 0
+
 store = Store()
+
+# Schema admin diletakkan terpisah agar instalasi lama dapat dimigrasikan tanpa
+# mengganti Store dan DATABASE_URL yang sudah digunakan aplikasi.
+from app.services.admin_domain import initialize_admin_domain
+
+admin_domain = initialize_admin_domain(store)
 
