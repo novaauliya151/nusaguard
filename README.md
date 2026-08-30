@@ -41,7 +41,7 @@ Buat akun admin awal dari terminal backend:
 
 User dan admin masuk melalui halaman yang sama, `http://localhost:3000/login`. Backend membaca role dari database: user diarahkan ke `/dashboard`, sedangkan admin diarahkan ke `/admin`. Tidak ada pilihan role pada formulir login dan seluruh endpoint `/api/admin/*` memverifikasi bearer token serta role admin pada setiap permintaan. Dashboard hanya menampilkan statistik agregat dan laporan yang dikirim pengguna dengan persetujuan; isi analisis biasa tetap tidak disimpan.
 
-Setiap area admin memiliki route dan file halaman terpisah: `/admin` untuk dashboard, `/admin/users` untuk manajemen pengguna, serta `/admin/reports`, `/admin/education`, `/admin/categories`, `/admin/model`, `/admin/roadmap`, dan `/admin/system`. Manajemen pengguna menyediakan pencarian, filter, pembuatan melalui modal, edit profil/password/role, aktivasi atau pemblokiran, dan penghapusan akun.
+Seluruh fitur admin berada pada `/admin` dan kode tiap fiturnya dipisahkan sebagai file datar, misalnya `admin.dashboard.tsx` dan `admin.manajemen-pengguna.tsx`. Manajemen pengguna menyediakan pencarian, filter, pembuatan melalui modal, edit profil/password/role, aktivasi atau pemblokiran, dan penghapusan akun.
 
 ### Akun pengguna dan role
 
