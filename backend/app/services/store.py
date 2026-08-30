@@ -115,6 +115,11 @@ class Store:
             row = db.execute(text("SELECT id,name,email,role,is_active,created_at FROM users WHERE id=:id"), {"id":user_id}).mappings().first()
         return dict(row) if row else None
 
+    def get_user_by_email(self, email: str) -> dict | None:
+        with self.engine.connect() as db:
+            row = db.execute(text("SELECT id,name,email,role,is_active,created_at FROM users WHERE email=:email"), {"email": email.casefold()}).mappings().first()
+        return dict(row) if row else None
+
     def authenticate(self, email: str, password: str) -> tuple[str, dict] | None:
         with self.engine.connect() as db:
             row = db.execute(text("SELECT * FROM users WHERE email=:email"), {"email":email.casefold()}).mappings().first()

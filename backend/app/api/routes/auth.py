@@ -26,6 +26,13 @@ def bearer_user(authorization: str | None) -> dict:
     return user
 
 
+def bearer_admin(authorization: str | None) -> dict:
+    user = bearer_user(authorization)
+    if user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Hak akses administrator diperlukan.")
+    return user
+
+
 @router.post("/register", response_model=AuthResponse, status_code=201)
 def register(payload: RegisterRequest) -> AuthResponse:
     user = store.create_user(payload.name, payload.email, payload.password)

@@ -1,8 +1,18 @@
 from fastapi.testclient import TestClient
 from app.main import app
+from app.services.store import store
 from uuid import uuid4
 
 client = TestClient(app)
+
+def auth_headers(role: str = "admin") -> dict[str, str]:
+    email = f"{role}-{uuid4().hex[:10]}@example.com"
+    user = store.create_user(f"Akun {role}", email, "rahasia123", role)
+    assert user is not None
+    result = store.authenticate(email, "rahasia123")
+    assert result is not None
+    token, _ = result
+    return {"Authorization": f"Bearer {token}"}
 
 def test_analyze_is_ephemeral_and_returns_complete_contract() -> None:
     response = client.post("/api/analyze", json={"text": "Segera kirim OTP atau akun diblokir", "source": "test"})
@@ -59,17 +69,16 @@ def test_protective_warning_is_not_flagged_as_fraud(monkeypatch, tmp_path) -> No
         _pipeline.cache_clear()
 
 
-def test_admin_dashboard_requires_key_and_supports_moderation(monkeypatch) -> None:
-    monkeypatch.setenv("ADMIN_API_KEY", "test-admin-secret")
+def test_admin_dashboard_requires_admin_role_and_supports_moderation() -> None:
     assert client.get("/api/admin/dashboard").status_code == 401
-    assert client.get("/api/admin/dashboard", headers={"X-API-Key": "wrong"}).status_code == 401
+    assert client.get("/api/admin/dashboard", headers=auth_headers("user")).status_code == 403
 
     created = client.post("/api/report", json={
         "text": "Undangan palsu untuk ditinjau admin",
         "category_suggested": "Phishing/Link Berbahaya",
         "consent": True,
     })
-    headers = {"X-API-Key": "test-admin-secret"}
+    headers = auth_headers()
     dashboard = client.get("/api/admin/dashboard", headers=headers)
     assert dashboard.status_code == 200
     assert dashboard.json()["reports_pending"] >= 1
@@ -84,8 +93,7 @@ def test_admin_dashboard_requires_key_and_supports_moderation(monkeypatch) -> No
     assert updated.json()["status"] == "reviewed"
 
 
-def test_user_registration_login_and_role_management(monkeypatch) -> None:
-    monkeypatch.setenv("ADMIN_API_KEY", "test-admin-secret")
+def test_user_registration_login_and_role_management() -> None:
     email = f"user-{uuid4().hex[:8]}@example.com"
     registered = client.post("/api/auth/register", json={"name": "Pengguna Uji", "email": email, "password": "rahasia123"})
     assert registered.status_code == 201
@@ -97,7 +105,7 @@ def test_user_registration_login_and_role_management(monkeypatch) -> None:
     assert profile.status_code == 200
     assert profile.json()["email"] == email
 
-    headers = {"X-API-Key": "test-admin-secret"}
+    headers = auth_headers()
     users = client.get("/api/admin/users", headers=headers)
     target = next(item for item in users.json() if item["email"] == email)
     promoted = client.patch(f"/api/admin/users/{target['id']}", headers=headers, json={"role": "analyst"})
@@ -109,9 +117,8 @@ def test_user_registration_login_and_role_management(monkeypatch) -> None:
     assert login.json()["user"]["role"] == "analyst"
 
 
-def test_dynamic_education_and_anonymized_dataset(monkeypatch) -> None:
-    monkeypatch.setenv("ADMIN_API_KEY", "test-admin-secret")
-    headers = {"X-API-Key": "test-admin-secret"}
+def test_dynamic_education_and_anonymized_dataset() -> None:
+    headers = auth_headers()
     education = client.post("/api/admin/education", headers=headers, json={
         "title": "Waspada Undangan APK",
         "category": "Phishing/Link Berbahaya",

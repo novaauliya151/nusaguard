@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 logger = logging.getLogger("nusaguard")
 app = FastAPI(title="NusaGuard API", version="1.0.0", description="Analisis pesan ephemeral: isi pesan tidak dicatat dalam log atau histori analisis.")
 origins = [item.strip() for item in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if item.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Content-Type", "X-API-Key", "Authorization"])
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Content-Type", "Authorization"])
 
 @app.middleware("http")
 async def metadata_logging(request: Request, call_next):
