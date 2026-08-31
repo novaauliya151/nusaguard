@@ -163,17 +163,26 @@ def delete_education(item_id: str, authorization: str | None = Header(default=No
     admin_domain.save_activity(actor,"archive","education",item_id,"Mengarsipkan konten edukasi")
 
 
-@router.post("/reports/{report_id}/dataset", response_model=PublicDatasetRow, status_code=201)
-def process_report(report_id: str, authorization: str | None = Header(default=None)) -> PublicDatasetRow:
+@router.post("/reports/{report_id}/dataset", response_model=DatasetCandidate, status_code=201)
+def process_report(report_id: str, authorization: str | None = Header(default=None)) -> DatasetCandidate:
     admin = require(authorization, "datasets.create")
     report = store.get_report(report_id)
     if not report or report["status"] not in {"reviewed", "approved"}: raise HTTPException(400, "Laporan harus disetujui sebelum masuk dataset.")
-    row = store.publish_report_dataset(report_id, anonymize_report(report["text"]))
+    existing = next((item for item in store.candidates() if item.get("report_id") == report_id), None)
+    if existing: raise HTTPException(409, "Laporan ini sudah memiliki kandidat dataset.")
     candidate = store.save_candidate(None, {"report_id":report_id,"text_anonymized":anonymize_report(report["text"]),"category":report.get("correct_category") or report["category_suggested"],"source":"community_report","data_type":"primer","validation_status":"pending","split":None,"validator":admin["email"],"notes":report.get("validation_notes"),"is_duplicate":False,"is_archived":False,"nseae_validation":{}})
     store.validate_report(report_id, {"status":"dataset_candidate"})
     # Setelah kandidat anonim terbentuk, isi asli tidak lagi diperlukan oleh MVP.
     store.validate_report(report_id, {"text":"[DIHAPUS SETELAH ANONIMISASI]", "anonymized_text": candidate["text_anonymized"], "reviewer_id": admin["id"], "reviewed_at": datetime.utcnow()})
     store.add_activity(admin["email"], "create_candidate", "dataset_candidate", candidate["id"], report_id)
+    return DatasetCandidate(**candidate)
+
+@router.post("/candidates/{candidate_id}/publish", response_model=PublicDatasetRow, status_code=201)
+def publish_candidate(candidate_id: str, authorization: str | None = Header(default=None)) -> PublicDatasetRow:
+    actor = require(authorization, "datasets.validate")
+    row = store.publish_candidate(candidate_id)
+    if not row: raise HTTPException(422, "Kandidat harus terverifikasi, bukan duplikat, berasal dari laporan, dan memiliki enam validasi N-SEAE yang pasti.")
+    admin_domain.save_activity(actor, "publish", "dataset_candidate", candidate_id, "Mempublikasikan kandidat tervalidasi ke dataset publik")
     return PublicDatasetRow(**row)
 
 
@@ -185,12 +194,19 @@ def candidates(authorization: str | None = Header(default=None)) -> list[Dataset
 
 @router.post("/candidates", response_model=DatasetCandidate, status_code=201)
 def create_candidate(payload: DatasetCandidateRequest, authorization: str | None = Header(default=None)) -> DatasetCandidate:
-    admin=require(authorization,"datasets.create");item=store.save_candidate(None,{**payload.model_dump(),"validator":payload.validator or admin["email"]});store.add_activity(admin["email"],"create_candidate","dataset_candidate",item["id"]);return DatasetCandidate(**item)
+    admin=require(authorization,"datasets.create")
+    if anonymize_report(payload.text_anonymized) != payload.text_anonymized: raise HTTPException(422, "Teks kandidat masih mengandung data pribadi.")
+    item=store.save_candidate(None,{**payload.model_dump(),"validation_status":"pending","validator":payload.validator or admin["email"]});store.add_activity(admin["email"],"create_candidate","dataset_candidate",item["id"]);return DatasetCandidate(**item)
 
 
 @router.patch("/candidates/{candidate_id}", response_model=DatasetCandidate)
 def update_candidate(candidate_id: str, payload: DatasetCandidateRequest, authorization: str | None = Header(default=None)) -> DatasetCandidate:
-    admin=require(authorization,"datasets.update");item=store.save_candidate(candidate_id,{**payload.model_dump(),"validator":payload.validator or admin["email"]});store.add_activity(admin["email"],"update_candidate","dataset_candidate",candidate_id);return DatasetCandidate(**item)
+    admin=require(authorization,"datasets.update")
+    if anonymize_report(payload.text_anonymized) != payload.text_anonymized: raise HTTPException(422, "Teks kandidat masih mengandung data pribadi.")
+    if payload.validation_status == "verified":
+        validations = [item for item in admin_domain.crud_list("nseae_validations") if item["dataset_candidate_id"] == candidate_id and item["human_validation"] != "unsure"]
+        if len({item["indicator"] for item in validations}) != 6: raise HTTPException(422, "Status verified memerlukan enam validasi N-SEAE yang pasti.")
+    item=store.save_candidate(candidate_id,{**payload.model_dump(),"validator":payload.validator or admin["email"]});store.add_activity(admin["email"],"update_candidate","dataset_candidate",candidate_id);return DatasetCandidate(**item)
 
 
 @router.delete("/candidates/{candidate_id}", status_code=204)
@@ -296,6 +312,11 @@ def update_profile(payload:ProfileUpdatePayload,authorization:str|None=Header(de
 def roles(authorization: str | None = Header(default=None)) -> dict:
     require(authorization, "roles.manage")
     return {"roles": admin_domain.roles(), "permissions": admin_domain.permission_catalog()}
+
+@router.get("/roles/assignable")
+def assignable_roles(authorization: str | None = Header(default=None)) -> dict:
+    require(authorization, "users.view")
+    return {"roles": admin_domain.roles()}
 
 @router.post("/roles", status_code=201)
 def create_role(payload: RoleRequest, authorization: str | None = Header(default=None)) -> dict:
@@ -421,7 +442,7 @@ def models(authorization: str | None = Header(default=None)) -> dict:
 
 @router.post("/models/versions", status_code=201)
 def create_model_version(payload: ModelVersionPayload, authorization: str | None = Header(default=None)) -> dict:
-    actor = require(authorization, "models.view"); item = admin_domain.save_model_version(payload.model_dump()); admin_domain.save_activity(actor, "create_version", "models", item["id"], "Menyimpan metadata versi model"); return item
+    actor = require(authorization, "models.manage"); item = admin_domain.save_model_version(payload.model_dump()); admin_domain.save_activity(actor, "create_version", "models", item["id"], "Menyimpan metadata versi model"); return item
 
 @router.post("/models/test")
 def test_model(payload: AnalyzeRequest, authorization: str | None = Header(default=None)) -> dict:

@@ -1,5 +1,5 @@
 import time
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.models.schemas import AnalyzeRequest, AnalyzeResponse, RiskLevel
 from app.services.explanation import generate_explanation, recommendation_for
 from app.services.nseae import aggregate_nseae_risk, analyze_nseae
@@ -17,8 +17,14 @@ def score_to_risk_level(score: float) -> RiskLevel:
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
+    if not admin_domain.setting_enabled("analysis", "service_enabled", True):
+        raise HTTPException(503, "Layanan analisis sedang dinonaktifkan oleh administrator.")
+    minimum = int(admin_domain.setting("analysis", "min_characters", "1"))
+    maximum = int(admin_domain.setting("analysis", "max_characters", "5000"))
+    if not minimum <= len(payload.text) <= maximum:
+        raise HTTPException(422, f"Panjang teks harus antara {minimum} dan {maximum} karakter.")
     started = time.perf_counter()
-    patterns, scores = analyze_nseae(payload.text)
+    patterns, scores = analyze_nseae(payload.text, admin_domain.active_lexicons())
     basic, category, confidence, model_source, fusion_applied, model_confidence = predict_category_with_fusion(payload.text, scores)
     nseae_score = aggregate_nseae_risk(scores)
     # A non-safe classifier result must not be presented as LOW merely because
@@ -28,6 +34,8 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     level = score_to_risk_level(risk_score)
     store.increment(category.value, payload.source or "manual_web")
     admin_domain.record_analysis(category.value, level.value, "success", (time.perf_counter()-started)*1000, [name for name, score in scores.items() if score > 0], model_source)
-    return AnalyzeResponse(kategori_dasar=basic, category=category, risk_level=level, risk_score=risk_score, confidence=confidence, model_confidence=model_confidence, nseae_risk_score=nseae_score, fusion_applied=fusion_applied, nseae_scores=scores, detected_patterns=patterns, explanation=generate_explanation(patterns, category.value), recommendation=recommendation_for(level), model_source=model_source)
+    active_indicators = [name for name, score in scores.items() if score > 0]
+    dynamic_recommendation = admin_domain.recommendation(category.value, level.value, active_indicators)
+    return AnalyzeResponse(kategori_dasar=basic, category=category, risk_level=level, risk_score=risk_score, confidence=confidence, model_confidence=model_confidence, nseae_risk_score=nseae_score, fusion_applied=fusion_applied, nseae_scores=scores, detected_patterns=patterns, explanation=generate_explanation(patterns, category.value), recommendation=recommendation_for(level, dynamic_recommendation), model_source=model_source)
 
 

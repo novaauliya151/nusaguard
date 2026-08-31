@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import text
+from app.services.request_context import request_agent, request_ip
 
 PERMISSIONS = {
     "dashboard.view": ("Dashboard", "dashboard"),
@@ -32,7 +33,7 @@ PERMISSIONS = {
     "education.delete": ("Hapus edukasi", "education"),
     "recommendations.manage": ("Kelola rekomendasi", "recommendations"),
     "statistics.view": ("Lihat statistik", "statistics"), "models.view": ("Lihat model", "models"),
-    "models.test": ("Uji model", "models"), "activity_logs.view": ("Lihat log", "activity_logs"),
+    "models.test": ("Uji model", "models"), "models.manage": ("Kelola versi model", "models"), "activity_logs.view": ("Lihat log", "activity_logs"),
     "settings.manage": ("Kelola pengaturan", "settings"), "profile.manage": ("Kelola profil", "profile"),
     "dashboard.user.view": ("Dashboard pribadi", "user"), "analysis.create": ("Analisis pesan", "user"),
     "analysis.history.view_own": ("Lihat riwayat sendiri", "user"), "analysis.history.delete_own": ("Hapus riwayat sendiri", "user"),
@@ -315,6 +316,27 @@ class AdminDomain:
             result.setdefault(item["setting_group"], {})[item["setting_key"]] = item["value"]
         return result
 
+    def setting(self, group: str, key: str, default: str = "") -> str:
+        with self.engine.connect() as db:
+            value = db.execute(text("SELECT value FROM system_settings WHERE setting_group=:group AND setting_key=:key"), {"group": group, "key": key}).scalar()
+        return str(value) if value is not None else default
+
+    def setting_enabled(self, group: str, key: str, default: bool = True) -> bool:
+        return self.setting(group, key, "true" if default else "false").casefold() in {"1", "true", "yes", "on", "aktif"}
+
+    def active_lexicons(self) -> list[dict[str, Any]]:
+        return [item for item in self.crud_list("nseae_lexicons") if item["is_active"]]
+
+    def recommendation(self, category: str, risk_level: str, indicators: list[str]) -> str | None:
+        ranked: list[tuple[int, int, str]] = []
+        for item in self.crud_list("action_recommendations"):
+            if not item["is_active"] or item.get("category") not in {None, "", category}: continue
+            if item.get("risk_level") not in {None, "", risk_level}: continue
+            if item.get("nseae_indicator") not in {None, ""} and item["nseae_indicator"] not in indicators: continue
+            specificity = sum(bool(item.get(key)) for key in ("category", "risk_level", "nseae_indicator"))
+            ranked.append((specificity, -int(item.get("display_order") or 0), item["content"]))
+        return max(ranked, default=(0, 0, ""))[2] or None
+
     def save_settings(self, values: dict[str, dict[str, str]], actor_id: str) -> dict[str, dict[str, Any]]:
         now = datetime.now(timezone.utc)
         with self.engine.begin() as db:
@@ -368,6 +390,7 @@ class AdminDomain:
         return {"categories": categories, "splits": stats["dataset_splits"], "sources": stats["dataset_sources"], "data_types": stats["dataset_types"], "imbalanced": imbalance, "target_per_category": target}
 
     def save_activity(self, actor: dict[str, Any], action: str, module: str, entity_id: str | None, description: str, old_values: Any = None, new_values: Any = None, ip: str | None = None, agent: str | None = None) -> None:
+        ip, agent = ip or request_ip.get(), agent or request_agent.get()
         safe_old = json.dumps(old_values, default=str) if old_values is not None else None; safe_new = json.dumps(new_values, default=str) if new_values is not None else None
         with self.engine.begin() as db:
             db.execute(text("INSERT INTO admin_activity_logs(id,admin_email,action,object_type,object_id,detail,created_at,user_id,module,entity_type,old_values,new_values,ip_address,user_agent) VALUES (:id,:email,:action,:module,:entity,:description,:now,:user,:module,:module,:old,:new,:ip,:agent)"), {"id": str(uuid.uuid4()), "email": actor["email"], "action": action, "module": module, "entity": entity_id, "description": description, "now": datetime.now(timezone.utc), "user": actor["id"], "old": safe_old, "new": safe_new, "ip": ip, "agent": agent})

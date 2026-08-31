@@ -1,6 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.models.schemas import CategoryInfo, KategoriNusaGuard, StatsResponse
-from app.services.store import store
+from app.services.store import admin_domain, store
 
 router = APIRouter(tags=["public"])
 CATEGORIES = [
@@ -17,5 +17,7 @@ def categories() -> list[CategoryInfo]:
 
 @router.get("/stats", response_model=StatsResponse)
 def stats() -> StatsResponse:
+    if not admin_domain.setting_enabled("public_statistics", "enabled", True):
+        raise HTTPException(503, "Statistik publik sedang dinonaktifkan.")
     snapshot = store.public_statistics()
     return StatsResponse(total_analyzed=snapshot["total"], category_counts=snapshot["counts"], month_total=snapshot["month_total"], month_category_counts=snapshot["month_counts"], top_category_this_month=snapshot["top_category"], daily_stats=snapshot["daily"], updated_at=snapshot["updated_at"])

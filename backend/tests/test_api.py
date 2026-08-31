@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from app.main import app
-from app.services.store import store
+from app.services.store import admin_domain, store
 from uuid import uuid4
 
 client = TestClient(app)
@@ -203,7 +203,14 @@ def test_education_draft_and_dataset_export_are_privacy_safe() -> None:
     assert processed.status_code == 201
     assert "081234567890" not in processed.json()["text_anonymized"]
     assert "test@example.com" not in processed.json()["text_anonymized"]
-    assert client.get("/api/dataset").status_code == 200
+    assert all(item.get("report_id") != report["id"] for item in store.public_dataset())
+    candidate_id = processed.json()["id"]
+    validations = [{"indicator": indicator, "ai_score": 0.5, "human_validation": "detected", "detected_evidence": "frasa anonim", "notes": "ditinjau"} for indicator in ("urgency", "authority", "fear", "reward", "impersonation", "credential_request")]
+    assert client.put(f"/api/admin/nseae-validations/{candidate_id}", headers=headers, json={"validations": validations}).status_code == 200
+    verified = client.patch(f"/api/admin/candidates/{candidate_id}", headers=headers, json={**processed.json(), "validation_status": "verified", "split": "train"})
+    assert verified.status_code == 200
+    assert client.post(f"/api/admin/candidates/{candidate_id}/publish", headers=headers).status_code == 201
+    assert any(item["id"] for item in client.get("/api/dataset").json())
 
 
 def test_dataset_collections_are_described_separately() -> None:
@@ -230,6 +237,8 @@ def test_admin_candidate_workflow_and_activity_log() -> None:
     })
     assert created.status_code == 201
     candidate_id = created.json()["id"]
+    validations = [{"indicator": indicator, "ai_score": 0.5, "human_validation": "not_detected", "detected_evidence": "", "notes": "ditinjau"} for indicator in ("urgency", "authority", "fear", "reward", "impersonation", "credential_request")]
+    assert client.put(f"/api/admin/nseae-validations/{candidate_id}", headers=headers, json={"validations": validations}).status_code == 200
     updated = client.patch(f"/api/admin/candidates/{candidate_id}", headers=headers, json={**created.json(), "validation_status": "verified", "split": "train"})
     assert updated.status_code == 200
     assert updated.json()["validation_status"] == "verified"
@@ -270,4 +279,43 @@ def test_user_privacy_reports_guides_and_export_are_private() -> None:
     exported=client.get("/api/user/data-export",headers=headers).json()
     assert "password_hash" not in str(exported) and "token" not in str(exported)
     assert client.get("/api/admin/dashboard",headers=headers).status_code==403
+
+
+def test_admin_settings_control_runtime_services() -> None:
+    admin_domain.save_settings({"analysis": {"service_enabled": "false"}}, "test")
+    try:
+        response = client.post("/api/analyze", json={"text": "pesan uji"})
+        assert response.status_code == 503
+    finally:
+        admin_domain.save_settings({"analysis": {"service_enabled": "true"}}, "test")
+    assert client.post("/api/analyze", json={"text": "pesan uji"}).status_code == 200
+
+
+def test_admin_lexicon_and_recommendation_affect_live_analysis() -> None:
+    headers = auth_headers()
+    phrase = f"sinyalunik{uuid4().hex[:8]}"
+    lexicon = client.post("/api/admin/lexicons", headers=headers, json={"phrase": phrase, "indicator": "fear", "weight": 1, "match_type": "contains", "example": "", "description": "uji runtime", "is_active": True})
+    assert lexicon.status_code == 201
+    recommendation = client.post("/api/admin/recommendations", headers=headers, json={"title": f"Rekomendasi {phrase}", "content": "REKOMENDASI DINAMIS TERHUBUNG", "category": None, "risk_level": None, "nseae_indicator": "fear", "display_order": 0, "is_active": True})
+    assert recommendation.status_code == 201
+    analyzed = client.post("/api/analyze", json={"text": phrase})
+    assert analyzed.status_code == 200
+    assert analyzed.json()["nseae_scores"]["fear"] == 1
+    assert analyzed.json()["recommendation"] == "REKOMENDASI DINAMIS TERHUBUNG"
+    logs = client.get("/api/admin/activities", headers=headers).json()
+    assert any(item.get("ip_address") for item in logs)
+
+
+def test_custom_role_can_be_assigned_and_authorized() -> None:
+    headers = auth_headers()
+    slug = f"reviewer_{uuid4().hex[:8]}"
+    role = client.post("/api/admin/roles", headers=headers, json={"name": "Reviewer Khusus", "slug": slug, "description": "Role kustom", "permissions": ["dashboard.view"]})
+    assert role.status_code == 201
+    email = f"{slug}@example.com"
+    created = client.post("/api/admin/users", headers=headers, json={"name": "Reviewer", "email": email, "password": "rahasia123", "confirm_password": "rahasia123", "role": slug, "status": "active", "must_change_password": False})
+    assert created.status_code == 201
+    login = client.post("/api/auth/login", json={"email": email, "password": "rahasia123"})
+    assert login.status_code == 200
+    custom_headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+    assert client.get("/api/admin/dashboard", headers=custom_headers).status_code == 200
 

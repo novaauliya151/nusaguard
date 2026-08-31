@@ -7,7 +7,9 @@ def generate_explanation(patterns: list[DetectedPattern], category: str) -> str:
         return f"Tidak ditemukan pola rekayasa sosial yang kuat; klasifikasi sementara: {category}."
     return "Terdeteksi " + ", ".join(LABELS[p.pattern] for p in patterns) + "."
 
-def recommendation_for(level: RiskLevel) -> str:
+def recommendation_for(level: RiskLevel, dynamic: str | None = None) -> str:
+    if dynamic:
+        return dynamic
     if level is RiskLevel.HIGH:
         return "Jangan klik tautan, jangan kirim OTP/PIN, dan verifikasi pengirim melalui kanal resmi."
     if level is RiskLevel.MEDIUM:
