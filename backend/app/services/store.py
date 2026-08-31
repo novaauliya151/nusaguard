@@ -148,14 +148,14 @@ class Store:
             row = db.execute(text("SELECT id,name,email,role,is_active,status,avatar,must_change_password,last_login_at,created_by,created_at,updated_at,deleted_at FROM users WHERE email=:email AND deleted_at IS NULL"), {"email": email.casefold()}).mappings().first()
         return dict(row) if row else None
 
-    def authenticate(self, email: str, password: str) -> tuple[str, dict] | None:
+    def authenticate(self, email: str, password: str, remember_me: bool = False) -> tuple[str, dict] | None:
         with self.engine.connect() as db:
             row = db.execute(text("SELECT * FROM users WHERE email=:email"), {"email":email.casefold()}).mappings().first()
         if not row or row.get("deleted_at") or not row["is_active"] or row.get("status", "active") != "active" or not self._password_valid(password, row["password_hash"]):
             return None
         token, now = secrets.token_urlsafe(32), datetime.now(timezone.utc)
         with self.lock, self.engine.begin() as db:
-            db.execute(text("INSERT INTO user_sessions(token_hash,user_id,expires_at,created_at) VALUES (:token,:user,:expires,:created)"), {"token":hashlib.sha256(token.encode()).hexdigest(),"user":row["id"],"expires":now+timedelta(days=7),"created":now})
+            db.execute(text("INSERT INTO user_sessions(token_hash,user_id,expires_at,created_at) VALUES (:token,:user,:expires,:created)"), {"token":hashlib.sha256(token.encode()).hexdigest(),"user":row["id"],"expires":now+timedelta(days=30 if remember_me else 1),"created":now})
             db.execute(text("UPDATE users SET last_login_at=:now,updated_at=:now WHERE id=:id"), {"now": now, "id": row["id"]})
         return token, self.get_user(row["id"])
 

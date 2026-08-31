@@ -76,7 +76,7 @@ def login(payload: LoginRequest, request: Request) -> AuthResponse:
         _attempts[key] = [stamp for stamp in _attempts[key] if now - stamp < ATTEMPT_WINDOW]
         if len(_attempts[key]) >= MAX_ATTEMPTS:
             raise HTTPException(status_code=429, detail="Terlalu banyak percobaan login. Coba lagi beberapa saat.")
-    result = store.authenticate(payload.email, payload.password)
+    result = store.authenticate(payload.email, payload.password, payload.remember_me)
     if not result:
         with _attempt_lock: _attempts[key].append(now)
         raise HTTPException(status_code=401, detail="Email atau kata sandi salah.")

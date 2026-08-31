@@ -154,6 +154,7 @@ class PrivacyUpdateRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
+    remember_me: bool = False
 
 class AuthResponse(BaseModel):
     access_token: str
