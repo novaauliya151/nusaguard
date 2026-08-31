@@ -158,3 +158,44 @@
 .privacyGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 45px; }
 .privacyGrid p { font-size: 12px; line-height: 1.7; color: color-mix(in srgb, #edf4ef 72%, var(--muted)); border-top: 1px solid var(--border); padding-top: 20px; }
 .footer { padding: 34px 6vw; display: flex; justify-content: space-between; background: var(--page); color: var(--muted); font-size: 10px; border-top: 1px solid var(--border-soft); }
+
+@media (max-width: 900px) {
+  .shell { min-width: 0; width: 100%; overflow-x: hidden; }
+  .header { height: 66px; padding: 0 20px; }
+  .nav { display: none; }
+  .hero { min-height: auto; grid-template-columns: 1fr; padding: 52px 20px 38px; gap: 24px; }
+  .hero h1 { font-size: clamp(48px, 13vw, 72px); line-height: .92; margin: 18px 0 22px; }
+  .lead { font-size: 14px; }
+  .visual { display: none; }
+  .heroActions { align-items: stretch; flex-direction: column; gap: 10px; }
+  .heroActions > * { width: 100%; text-align: center; }
+  .trust { flex-wrap: wrap; gap: 10px 18px; margin-top: 30px; }
+  .stats { grid-template-columns: 1fr; margin: 0 20px 55px; }
+  .stats article { border-right: 0; border-bottom: 1px solid var(--border-soft); padding: 21px; }
+  .flow, .categories, .community, .privacy { padding: 58px 20px; }
+  .title { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .title h2 { font-size: clamp(36px, 10vw, 50px); }
+  .steps { grid-template-columns: 1fr; }
+  .steps article, .steps article + article { min-height: auto; padding: 24px 0; border-right: 0; border-bottom: 1px solid var(--border-soft); }
+  .analyzer { padding: 58px 20px; }
+  .workspace { grid-template-columns: 1fr; }
+  .card { min-height: auto; padding: 20px; }
+  .card textarea { height: 220px; }
+  .cardFoot { align-items: stretch; flex-direction: column; gap: 8px; }
+  .cardFoot .primary { width: 100%; }
+  .riskHead { gap: 12px; }
+  .score { font-size: 42px; }
+  .bars > div { grid-template-columns: 100px 1fr 24px; }
+  .categoryGrid, .communityGrid, .privacyGrid { grid-template-columns: 1fr; }
+  .platform { grid-template-columns: 1fr; margin: 0 20px 58px; padding: 34px 22px; gap: 28px; }
+  .platform h2, .privacy h2 { font-size: 38px; }
+  .footer { align-items: flex-start; flex-direction: column; gap: 10px; padding: 25px 20px; }
+}
+
+@media (max-width: 380px) {
+  .hero h1 { font-size: 44px; }
+  .brand { font-size: 18px; }
+  .cardHead { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .riskHead { flex-direction: column; }
+  .score { float: none; }
+}
