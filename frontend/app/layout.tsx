@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./mobile.css";
 import "./accessibility.css";
 import AccessibilityControls from "./accessibility-controls";
 
