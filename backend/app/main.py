@@ -4,7 +4,7 @@ import time
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.api.routes import admin, analyze, auth, content, report, statistics
+from app.api.routes import admin, analyze, auth, content, report, statistics, user
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("nusaguard")
@@ -31,4 +31,5 @@ app.include_router(statistics.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(content.router, prefix="/api")
+app.include_router(user.router, prefix="/api")
 

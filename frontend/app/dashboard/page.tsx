@@ -1,2 +1,3 @@
 import UserShell from "./user-shell";
-export default function DashboardPage(){return <UserShell/>}
+import {Suspense} from "react";
+export default function DashboardPage(){return <Suspense fallback={<main>Memuat dashboard…</main>}><UserShell/></Suspense>}

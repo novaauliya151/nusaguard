@@ -64,10 +64,10 @@ class Store:
             daily_rows = db.execute(text("SELECT day,SUM(count) AS count FROM stats_daily GROUP BY day ORDER BY day DESC LIMIT 14")).mappings().all()
         month_counts = {row["category"]: row["count"] for row in month_rows}
         return {"total": total, "counts": counts, "month_total": sum(month_counts.values()), "month_counts": month_counts, "top_category": month_rows[0]["category"] if month_rows else None, "daily": list(reversed([dict(row) for row in daily_rows])), "updated_at": datetime.now(timezone.utc)}
-    def report(self, content: str, category: str, source: str | None = None, additional_notes: str | None = None) -> tuple[str, datetime]:
+    def report(self, content: str, category: str, source: str | None = None, additional_notes: str | None = None, user_id: str | None = None, anonymized_text: str | None = None) -> tuple[str, datetime]:
         report_id, created = str(uuid.uuid4()), datetime.now(timezone.utc)
         with self.lock, self.engine.begin() as db:
-            db.execute(text("INSERT INTO reports(id,text,category_suggested,source,additional_notes,created_at) VALUES (:id,:content,:category,:source,:notes,:created)"), {"id":report_id,"content":content,"category":category,"source":source,"notes":additional_notes,"created":created})
+            db.execute(text("INSERT INTO reports(id,text,anonymized_text,category_suggested,source,additional_notes,user_id,created_at,updated_at) VALUES (:id,:content,:anonymized,:category,:source,:notes,:user,:created,:created)"), {"id":report_id,"content":content,"anonymized":anonymized_text,"category":category,"source":source,"notes":additional_notes,"user":user_id,"created":created})
         return report_id, created
 
     def admin_dashboard(self, limit: int = 100) -> dict:
@@ -278,4 +278,8 @@ store = Store()
 from app.services.admin_domain import initialize_admin_domain
 
 admin_domain = initialize_admin_domain(store)
+
+from app.services.user_domain import initialize_user_domain
+
+user_domain = initialize_user_domain(store)
 
