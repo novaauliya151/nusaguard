@@ -1,0 +1,5 @@
+"use client";
+export const dynamic="force-dynamic";
+import {FormEvent,useState} from "react";import {useSearchParams} from "next/navigation";import styles from "../login/auth.module.css";
+const API=process.env.NEXT_PUBLIC_API_URL??"http://localhost:8000";
+export default function Reset(){const search=useSearchParams(),[password,setPassword]=useState(""),[message,setMessage]=useState("");async function submit(e:FormEvent){e.preventDefault();const r=await fetch(`${API}/api/user/password-reset/confirm`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:search.get("token")??"",password,revoke_sessions:true})});const b=await r.json();setMessage(b.message??b.detail)}return <main className={styles.shell}><section className={styles.formSide}><div className={styles.formWrap}><p className={styles.kicker}>RESET PASSWORD</p><h1>Buat kata sandi baru.</h1><form onSubmit={submit}><label>Kata sandi baru<input required minLength={8} type="password" value={password} onChange={e=>setPassword(e.target.value)}/></label><button>Perbarui kata sandi</button></form>{message&&<p>{message}</p>}</div></section></main>}

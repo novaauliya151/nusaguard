@@ -56,6 +56,12 @@ def _login_key(request: Request, email: str) -> str:
 
 @router.post("/register", response_model=AuthResponse, status_code=201)
 def register(payload: RegisterRequest) -> AuthResponse:
+    if payload.confirm_password is not None and payload.password != payload.confirm_password:
+        raise HTTPException(status_code=422, detail="Konfirmasi kata sandi tidak sama.")
+    if not payload.accept_terms or not payload.accept_privacy:
+        raise HTTPException(status_code=422, detail="Persetujuan syarat dan kebijakan privasi diperlukan.")
+    if not any(ch.isalpha() for ch in payload.password) or not any(ch.isdigit() for ch in payload.password):
+        raise HTTPException(status_code=422, detail="Kata sandi harus berisi huruf dan angka.")
     user = store.create_user(payload.name, payload.email, payload.password)
     if not user:
         raise HTTPException(status_code=409, detail="Email sudah terdaftar.")

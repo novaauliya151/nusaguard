@@ -34,6 +34,13 @@ PERMISSIONS = {
     "statistics.view": ("Lihat statistik", "statistics"), "models.view": ("Lihat model", "models"),
     "models.test": ("Uji model", "models"), "activity_logs.view": ("Lihat log", "activity_logs"),
     "settings.manage": ("Kelola pengaturan", "settings"), "profile.manage": ("Kelola profil", "profile"),
+    "dashboard.user.view": ("Dashboard pribadi", "user"), "analysis.create": ("Analisis pesan", "user"),
+    "analysis.history.view_own": ("Lihat riwayat sendiri", "user"), "analysis.history.delete_own": ("Hapus riwayat sendiri", "user"),
+    "analysis.history.export_own": ("Ekspor riwayat sendiri", "user"), "analysis.favorite.manage_own": ("Kelola penanda penting", "user"),
+    "reports.create": ("Kirim laporan", "user"), "reports.view_own": ("Lihat laporan sendiri", "user"),
+    "guides.favorite.manage_own": ("Simpan panduan", "user"), "profile.view_own": ("Lihat profil sendiri", "user"),
+    "profile.update_own": ("Ubah profil sendiri", "user"), "account.password.update_own": ("Ubah kata sandi sendiri", "user"),
+    "account.delete_own": ("Hapus akun sendiri", "user"), "privacy.settings.update_own": ("Atur privasi sendiri", "user"),
 }
 
 ROLE_DEFINITIONS = {
@@ -48,7 +55,7 @@ ROLE_DEFINITIONS = {
         "dashboard.view", "education.view", "education.create", "education.update", "education.publish",
         "education.delete", "recommendations.manage", "profile.manage",
     }},
-    "user": {"name": "Pengguna", "permissions": set()},
+    "user": {"name": "Pengguna", "permissions": {slug for slug in PERMISSIONS if slug.endswith("_own") or slug in {"dashboard.user.view","analysis.create","reports.create"}}},
 }
 ROLE_ALIASES = {"admin": "super_admin", "moderator": "validator", "analyst": "validator"}
 LEGACY_PERMISSIONS = {"analyst": ["view_aggregate_stats"], "moderator": ["view_aggregate_stats", "manage_reports"], "admin": ["manage_users", "manage_reports", "view_system_status"]}
@@ -149,7 +156,7 @@ class AdminDomain:
         if role: clauses.append("u.role=:role"); params["role"] = role
         if status: clauses.append("u.status=:status"); params["status"] = status
         with self.engine.connect() as db:
-            rows = db.execute(text(f"SELECT u.id,u.name,u.email,u.role,u.status,u.is_active,u.avatar,u.must_change_password,u.last_login_at,u.created_by,u.created_at,u.updated_at,c.name AS created_by_name FROM users u LEFT JOIN users c ON c.id=u.created_by WHERE {' AND '.join(clauses)} ORDER BY u.created_at DESC"), params).mappings().all()
+            rows = db.execute(text(f"SELECT u.id,u.name,u.email,u.role,u.status,u.is_active,u.avatar,u.must_change_password,u.email_verified_at,u.last_login_at,u.created_by,u.created_at,u.updated_at,c.name AS created_by_name,(SELECT COUNT(*) FROM user_analysis_histories h WHERE h.user_id=u.id AND h.deleted_at IS NULL) AS analysis_count,(SELECT COUNT(*) FROM reports r WHERE r.user_id=u.id AND r.deleted_at IS NULL) AS report_count FROM users u LEFT JOIN users c ON c.id=u.created_by WHERE {' AND '.join(clauses)} ORDER BY u.created_at DESC"), params).mappings().all()
         return [{**dict(row), "is_active": bool(row["is_active"]), "must_change_password": bool(row["must_change_password"]), "permissions": sorted(set(self.permissions_for(row["role"]) + LEGACY_PERMISSIONS.get(row["role"], [])))} for row in rows]
 
     def user_detail(self, user_id: str) -> dict[str, Any] | None:
