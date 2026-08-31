@@ -232,3 +232,36 @@ def test_admin_candidate_workflow_and_activity_log() -> None:
     assert client.get("/api/admin/activities", headers=headers).status_code == 200
     assert client.delete(f"/api/admin/candidates/{candidate_id}", headers=headers).status_code == 204
 
+
+def test_guest_remains_ephemeral_and_user_history_is_owner_scoped() -> None:
+    before = store.engine.connect().execute(__import__("sqlalchemy").text("SELECT COUNT(*) FROM user_analysis_histories")).scalar_one()
+    assert client.post("/api/analyze", json={"text":"Jangan kirim OTP"}).status_code == 200
+    after = store.engine.connect().execute(__import__("sqlalchemy").text("SELECT COUNT(*) FROM user_analysis_histories")).scalar_one()
+    assert after == before
+    first = client.post("/api/auth/register", json={"name":"User Satu","email":f"one-{uuid4().hex}@example.com","password":"aman12345","confirm_password":"aman12345","accept_terms":True,"accept_privacy":True}).json()
+    second = client.post("/api/auth/register", json={"name":"User Dua","email":f"two-{uuid4().hex}@example.com","password":"aman12345","confirm_password":"aman12345","accept_terms":True,"accept_privacy":True}).json()
+    first_headers={"Authorization":f"Bearer {first['access_token']}"};second_headers={"Authorization":f"Bearer {second['access_token']}"}
+    saved=client.post("/api/user/histories",headers=first_headers,json={"text":"OTP 123456 kirim ke test@example.com","category":"Social Engineering","risk_level":"HIGH","risk_score":.9,"confidence":.8,"summary":"Uji","nseae_scores":{"credential_request":1}})
+    assert saved.status_code==201 and "123456" not in (saved.json()["anonymized_text"] or "") and "test@example.com" not in saved.json()["anonymized_text"]
+    history_id=saved.json()["id"]
+    assert client.get(f"/api/user/histories/{history_id}",headers=first_headers).status_code==200
+    assert client.get(f"/api/user/histories/{history_id}",headers=second_headers).status_code==404
+    assert client.patch(f"/api/user/histories/{history_id}",headers=first_headers,json={"is_favorite":True,"personal_note":"Penting"}).json()["is_favorite"] is True
+    assert client.delete(f"/api/user/histories/{history_id}",headers=second_headers).status_code==404
+    assert client.delete(f"/api/user/histories/{history_id}",headers=first_headers).status_code==204
+
+
+def test_user_privacy_reports_guides_and_export_are_private() -> None:
+    email=f"privacy-{uuid4().hex}@example.com";registered=client.post("/api/auth/register",json={"name":"Privacy User","email":email,"password":"aman12345"}).json();headers={"Authorization":f"Bearer {registered['access_token']}"}
+    settings=client.put("/api/user/privacy",headers=headers,json={"history_storage_mode":"never","retention_period":"30_days","save_anonymized_text":False,"require_save_confirmation":True})
+    assert settings.status_code==200
+    assert client.post("/api/user/histories",headers=headers,json={"text":"rahasia","category":"Aman","risk_level":"LOW","risk_score":.1}).status_code==409
+    report=client.post("/api/report",headers=headers,json={"text":"Hubungi 081234567890","category_suggested":"Social Engineering","consent":True})
+    assert report.status_code==201 and any(x["id"]==report.json()["id"] for x in client.get("/api/user/reports",headers=headers).json())
+    guide=client.get("/api/education").json()[0]
+    assert client.post(f"/api/user/saved-guides/{guide['id']}",headers=headers).status_code==204
+    assert any(x["id"]==guide["id"] for x in client.get("/api/user/saved-guides",headers=headers).json())
+    exported=client.get("/api/user/data-export",headers=headers).json()
+    assert "password_hash" not in str(exported) and "token" not in str(exported)
+    assert client.get("/api/admin/dashboard",headers=headers).status_code==403
+

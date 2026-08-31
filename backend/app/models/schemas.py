@@ -121,10 +121,40 @@ class RegisterRequest(BaseModel):
     name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=80)]
     email: Annotated[str, StringConstraints(strip_whitespace=True, min_length=5, max_length=160, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
     password: Annotated[str, StringConstraints(min_length=8, max_length=128)]
+    confirm_password: str | None = None
+    accept_terms: bool = True
+    accept_privacy: bool = True
+
+class HistorySaveRequest(BaseModel):
+    text: MessageText | None = None
+    save_text: bool = True
+    category: KategoriNusaGuard
+    risk_level: RiskLevel
+    risk_score: float = Field(ge=0, le=1)
+    confidence: float | None = Field(default=None, ge=0, le=1)
+    summary: str | None = Field(default=None, max_length=1000)
+    explanation: str | list[str] = ""
+    warning_signs: list[str] = Field(default_factory=list)
+    recommendations: str | list[str] = ""
+    nseae_scores: dict[str, float] = Field(default_factory=dict)
+    model_version: str | None = None
+    processing_time_ms: float | None = None
+    parent_history_id: str | None = None
+
+class HistoryUpdateRequest(BaseModel):
+    is_favorite: bool | None = None
+    personal_note: str | None = Field(default=None, max_length=1000)
+
+class PrivacyUpdateRequest(BaseModel):
+    history_storage_mode: Literal["never","ask","automatic"]
+    retention_period: Literal["30_days","90_days","1_year","forever"]
+    save_anonymized_text: bool = True
+    require_save_confirmation: bool = True
 
 class LoginRequest(BaseModel):
     email: str
     password: str
+    remember_me: bool = False
 
 class AuthResponse(BaseModel):
     access_token: str

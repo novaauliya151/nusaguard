@@ -64,10 +64,10 @@ class Store:
             daily_rows = db.execute(text("SELECT day,SUM(count) AS count FROM stats_daily GROUP BY day ORDER BY day DESC LIMIT 14")).mappings().all()
         month_counts = {row["category"]: row["count"] for row in month_rows}
         return {"total": total, "counts": counts, "month_total": sum(month_counts.values()), "month_counts": month_counts, "top_category": month_rows[0]["category"] if month_rows else None, "daily": list(reversed([dict(row) for row in daily_rows])), "updated_at": datetime.now(timezone.utc)}
-    def report(self, content: str, category: str, source: str | None = None, additional_notes: str | None = None) -> tuple[str, datetime]:
+    def report(self, content: str, category: str, source: str | None = None, additional_notes: str | None = None, user_id: str | None = None, anonymized_text: str | None = None) -> tuple[str, datetime]:
         report_id, created = str(uuid.uuid4()), datetime.now(timezone.utc)
         with self.lock, self.engine.begin() as db:
-            db.execute(text("INSERT INTO reports(id,text,category_suggested,source,additional_notes,created_at) VALUES (:id,:content,:category,:source,:notes,:created)"), {"id":report_id,"content":content,"category":category,"source":source,"notes":additional_notes,"created":created})
+            db.execute(text("INSERT INTO reports(id,text,anonymized_text,category_suggested,source,additional_notes,user_id,created_at,updated_at) VALUES (:id,:content,:anonymized,:category,:source,:notes,:user,:created,:created)"), {"id":report_id,"content":content,"anonymized":anonymized_text,"category":category,"source":source,"notes":additional_notes,"user":user_id,"created":created})
         return report_id, created
 
     def admin_dashboard(self, limit: int = 100) -> dict:
@@ -148,14 +148,14 @@ class Store:
             row = db.execute(text("SELECT id,name,email,role,is_active,status,avatar,must_change_password,last_login_at,created_by,created_at,updated_at,deleted_at FROM users WHERE email=:email AND deleted_at IS NULL"), {"email": email.casefold()}).mappings().first()
         return dict(row) if row else None
 
-    def authenticate(self, email: str, password: str) -> tuple[str, dict] | None:
+    def authenticate(self, email: str, password: str, remember_me: bool = False) -> tuple[str, dict] | None:
         with self.engine.connect() as db:
             row = db.execute(text("SELECT * FROM users WHERE email=:email"), {"email":email.casefold()}).mappings().first()
         if not row or row.get("deleted_at") or not row["is_active"] or row.get("status", "active") != "active" or not self._password_valid(password, row["password_hash"]):
             return None
         token, now = secrets.token_urlsafe(32), datetime.now(timezone.utc)
         with self.lock, self.engine.begin() as db:
-            db.execute(text("INSERT INTO user_sessions(token_hash,user_id,expires_at,created_at) VALUES (:token,:user,:expires,:created)"), {"token":hashlib.sha256(token.encode()).hexdigest(),"user":row["id"],"expires":now+timedelta(days=7),"created":now})
+            db.execute(text("INSERT INTO user_sessions(token_hash,user_id,expires_at,created_at) VALUES (:token,:user,:expires,:created)"), {"token":hashlib.sha256(token.encode()).hexdigest(),"user":row["id"],"expires":now+timedelta(days=30 if remember_me else 1),"created":now})
             db.execute(text("UPDATE users SET last_login_at=:now,updated_at=:now WHERE id=:id"), {"now": now, "id": row["id"]})
         return token, self.get_user(row["id"])
 
@@ -278,4 +278,8 @@ store = Store()
 from app.services.admin_domain import initialize_admin_domain
 
 admin_domain = initialize_admin_domain(store)
+
+from app.services.user_domain import initialize_user_domain
+
+user_domain = initialize_user_domain(store)
 
