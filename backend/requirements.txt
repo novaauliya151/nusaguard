@@ -5,6 +5,7 @@ pytest
 httpx
 sqlalchemy
 psycopg[binary]
+scikit-learn
 torch
 transformers
 

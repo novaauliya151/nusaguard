@@ -5,6 +5,12 @@ from uuid import uuid4
 
 client = TestClient(app)
 
+def test_readiness_reports_database_and_model_policy() -> None:
+    response = client.get("/health/ready")
+    assert response.status_code == 200
+    assert response.json()["database"] is True
+    assert {"status", "indobert_configured", "indobert_required", "fallback_allowed"} <= response.json().keys()
+
 def auth_headers(role: str = "admin") -> dict[str, str]:
     email = f"{role}-{uuid4().hex[:10]}@example.com"
     user = store.create_user(f"Akun {role}", email, "rahasia123", role)

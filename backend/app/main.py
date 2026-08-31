@@ -1,10 +1,13 @@
 import logging
 import os
 import time
-from fastapi import FastAPI, Request
+from pathlib import Path
+from fastapi import FastAPI, Request, Response
+from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.api.routes import admin, analyze, auth, content, report, statistics, user
+from app.services.store import store
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("nusaguard")
@@ -24,6 +27,20 @@ async def metadata_logging(request: Request, call_next):
 @app.get("/health", tags=["system"])
 def health():
     return {"status": "ok"}
+
+@app.get("/health/ready", tags=["system"])
+def readiness(response: Response):
+    model_path = Path(os.getenv("NUSAGUARD_MODEL_PATH", Path(__file__).resolve().parents[1] / "model" / "indobert"))
+    model_available = (model_path / "config.json").exists() or bool(os.getenv("NUSAGUARD_MODEL_REPO"))
+    try:
+        with store.engine.connect() as db: db.execute(text("SELECT 1")).scalar_one()
+        database = True
+    except Exception:
+        database = False
+    require_model = os.getenv("REQUIRE_INDOBERT", "false").casefold() == "true"
+    ready = database and (model_available or not require_model)
+    if not ready: response.status_code = 503
+    return {"status":"ready" if ready else "not_ready","database":database,"indobert_configured":model_available,"indobert_required":require_model,"fallback_allowed":not require_model}
 
 app.include_router(analyze.router, prefix="/api")
 app.include_router(report.router, prefix="/api")
