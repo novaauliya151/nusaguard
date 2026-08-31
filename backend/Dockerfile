@@ -3,6 +3,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app app
+COPY scripts scripts
 COPY model model
 ENV PORT=8000
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "python scripts/bootstrap_model.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]

@@ -1,0 +1,21 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: sqlite:////data/nusaguard.db
+      CORS_ORIGINS: http://localhost:3000
+      NUSAGUARD_MODEL_REPO: ${NUSAGUARD_MODEL_REPO:-}
+      NUSAGUARD_MODEL_REVISION: ${NUSAGUARD_MODEL_REVISION:-}
+    ports: ["8000:8000"]
+    volumes: ["nusaguard-data:/data"]
+    restart: unless-stopped
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports: ["3000:3000"]
+    depends_on: [backend]
+    restart: unless-stopped
+volumes:
+  nusaguard-data:

@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound(){return <main style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:24,background:"#f4f1e8",color:"#102a24"}}><section style={{maxWidth:560,textAlign:"center"}}><p>404 · NUSAGUARD</p><h1 style={{font:"500 42px Georgia"}}>Halaman tidak ditemukan.</h1><p>Alamat mungkin berubah atau tidak tersedia untuk akunmu.</p><Link href="/" style={{display:"inline-block",padding:"13px 18px",background:"#173c32",color:"white",borderRadius:6}}>Kembali ke beranda</Link></section></main>}
