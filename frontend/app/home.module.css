@@ -162,7 +162,7 @@
 
 @media (max-width: 900px) {
   .shell { min-width: 0; width: 100%; overflow-x: hidden; }
-  .header { height: 66px; padding: 0 20px; }
+  .header { height: 66px; padding: 0 20px; background: var(--page); backdrop-filter: none; }
   .navToggle { display: grid; width: 42px; height: 42px; padding: 10px; gap: 5px; align-content: center; border: 1px solid var(--border-soft); border-radius: 9px; background: var(--surface); color: var(--ink); cursor: pointer; z-index: 43; }
   .navToggle span { display: block; height: 2px; border-radius: 2px; background: currentColor; transition: transform .22s ease, opacity .22s ease; }
   .navToggle[aria-expanded="true"] span:first-child { transform: translateY(7px) rotate(45deg); }
@@ -173,7 +173,7 @@
   .nav a { padding: 14px 12px; border-bottom: 1px solid var(--border-soft); font-size: 13px; }
   .nav a::after { display: none; }
   .nav .login { margin-top: 8px; border: 0; text-align: center; }
-  .navBackdrop { position: fixed; inset: 0; border: 0; padding: 0; background: rgba(7, 25, 21, .56); opacity: 0; pointer-events: none; transition: opacity .22s ease; z-index: 40; }
+  .navBackdrop { position: fixed; inset: 0; border: 0; padding: 0; background: rgba(7, 25, 21, .56); opacity: 0; pointer-events: none; transition: opacity .22s ease; z-index: 15; }
   .navBackdropOpen { display: block; opacity: 1; pointer-events: auto; }
   .hero { min-height: auto; grid-template-columns: 1fr; padding: 52px 20px 38px; gap: 24px; }
   .hero h1 { font-size: clamp(48px, 13vw, 72px); line-height: .92; margin: 18px 0 22px; }
