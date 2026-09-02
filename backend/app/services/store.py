@@ -8,6 +8,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import create_engine, text
+from app.services.request_context import request_agent, request_ip
 
 DEFAULT_EDUCATION = [
     ("seed-phishing", "Waspada tautan dan APK palsu", "Phishing/Link Berbahaya", "Penipu menyamarkan tautan atau file APK sebagai undangan, paket, dan layanan resmi.", ["Domain asing atau file .apk", "Meminta segera membuka tautan"], ["Buka aplikasi resmi secara mandiri", "Jangan memasang APK dari pesan"]),
@@ -75,7 +76,7 @@ class Store:
         with self.engine.connect() as db:
             reports_total = db.execute(text("SELECT COUNT(*) FROM reports")).scalar_one()
             reports_pending = db.execute(text("SELECT COUNT(*) FROM reports WHERE status='pending'")).scalar_one()
-            rows = db.execute(text("SELECT id,text,category_suggested,status,created_at FROM reports ORDER BY created_at DESC LIMIT :limit"), {"limit": limit}).mappings().all()
+            rows = db.execute(text("SELECT id,COALESCE(anonymized_text,'[BELUM DIANONIMKAN]') AS text,category_suggested,status,created_at FROM reports WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT :limit"), {"limit": limit}).mappings().all()
             daily = db.execute(text("SELECT day,SUM(count) AS count FROM stats_daily GROUP BY day ORDER BY day DESC LIMIT 14")).mappings().all()
             sources = db.execute(text("SELECT source,SUM(count) AS count FROM stats_daily GROUP BY source ORDER BY count DESC")).mappings().all()
             reports_reviewed = db.execute(text("SELECT COUNT(*) FROM reports WHERE status IN ('reviewed','approved','dataset_candidate')")).scalar_one()
@@ -226,6 +227,21 @@ class Store:
                 db.execute(text("INSERT INTO public_dataset(id,report_id,text_anonymized,category,provenance,reviewed,created_at) VALUES (:dataset_id,:report_id,:content,:category,'consented_user_report',TRUE,:created)"), {"dataset_id":str(uuid.uuid4()),"report_id":report_id,"content":anonymized,"category":report["category_suggested"],"created":now})
         return self.dataset_by_report(report_id)
 
+    def publish_candidate(self, candidate_id: str) -> dict | None:
+        now = datetime.now(timezone.utc)
+        with self.lock, self.engine.begin() as db:
+            candidate = db.execute(text("SELECT * FROM dataset_candidates WHERE id=:id AND validation_status='verified' AND is_duplicate=FALSE AND is_archived=FALSE"), {"id": candidate_id}).mappings().first()
+            if not candidate or not candidate["report_id"]:
+                return None
+            validations = db.execute(text("SELECT COUNT(DISTINCT indicator) FROM nseae_validations WHERE dataset_candidate_id=:id AND human_validation<>'unsure'"), {"id": candidate_id}).scalar_one()
+            if validations < 6:
+                return None
+            existing = db.execute(text("SELECT id FROM public_dataset WHERE report_id=:id"), {"id": candidate["report_id"]}).first()
+            if not existing:
+                db.execute(text("INSERT INTO public_dataset(id,report_id,text_anonymized,category,provenance,reviewed,created_at) VALUES (:dataset_id,:report_id,:content,:category,'consented_user_report',TRUE,:created)"), {"dataset_id":str(uuid.uuid4()),"report_id":candidate["report_id"],"content":candidate["text_anonymized"],"category":candidate["category"],"created":now})
+            db.execute(text("UPDATE reports SET status='published',updated_at=:now WHERE id=:id"), {"id": candidate["report_id"], "now": now})
+        return self.dataset_by_report(candidate["report_id"])
+
     def dataset_by_report(self, report_id: str) -> dict | None:
         with self.engine.connect() as db:
             row = db.execute(text("SELECT id,text_anonymized,category,provenance,reviewed,created_at FROM public_dataset WHERE report_id=:id"), {"id":report_id}).mappings().first()
@@ -253,7 +269,7 @@ class Store:
         return result.rowcount>0
 
     def add_activity(self,admin_email:str,action:str,object_type:str,object_id:str|None=None,detail:str|None=None)->None:
-        with self.lock,self.engine.begin() as db: db.execute(text("INSERT INTO admin_activity_logs(id,admin_email,action,object_type,object_id,detail,created_at) VALUES(:id,:admin,:action,:type,:object,:detail,:created)"),{"id":str(uuid.uuid4()),"admin":admin_email,"action":action,"type":object_type,"object":object_id,"detail":detail,"created":datetime.now(timezone.utc)})
+        with self.lock,self.engine.begin() as db: db.execute(text("INSERT INTO admin_activity_logs(id,admin_email,action,object_type,object_id,detail,created_at,ip_address,user_agent) VALUES(:id,:admin,:action,:type,:object,:detail,:created,:ip,:agent)"),{"id":str(uuid.uuid4()),"admin":admin_email,"action":action,"type":object_type,"object":object_id,"detail":detail,"created":datetime.now(timezone.utc),"ip":request_ip.get(),"agent":request_agent.get()})
 
     def activities(self,limit:int=100)->list[dict]:
         with self.engine.connect() as db: rows=db.execute(text("SELECT * FROM admin_activity_logs ORDER BY created_at DESC LIMIT :limit"),{"limit":limit}).mappings().all()

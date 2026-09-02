@@ -35,7 +35,8 @@ def bearer_user(authorization: str | None) -> dict:
 
 def bearer_admin(authorization: str | None) -> dict:
     user = bearer_user(authorization)
-    if canonical_role(user["role"]) not in {"super_admin", "validator", "content_editor"}:
+    permissions = admin_domain.permissions_for(user["role"])
+    if canonical_role(user["role"]) == "user" or not permissions:
         raise HTTPException(status_code=403, detail="Hak akses administrator diperlukan.")
     return user
 

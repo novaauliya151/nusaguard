@@ -77,8 +77,13 @@ def has_protective_context(text: str) -> bool:
     return any(re.search(pattern, normalized) for pattern in PROTECTIVE_CONTEXT)
 
 
-def analyze_nseae(text: str) -> tuple[list[DetectedPattern], dict[str, float]]:
+def analyze_nseae(text: str, lexicons: list[dict] | None = None) -> tuple[list[DetectedPattern], dict[str, float]]:
     normalized = " ".join(text.casefold().split())
-    scores = {name: _indicator_score(normalized, signals) for name, signals in INDICATORS.items()}
+    signals = {name: list(items) for name, items in INDICATORS.items()}
+    for item in lexicons or []:
+        phrase, kind = item["phrase"], item["match_type"]
+        pattern = phrase if kind == "regex" else rf"\b{re.escape(phrase)}\b" if kind == "exact" else re.escape(phrase)
+        signals.setdefault(item["indicator"], []).append((pattern, float(item["weight"])))
+    scores = {name: _indicator_score(normalized, tuple(items)) for name, items in signals.items()}
     return [DetectedPattern(pattern=name, weight=score) for name, score in scores.items() if score], scores
 

@@ -78,7 +78,7 @@ class AdminReport(BaseModel):
     id: str
     text: str
     category_suggested: KategoriNusaGuard
-    status: Literal["pending", "reviewed", "in_review", "approved", "rejected", "needs_anonymization", "dataset_candidate"]
+    status: Literal["pending", "reviewed", "in_review", "approved", "rejected", "needs_anonymization", "dataset_candidate", "published"]
     created_at: datetime
 
 class AdminReportUpdate(BaseModel):

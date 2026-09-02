@@ -6,8 +6,10 @@ from fastapi import FastAPI, Request, Response
 from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from app.api.routes import admin, analyze, auth, content, report, statistics, user
-from app.services.store import store
+from app.services.store import admin_domain, store
+from app.services.request_context import request_agent, request_ip
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("nusaguard")
@@ -20,9 +22,18 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 @app.middleware("http")
 async def metadata_logging(request: Request, call_next):
     started = time.perf_counter()
-    response = await call_next(request)
-    logger.info("method=%s path=%s status=%s duration_ms=%.1f", request.method, request.url.path, response.status_code, (time.perf_counter()-started)*1000)
-    return response
+    ip_token = request_ip.set(request.client.host if request.client else None)
+    agent_token = request_agent.set(request.headers.get("user-agent"))
+    try:
+        exempt = request.url.path.startswith(("/api/admin", "/api/auth", "/health", "/uploads"))
+        if not exempt and admin_domain.setting_enabled("system", "maintenance_mode", False):
+            return JSONResponse({"detail": "NusaGuard sedang dalam pemeliharaan terjadwal."}, status_code=503)
+        response = await call_next(request)
+        logger.info("method=%s path=%s status=%s duration_ms=%.1f", request.method, request.url.path, response.status_code, (time.perf_counter()-started)*1000)
+        return response
+    finally:
+        request_ip.reset(ip_token)
+        request_agent.reset(agent_token)
 
 @app.get("/health", tags=["system"])
 def health():
