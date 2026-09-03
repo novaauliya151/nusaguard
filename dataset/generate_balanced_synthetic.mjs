@@ -104,6 +104,77 @@ const definitions = {
   }
 };
 
+// Hard cases manual: pesan pendek/netral dan pola penipuan kontemporer.
+// Semua identitas, tautan, nominal, serta dokumen bersifat fiktif dan aman.
+const contemporaryHardCases = {
+  "Aman": [
+    "cobalah ini aja", "oke", "sip makasih", "nanti aku kabari", "sudah sampai belum?",
+    "jadi ketemu jam tiga?", "file PDF-nya sudah kukirim", "cek grup kelas ya", "aku lagi di jalan",
+    "jangan lupa makan", "boleh minta foto catatan kuliah?", "rapatnya pindah ke ruang B2",
+    "paketku sudah sampai tanpa biaya tambahan", "gunakan aplikasi resmi dari Play Store",
+    "jangan pernah bagikan OTP atau PIN", "QRIS kasir ini sesuai nama tokonya",
+    "informasi beasiswa ada di portal resmi kampus", "undangannya berupa gambar JPG, bukan aplikasi",
+    "voice chat WhatsApp tidak otomatis menguras saldo", "kalau ragu hubungi nomor resmi bank"
+  ],
+  "Phishing/Link Berbahaya": [
+    "Surat PHK terbaru ada di lampiran Surat_Pusat.apk, buka sekarang.",
+    "Foto paket gagal antar ada di CekPaket.apk.", "Scan barcode ini untuk memperbarui data Dukcapil.",
+    "Daftar pemutihan pinjol OJK lewat https://pemutihan-ojk.invalid.",
+    "Unduh bukti tilang pada E-Tilang_Resmi.apk.", "Klik https://bansos-verifikasi.invalid untuk pencairan bantuan.",
+    "File ZIP foto kegiatan ini harus diekstrak lalu jalankan isinya.",
+    "Akun WhatsApp akan ditutup, login ulang di https://wa-pusat.invalid.",
+    "QR bantuan pemerintah ini mengarah ke formulir login.", "Invoice pajak terlampir sebagai Tagihan.apk."
+  ],
+  "Social Engineering": [
+    "Saya staf kepala dinas, tolong transfer dana kegiatan ke rekening ini.",
+    "Ini nomor baru pimpinan. Rahasiakan dan kirim dana operasional sekarang.",
+    "Saya polisi, angkat video call ini agar perkara Anda tidak diproses.",
+    "Suara di voice note ini dari atasan, segera kirim uang tanpa konfirmasi.",
+    "Petugas Dukcapil meminta foto KTP dan kode OTP untuk pembaruan data.",
+    "CS dompet digital meminta Anda membagikan layar dan menyebutkan PIN.",
+    "Kurir meminta kode verifikasi yang baru masuk agar paket dapat diserahkan.",
+    "Akun anak Anda menghubungi dari nomor baru dan meminta transfer darurat.",
+    "Petugas IASC palsu menawarkan pengembalian dana dengan meminta OTP.",
+    "Nomor yang memakai foto pejabat meminta sumbangan melalui rekening pribadi."
+  ],
+  "Penipuan Investasi": [
+    "Masuk grup saham VIP, sinyal AI kami menjamin profit 30 persen setiap hari.",
+    "Robot trading otomatis tanpa risiko, deposit awal Rp500.000.",
+    "Koin baru pasti naik sepuluh kali lipat, transfer sebelum presale ditutup.",
+    "Investasi task merchant menjanjikan komisi setelah top up saldo.",
+    "Titip dana ke rekening mentor untuk mendapat cuan pasti malam ini.",
+    "Aplikasi investasi belum berizin ini menjamin penarikan instan.",
+    "Paket staking eksklusif memberi return tetap 20 persen per minggu.",
+    "Admin grup meminta pajak pencairan sebelum keuntungan bisa ditarik.",
+    "Gunakan akun pinjaman untuk modal trading yang dijamin menang.",
+    "Bukti profit selebritas dibuat AI, setor sekarang agar tidak kehabisan slot."
+  ],
+  "Penipuan Rekrutmen": [
+    "Kerja like video dari rumah, top up dulu untuk membuka tugas berikutnya.",
+    "Anda diterima magang tanpa wawancara, bayar seragam hari ini.",
+    "HRD meminta biaya medical check-up ke rekening pribadi.",
+    "Lowongan admin marketplace, gunakan rekening Anda untuk menerima dana pelanggan.",
+    "Interview hanya lewat Telegram dan peserta wajib membeli tiket dari agen kami.",
+    "Tugas optimasi produk memberi komisi besar setelah deposit.",
+    "Penerimaan pegawai BUMN dipercepat jika membayar biaya dokumen.",
+    "Recruiter meminta OTP akun pencari kerja untuk verifikasi.",
+    "Gaji harian Rp2 juta tanpa pengalaman, klik formulir pribadi ini.",
+    "Rahasiakan proses rekrutmen dan transfer uang jaminan posisi."
+  ],
+  "Penipuan Romansa": [
+    "Kita baru kenal, tapi aku sayang kamu. Tolong kirim biaya tiket untuk menemuimu.",
+    "Paket hadiah dari luar negeri tertahan bea cukai, bayarkan tagihannya ya sayang.",
+    "Jangan cerita keluarga tentang hubungan kita, aku butuh dana darurat.",
+    "Aku tentara di luar negeri dan perlu uang agar bisa pulang menikahimu.",
+    "Buktikan cintamu dengan membayar biaya rumah sakit keluargaku.",
+    "Akun dating-ku bermasalah, kirim uang ke rekening temanku.",
+    "Aku ingin masa depan bersama, modal usaha kita transfer hari ini.",
+    "Video call-ku rusak, tetapi kirim dulu uang untuk tiket perjalanan.",
+    "Hadiah pernikahan kita ditahan kurir dan harus ditebus sekarang.",
+    "Setelah semua chat kita, masa kamu tidak percaya untuk meminjamkan uang?"
+  ]
+};
+
 const categoryCodes = {
   "Aman": "AMN", "Phishing/Link Berbahaya": "PHI", "Social Engineering": "SOC",
   "Penipuan Investasi": "INV", "Penipuan Rekrutmen": "REK", "Penipuan Romansa": "ROM",
@@ -121,7 +192,15 @@ const fill = (template, id) => template
 const rows = [];
 for (const [category, config] of Object.entries(definitions)) {
   const seen = new Set();
-  while (seen.size < 500) {
+  for (const [index, message] of contemporaryHardCases[category].entries()) {
+    seen.add(message);
+    rows.push({
+      Kategori: config.dasar, Pesan: message, Kategori_NusaGuard: category,
+      Subtipe: "contemporary_hard_case", Provenance: "synthetic_contemporary_v2",
+      Synthetic: true, Reviewed: false, Template_ID: `${categoryCodes[category]}-H${index + 1}`
+    });
+  }
+  while (seen.size < 600) {
     const id = seen.size + 1;
     const templateId = Math.floor(random() * config.templates.length);
     const message = `${pick(openings)}, ${fill(config.templates[templateId], id)} ${pick(closings)}`;
@@ -150,9 +229,9 @@ await fs.writeFile(output, csv, "utf8");
 const splits = { train: [], val: [], test: [] };
 for (const category of Object.keys(definitions)) {
   const categoryRows = rows.filter(row => row.Kategori_NusaGuard === category);
-  splits.train.push(...categoryRows.slice(0, 350));
-  splits.val.push(...categoryRows.slice(350, 425));
-  splits.test.push(...categoryRows.slice(425, 500));
+  splits.train.push(...categoryRows.slice(0, 420));
+  splits.val.push(...categoryRows.slice(420, 510));
+  splits.test.push(...categoryRows.slice(510, 600));
 }
 for (const [name, data] of Object.entries(splits)) {
   for (let i = data.length - 1; i > 0; i--) {
@@ -162,3 +241,4 @@ for (const [name, data] of Object.entries(splits)) {
   await fs.writeFile(path.resolve(`dataset/training/${name}.csv`), toCsv(data), "utf8");
 }
 console.log(JSON.stringify({ output, rows: rows.length, seed, splits: Object.fromEntries(Object.entries(splits).map(([name, data]) => [name, data.length])) }, null, 2));
+

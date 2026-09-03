@@ -32,11 +32,12 @@ def dataset() -> list[PublicDatasetRow]:
 def dataset_info() -> DatasetCollectionInfo:
     return DatasetCollectionInfo(
         public_samples=len(store.public_dataset()),
-        development_samples=3000,
+        development_samples=3600,
         development_categories=6,
-        development_samples_per_category=500,
+        development_samples_per_category=600,
         public_collection="Laporan sukarela yang telah mendapat persetujuan, ditinjau admin, dan dianonimkan.",
         development_collection="Dataset sintetis untuk pelatihan dan evaluasi pengembangan model; bukan laporan masyarakat.",
         development_downloadable=False,
     )
+
 

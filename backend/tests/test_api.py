@@ -75,6 +75,18 @@ def test_protective_warning_is_not_flagged_as_fraud(monkeypatch, tmp_path) -> No
         _pipeline.cache_clear()
 
 
+def test_short_neutral_messages_are_safe_without_loading_model(monkeypatch) -> None:
+    from app.services import predictor
+    monkeypatch.setattr(predictor, "predict_probabilities", lambda _text: (_ for _ in ()).throw(AssertionError("model should not load")))
+    for message in ("cobalah ini aja", "oke", "nanti aku kabari", "sudah sampai belum?"):
+        response = client.post("/api/analyze", json={"text": message})
+        assert response.status_code == 200
+        body = response.json()
+        assert body["category"] == "Aman"
+        assert body["risk_level"] == "LOW"
+        assert body["model_source"] == "low-information-guard"
+
+
 def test_admin_dashboard_requires_admin_role_and_supports_moderation() -> None:
     assert client.get("/api/admin/dashboard").status_code == 401
     assert client.get("/api/admin/dashboard", headers=auth_headers("user")).status_code == 403
@@ -216,8 +228,8 @@ def test_education_draft_and_dataset_export_are_privacy_safe() -> None:
 def test_dataset_collections_are_described_separately() -> None:
     info = client.get("/api/dataset/info")
     assert info.status_code == 200
-    assert info.json()["development_samples"] == 3000
-    assert info.json()["development_samples_per_category"] == 500
+    assert info.json()["development_samples"] == 3600
+    assert info.json()["development_samples_per_category"] == 600
     assert info.json()["development_downloadable"] is False
 
 
@@ -318,4 +330,5 @@ def test_custom_role_can_be_assigned_and_authorized() -> None:
     assert login.status_code == 200
     custom_headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
     assert client.get("/api/admin/dashboard", headers=custom_headers).status_code == 200
+
 
