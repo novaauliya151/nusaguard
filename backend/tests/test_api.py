@@ -78,13 +78,25 @@ def test_protective_warning_is_not_flagged_as_fraud(monkeypatch, tmp_path) -> No
 def test_short_neutral_messages_are_safe_without_loading_model(monkeypatch) -> None:
     from app.services import predictor
     monkeypatch.setattr(predictor, "predict_probabilities", lambda _text: (_ for _ in ()).throw(AssertionError("model should not load")))
-    for message in ("cobalah ini aja", "oke", "nanti aku kabari", "sudah sampai belum?"):
+    for message in ("cobalah ini aja", "oke", "nanti aku kabari", "sudah sampai belum?", "aku sayang kamu"):
         response = client.post("/api/analyze", json={"text": message})
         assert response.status_code == 200
         body = response.json()
         assert body["category"] == "Aman"
         assert body["risk_level"] == "LOW"
         assert body["model_source"] == "low-information-guard"
+
+
+def test_confident_model_cannot_flag_evidence_free_neutral_text(monkeypatch) -> None:
+    from app.models.schemas import KategoriNusaGuard
+    from app.services import predictor
+    monkeypatch.setattr(predictor, "predict_probabilities", lambda _text: ({
+        KategoriNusaGuard.PENIPUAN_ROMANSA: 0.99,
+        KategoriNusaGuard.AMAN: 0.01,
+    }, "indobert"))
+    response = client.post("/api/analyze", json={"text": "Aku senang bisa berbicara denganmu malam ini"})
+    assert response.status_code == 200
+    assert response.json()["category"] == "Aman"
 
 
 def test_admin_dashboard_requires_admin_role_and_supports_moderation() -> None:
