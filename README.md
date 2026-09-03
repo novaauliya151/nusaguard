@@ -10,7 +10,7 @@ Prototype anti-penipuan berbahasa Indonesia: pesan manual dari web atau teks not
 - PostgreSQL reports/aggregate statistics (`DATABASE_URL`), SQLite local fallback
 - Flutter client + native Kotlin `NotificationListenerService` source
 - IndoBERT fine-tuning/evaluation pipeline
-- Balanced synthetic development dataset: 500 samples for each of six categories, with provenance/review metadata
+- Balanced synthetic development dataset: 600 samples for each of six categories (3,600 total), including contemporary hard cases and provenance/review metadata
 - Docker/Render blueprint and GitHub Actions
 
 The analyzed message is never stored. Only an explicitly consented `/api/report` submission stores text. Logs contain method, path, status, and response time—not message bodies, contacts, or phone numbers.
@@ -104,5 +104,6 @@ Live deployment, an Android APK, and a real WhatsApp device demonstration requir
 - Send a controlled WhatsApp test message containing urgency + OTP; show the warning notification.
 - Open education and privacy sections.
 - State the actual held-out accuracy/F1 from `evaluation.json`, not the proposal target.
+
 
 
