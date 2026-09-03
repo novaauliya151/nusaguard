@@ -122,6 +122,15 @@
 .badge { color: var(--accent); font-size: 9px; letter-spacing: .14em; font-weight: 900; }
 .score { font: 500 54px Georgia; }
 .score small { font: 10px Arial; }
+.riskLow { --risk-color: #3f8a5b; border-top: 5px solid var(--risk-color); }
+.riskMedium { --risk-color: #d99132; border-top: 5px solid var(--risk-color); }
+.riskHigh { --risk-color: #d95f4d; border-top: 5px solid var(--risk-color); }
+.riskLow .badge, .riskLow .score, .riskMedium .badge, .riskMedium .score, .riskHigh .badge, .riskHigh .score { color: var(--risk-color); }
+.riskScale { display: grid; grid-template-columns: repeat(3, 1fr); margin: 17px 0 12px; overflow: hidden; border: 1px solid var(--border-soft); border-radius: 6px; font-size: 8px; font-weight: 800; text-align: center; }
+.riskScale span { padding: 8px 4px; }
+.riskScale span:nth-child(1) { background: color-mix(in srgb, #3f8a5b 18%, var(--card)); color: #3f8a5b; }
+.riskScale span:nth-child(2) { background: color-mix(in srgb, #d99132 18%, var(--card)); color: #9a5c0b; }
+.riskScale span:nth-child(3) { background: color-mix(in srgb, #d95f4d 18%, var(--card)); color: #b34032; }
 .resultText { font-size: 12px; line-height: 1.6; color: var(--muted); }
 .bars { margin: 20px 0; }
 .bars > div { display: grid; grid-template-columns: 130px 1fr 25px; gap: 10px; align-items: center; font-size: 9px; margin: 9px 0; }
