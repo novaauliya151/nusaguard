@@ -26,7 +26,13 @@ def _contains_term(text: str, term: str) -> bool:
 
 def _has_explicit_scam_signal(text: str) -> bool:
     normalized = text.casefold()
-    return any(_contains_term(normalized, term) for terms in KEYWORDS.values() for term in terms)
+    strong_patterns = (
+        r"https?://|\.apk\b|\.zip\b",
+        r"\b(?:kirim|minta|sebutkan|masukkan|berikan)\b.{0,35}\b(?:otp|pin|password|kata sandi|kode verifikasi)\b",
+        r"\b(?:kirim|transfer|pinjamkan|bayar|setor|deposit|top up)\b.{0,35}\b(?:uang|dana|rp\.?\s?\d|biaya|saldo|modal)\b",
+        r"\b(?:profit|return|keuntungan|cuan)\b.{0,35}\b(?:pasti|dijamin|tanpa risiko|per hari|per minggu)\b",
+    )
+    return any(re.search(pattern, normalized) for pattern in strong_patterns)
 
 @lru_cache(maxsize=1)
 def _pipeline():
