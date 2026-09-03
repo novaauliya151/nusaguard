@@ -27,9 +27,11 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     patterns, scores = analyze_nseae(payload.text, admin_domain.active_lexicons())
     basic, category, confidence, model_source, fusion_applied, model_confidence = predict_category_with_fusion(payload.text, scores)
     nseae_score = aggregate_nseae_risk(scores)
-    # A non-safe classifier result must not be presented as LOW merely because
-    # a novel scam wording matches only one N-SEAE indicator.
-    classifier_floor = 0.70 if basic.value == "spam" else 0.0
+    normalized = payload.text.casefold()
+    critical = any(marker in normalized for marker in (".apk", "http://", "https://")) or any(
+        phrase in normalized for phrase in ("kirim otp", "minta otp", "kirim pin", "minta pin", "kirim password", "minta password")
+    )
+    classifier_floor = 0.70 if basic.value == "spam" and critical else 0.40 if basic.value == "spam" else 0.0
     risk_score = round(min(max(nseae_score, classifier_floor), 1.0), 2)
     level = score_to_risk_level(risk_score)
     store.increment(category.value, payload.source or "manual_web")
@@ -37,5 +39,6 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     active_indicators = [name for name, score in scores.items() if score > 0]
     dynamic_recommendation = admin_domain.recommendation(category.value, level.value, active_indicators)
     return AnalyzeResponse(kategori_dasar=basic, category=category, risk_level=level, risk_score=risk_score, confidence=confidence, model_confidence=model_confidence, nseae_risk_score=nseae_score, fusion_applied=fusion_applied, nseae_scores=scores, detected_patterns=patterns, explanation=generate_explanation(patterns, category.value), recommendation=recommendation_for(level, dynamic_recommendation), model_source=model_source)
+
 
 
