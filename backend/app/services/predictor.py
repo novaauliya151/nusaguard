@@ -23,6 +23,11 @@ def _contains_term(text: str, term: str) -> bool:
         return term in text
     return re.search(rf"(?<!\w){re.escape(term)}(?!\w)", text) is not None
 
+
+def _has_explicit_scam_signal(text: str) -> bool:
+    normalized = text.casefold()
+    return any(_contains_term(normalized, term) for terms in KEYWORDS.values() for term in terms)
+
 @lru_cache(maxsize=1)
 def _pipeline():
     default_path = Path(__file__).resolve().parents[2] / "model" / "indobert"
@@ -66,8 +71,11 @@ def predict_category(text: str) -> tuple[KategoriDasar, KategoriNusaGuard, float
 
 
 def predict_category_with_fusion(text: str, nseae_scores: dict[str, float]) -> tuple[KategoriDasar, KategoriNusaGuard, float, str, bool, float]:
-    probabilities, source = predict_probabilities(text)
+    tokens = re.findall(r"\b\w+\b", text.casefold())
     risk = aggregate_nseae_risk(nseae_scores)
+    if len(tokens) <= 5 and risk == 0 and not _has_explicit_scam_signal(text):
+        return KategoriDasar.HAM, KategoriNusaGuard.AMAN, 0.65, "low-information-guard", True, 0.0
+    probabilities, source = predict_probabilities(text)
     if not probabilities:
         basic, label, confidence, fallback_source = predict_category(text)
         normalized = text.casefold()
@@ -80,7 +88,9 @@ def predict_category_with_fusion(text: str, nseae_scores: dict[str, float]) -> t
     label, fusion_applied = baseline_label, False
     normalized = text.casefold()
     active_indicators = sum(score > 0 for score in nseae_scores.values())
-    if baseline_label is not KategoriNusaGuard.AMAN and has_protective_context(text) and (risk < 0.50 or active_indicators <= 1):
+    if baseline_label is not KategoriNusaGuard.AMAN and risk == 0 and not _has_explicit_scam_signal(text):
+        label, fusion_applied = KategoriNusaGuard.AMAN, True
+    elif baseline_label is not KategoriNusaGuard.AMAN and has_protective_context(text) and (risk < 0.50 or active_indicators <= 1):
         label, fusion_applied = KategoriNusaGuard.AMAN, True
     elif ".apk" in normalized or "http://" in normalized or "https://" in normalized:
         label, fusion_applied = KategoriNusaGuard.PHISHING, baseline_label is not KategoriNusaGuard.PHISHING
@@ -99,3 +109,4 @@ def predict_category_with_fusion(text: str, nseae_scores: dict[str, float]) -> t
         confidence = max(probabilities[label], risk * 0.75)
     basic = KategoriDasar.HAM if label is KategoriNusaGuard.AMAN else KategoriDasar.SPAM
     return basic, label, round(confidence, 4), "indobert+nseae", fusion_applied, model_confidence
+
