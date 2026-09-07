@@ -16,6 +16,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
+    HistoryService.changes.addListener(_loadHistory);
+    _loadHistory();
+  }
+
+  @override
+  void dispose() {
+    HistoryService.changes.removeListener(_loadHistory);
+    super.dispose();
+  }
+
+  Future<void> _loadHistory() async {
+    final entries = await HistoryService.getAll();
+    if (!mounted) return;
     _loadHistory();
   }
 
@@ -81,6 +94,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
             const SizedBox(height: 4),
             Text(
+              _riskLabel(result.riskLevel),
               'Kategori: ${result.kategoriDasar} · Risiko: ${result.riskLevel}',
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
@@ -93,6 +107,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
             const Divider(height: 32),
+            _scoreCard('Perkiraan tingkat bahaya', result.riskScore, scheme),
+            const SizedBox(height: 16),
+            _nseaeSection(scores, scheme),
             Row(
               children: [
                 _scoreCard('Risiko', result.riskScore, scheme),
@@ -139,6 +156,68 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ),
     );
+  }
+
+  Widget _nseaeSection(dynamic scores, ColorScheme scheme) {
+    final entries = <String, double>{
+      'Ada desakan untuk segera bertindak.': scores.urgency,
+      'Pesan mengatasnamakan pihak berwenang.': scores.authority,
+      'Pesan menggunakan ancaman atau rasa takut.': scores.fear,
+      'Pesan menawarkan hadiah atau keuntungan.': scores.reward,
+      'Pengirim mungkin menyamar sebagai orang lain.': scores.impersonation,
+      'Pesan meminta data rahasia atau informasi pribadi.':
+          scores.credentialRequest,
+    };
+    final visible = entries.entries.where((e) => e.value > 0).toList();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Mengapa hasilnya seperti ini?',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          if (visible.isEmpty)
+            const Text('Tidak ditemukan tanda manipulasi yang kuat.')
+          else
+            ...visible.map(
+              (entry) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      size: 18,
+                      color: scheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(entry.key)),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _riskLabel(String riskLevel) {
+    switch (riskLevel) {
+      case 'HIGH':
+        return 'Risiko tinggi';
+      case 'MEDIUM':
+        return 'Risiko sedang';
+      default:
+        return 'Risiko rendah';
+    }
   }
 
   Widget _nseaeSection(dynamic scores) {

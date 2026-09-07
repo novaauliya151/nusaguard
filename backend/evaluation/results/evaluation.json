@@ -1,0 +1,240 @@
+{
+  "scope": "Test set pengembangan terpisah; bukan klaim performa dunia nyata.",
+  "dataset": "D:\\Laravel\\nusaguard\\dataset\\training\\test.csv",
+  "samples": 540,
+  "labels": [
+    "Aman",
+    "Penipuan Investasi",
+    "Penipuan Rekrutmen",
+    "Penipuan Romansa",
+    "Phishing/Link Berbahaya",
+    "Social Engineering"
+  ],
+  "class_distribution": {
+    "Penipuan Rekrutmen": 90,
+    "Phishing/Link Berbahaya": 90,
+    "Aman": 90,
+    "Penipuan Romansa": 90,
+    "Social Engineering": 90,
+    "Penipuan Investasi": 90
+  },
+  "baseline_indobert": {
+    "accuracy": 0.9981481481481481,
+    "precision_macro": 0.9981684981684982,
+    "recall_macro": 0.9981481481481481,
+    "f1_macro": 0.9981480909904626,
+    "classification_report": {
+      "Aman": {
+        "precision": 1.0,
+        "recall": 0.9888888888888889,
+        "f1-score": 0.994413407821229,
+        "support": 90.0
+      },
+      "Penipuan Investasi": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 90.0
+      },
+      "Penipuan Rekrutmen": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 90.0
+      },
+      "Penipuan Romansa": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 90.0
+      },
+      "Phishing/Link Berbahaya": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 90.0
+      },
+      "Social Engineering": {
+        "precision": 0.989010989010989,
+        "recall": 1.0,
+        "f1-score": 0.994475138121547,
+        "support": 90.0
+      },
+      "accuracy": 0.9981481481481481,
+      "macro avg": {
+        "precision": 0.9981684981684982,
+        "recall": 0.9981481481481481,
+        "f1-score": 0.9981480909904626,
+        "support": 540.0
+      },
+      "weighted avg": {
+        "precision": 0.9981684981684983,
+        "recall": 0.9981481481481481,
+        "f1-score": 0.9981480909904626,
+        "support": 540.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        89,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        90,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        90,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        90,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        90,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        90
+      ]
+    ]
+  },
+  "indobert_plus_nseae": {
+    "accuracy": 0.9037037037037037,
+    "precision_macro": 0.9324169530355096,
+    "recall_macro": 0.9037037037037038,
+    "f1_macro": 0.9053420723875408,
+    "classification_report": {
+      "Aman": {
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1-score": 0.8,
+        "support": 90.0
+      },
+      "Penipuan Investasi": {
+        "precision": 1.0,
+        "recall": 0.7222222222222222,
+        "f1-score": 0.8387096774193549,
+        "support": 90.0
+      },
+      "Penipuan Rekrutmen": {
+        "precision": 1.0,
+        "recall": 0.7444444444444445,
+        "f1-score": 0.8535031847133758,
+        "support": 90.0
+      },
+      "Penipuan Romansa": {
+        "precision": 1.0,
+        "recall": 0.9555555555555556,
+        "f1-score": 0.9772727272727273,
+        "support": 90.0
+      },
+      "Phishing/Link Berbahaya": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 90.0
+      },
+      "Social Engineering": {
+        "precision": 0.9278350515463918,
+        "recall": 1.0,
+        "f1-score": 0.9625668449197861,
+        "support": 90.0
+      },
+      "accuracy": 0.9037037037037037,
+      "macro avg": {
+        "precision": 0.9324169530355096,
+        "recall": 0.9037037037037038,
+        "f1-score": 0.9053420723875408,
+        "support": 540.0
+      },
+      "weighted avg": {
+        "precision": 0.9324169530355098,
+        "recall": 0.9037037037037037,
+        "f1-score": 0.9053420723875407,
+        "support": 540.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        90,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        25,
+        65,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        16,
+        0,
+        67,
+        0,
+        0,
+        7
+      ],
+      [
+        4,
+        0,
+        0,
+        86,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        90,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        90
+      ]
+    ]
+  },
+  "fusion_delta_f1_macro": -0.09280601860292181,
+  "average_time_ms": {
+    "indobert": 123.34,
+    "indobert_plus_nseae": 97.29
+  }
+}

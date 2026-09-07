@@ -32,7 +32,13 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
         phrase in normalized for phrase in ("kirim otp", "minta otp", "kirim pin", "minta pin", "kirim password", "minta password")
     )
     classifier_floor = 0.70 if basic.value == "spam" and critical else 0.40 if basic.value == "spam" else 0.0
-    risk_score = round(min(max(nseae_score, classifier_floor), 1.0), 2)
+    # Skor dihitung ulang untuk setiap pesan dari keyakinan kategori dan bukti
+    # N-SEAE. Sebelumnya banyak pesan hanya menerima nilai ambang yang sama.
+    if basic.value == "spam":
+        combined_score = (0.55 * confidence) + (0.45 * nseae_score)
+        risk_score = round(min(max(combined_score, classifier_floor), 1.0), 4)
+    else:
+        risk_score = round(min(nseae_score, 0.39), 4)
     level = score_to_risk_level(risk_score)
     store.increment(category.value, payload.source or "manual_web")
     admin_domain.record_analysis(category.value, level.value, "success", (time.perf_counter()-started)*1000, [name for name, score in scores.items() if score > 0], model_source)

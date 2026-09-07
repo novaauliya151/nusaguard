@@ -17,6 +17,12 @@ class NseaeScores {
 
   factory NseaeScores.fromJson(Map<String, dynamic> json) {
     return NseaeScores(
+      urgency: (json['urgency'] as num?)?.toDouble() ?? 0,
+      authority: (json['authority'] as num?)?.toDouble() ?? 0,
+      fear: (json['fear'] as num?)?.toDouble() ?? 0,
+      reward: (json['reward'] as num?)?.toDouble() ?? 0,
+      impersonation: (json['impersonation'] as num?)?.toDouble() ?? 0,
+      credentialRequest: (json['credential_request'] as num?)?.toDouble() ?? 0,
       urgency: (json['urgency'] as num).toDouble(),
       authority: (json['authority'] as num).toDouble(),
       fear: (json['fear'] as num).toDouble(),
@@ -61,6 +67,18 @@ class AnalyzeResult {
 
   factory AnalyzeResult.fromJson(Map<String, dynamic> json) {
     return AnalyzeResult(
+      kategoriDasar: json['kategori_dasar'] as String? ?? 'Aman',
+      kategoriNusaGuard:
+          (json['category'] ?? json['kategori_nusaguard']) as String? ?? 'Aman',
+      riskLevel: json['risk_level'] as String? ?? 'LOW',
+      riskScore: (json['risk_score'] as num).toDouble(),
+      confidence: (json['confidence'] as num).toDouble(),
+      nseaeScores: NseaeScores.fromJson(
+        (json['nseae_scores'] as Map<String, dynamic>?) ?? const {},
+      ),
+      explanation: json['explanation'] as String? ?? '',
+      recommendedAction:
+          (json['recommendation'] ?? json['recommended_action']) as String? ?? '',
       kategoriDasar: json['kategori_dasar'] as String,
       kategoriNusaGuard: json['kategori_nusaguard'] as String,
       riskLevel: json['risk_level'] as String,

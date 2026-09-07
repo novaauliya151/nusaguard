@@ -1,4 +1,65 @@
 "use client";
-import {useCallback,useEffect,useState} from "react";import {adminFetch,API} from "./admin-api";import styles from "./admin.module.css";
-type Ready={status:string;database:boolean;indobert_configured:boolean;indobert_required:boolean;fallback_allowed:boolean};
-export default function SystemPage(){const[data,setData]=useState<Ready|null>(null),[error,setError]=useState("");const load=useCallback(()=>adminFetch<Ready>("/health/ready").then(setData).catch(e=>setError(e.message)),[]);useEffect(()=>{void load()},[load]);const items=[["Backend API",API,Boolean(data)],["Database",data?.database?"Terhubung":"Tidak terhubung",Boolean(data?.database)],["IndoBERT",data?.indobert_configured?"Terkonfigurasi":data?.fallback_allowed?"Fallback diizinkan":"Tidak tersedia",Boolean(data?.indobert_configured)],["Readiness",data?.status??"Belum diperiksa",data?.status==="ready"]];return <><div className={styles.sectionHead}><div><span>OPERATIONS</span><h2>Status arsitektur dan database</h2></div><button className={styles.secondaryButton} onClick={()=>void load()}>Periksa ulang</button></div>{error&&<div className={styles.alert}>{error}</div>}<div className={styles.systemGrid}>{items.map(([name,detail,ok])=><article key={String(name)}><i>{ok?"●":"○"}</i><div><h3>{String(name)}</h3><p>{String(detail)}</p></div><b>{ok?"Operasional":"Perlu perhatian"}</b></article>)}</div></>}
+import { useCallback, useEffect, useState } from "react";
+import { adminFetch, API } from "./admin-api";
+import styles from "./admin.module.css";
+type Ready = {
+  status: string;
+  database: boolean;
+  indobert_configured: boolean;
+  indobert_required: boolean;
+  fallback_allowed: boolean;
+};
+export default function SystemPage() {
+  const [data, setData] = useState<Ready | null>(null),
+    [error, setError] = useState("");
+  const load = useCallback(
+    () =>
+      adminFetch<Ready>("/health/ready")
+        .then(setData)
+        .catch((e) => setError(e.message)),
+    [],
+  );
+  useEffect(() => {
+    void load();
+  }, [load]);
+  const items = [
+    ["Backend API", API, Boolean(data)],
+    ["Database", data?.database ? "Terhubung" : "Tidak terhubung", Boolean(data?.database)],
+    [
+      "IndoBERT",
+      data?.indobert_configured
+        ? "Terkonfigurasi"
+        : data?.fallback_allowed
+          ? "Fallback diizinkan"
+          : "Tidak tersedia",
+      Boolean(data?.indobert_configured),
+    ],
+    ["Readiness", data?.status ?? "Belum diperiksa", data?.status === "ready"],
+  ];
+  return (
+    <>
+      <div className={styles.sectionHead}>
+        <div>
+          <span>OPERATIONS</span>
+          <h2>Status arsitektur dan database</h2>
+        </div>
+        <button className={styles.secondaryButton} onClick={() => void load()}>
+          Periksa ulang
+        </button>
+      </div>
+      {error && <div className={styles.alert}>{error}</div>}
+      <div className={styles.systemGrid}>
+        {items.map(([name, detail, ok]) => (
+          <article key={String(name)}>
+            <i>{ok ? "●" : "○"}</i>
+            <div>
+              <h3>{String(name)}</h3>
+              <p>{String(detail)}</p>
+            </div>
+            <b>{ok ? "Operasional" : "Perlu perhatian"}</b>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+}

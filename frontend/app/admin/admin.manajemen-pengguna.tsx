@@ -1,5 +1,437 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect -- remote loading state is synchronized by load() */
-import {FormEvent,useCallback,useEffect,useMemo,useState} from "react";import {adminFetch,AdminUser,Role} from "./admin-api";import {usePermission} from "./admin-context";import styles from "./admin.module.css";
-type Draft={name:string;email:string;password:string;confirm_password:string;role:string;status:string;must_change_password:boolean};const empty:Draft={name:"",email:"",password:"",confirm_password:"",role:"user",status:"active",must_change_password:true};
-export default function UsersPage(){const[users,setUsers]=useState<AdminUser[]>([]),[roles,setRoles]=useState<Role[]>([]),[query,setQuery]=useState(""),[role,setRole]=useState("all"),[status,setStatus]=useState("all"),[modal,setModal]=useState<"create"|"edit"|"reset"|"detail"|null>(null),[selected,setSelected]=useState<AdminUser|null>(null),[draft,setDraft]=useState<Draft>(empty),[reset,setReset]=useState({password:"",confirm_password:"",must_change_password:true}),[error,setError]=useState(""),[success,setSuccess]=useState(""),[loading,setLoading]=useState(true),[page,setPage]=useState(1),canCreate=usePermission("users.create"),canUpdate=usePermission("users.update"),canSuspend=usePermission("users.suspend"),canDelete=usePermission("users.delete");const load=useCallback(async()=>{setLoading(true);try{setUsers(await adminFetch<AdminUser[]>("/api/admin/users"));const catalog=await adminFetch<{roles:Role[]}>("/api/admin/roles/assignable");setRoles(catalog.roles)}catch(x){setError(x instanceof Error?x.message:"Data pengguna gagal dimuat.")}finally{setLoading(false)}},[]);useEffect(()=>{void load()},[load]);const filtered=useMemo(()=>users.filter(user=>(!query||`${user.name} ${user.email}`.toLowerCase().includes(query.toLowerCase()))&&(role==="all"||user.role===role)&&(status==="all"||user.status===status)),[users,query,role,status]),pages=Math.max(Math.ceil(filtered.length/10),1),rows=filtered.slice((page-1)*10,page*10);function show(kind:typeof modal,user?:AdminUser){setSelected(user??null);setDraft(user?{name:user.name,email:user.email,password:"",confirm_password:"",role:user.role,status:user.status,must_change_password:user.must_change_password}:empty);setModal(kind);setError("")}async function submit(e:FormEvent){e.preventDefault();if(draft.password!==draft.confirm_password){setError("Konfirmasi password tidak sama.");return}try{const body=modal==="create"?draft:{name:draft.name,email:draft.email,role:draft.role,status:draft.status,must_change_password:draft.must_change_password};await adminFetch(modal==="create"?"/api/admin/users":`/api/admin/users/${selected?.id}`,{method:modal==="create"?"POST":"PATCH",body:JSON.stringify(body)});setModal(null);setSuccess("Data pengguna berhasil disimpan.");await load()}catch(x){setError(x instanceof Error?x.message:"Data pengguna gagal disimpan.")}}async function resetPassword(e:FormEvent){e.preventDefault();if(!selected)return;try{await adminFetch(`/api/admin/users/${selected.id}/reset-password`,{method:"POST",body:JSON.stringify(reset)});setModal(null);setSuccess("Password berhasil direset dan sesi lama dicabut.")}catch(x){setError(x instanceof Error?x.message:"Password gagal direset.")}}async function toggle(user:AdminUser){const next=user.status==="active"?"suspended":"active";if(!confirm(`${next==="suspended"?"Blokir":"Aktifkan"} akun ${user.email}?`))return;try{await adminFetch(`/api/admin/users/${user.id}`,{method:"PATCH",body:JSON.stringify({status:next,suspension_reason:next==="suspended"?"Diblokir administrator":null})});await load()}catch(x){setError(x instanceof Error?x.message:"Status gagal diperbarui.")}}async function remove(user:AdminUser){if(!confirm(`Hapus akun ${user.email} secara lunak?`))return;try{await adminFetch(`/api/admin/users/${user.id}`,{method:"DELETE"});await load()}catch(x){setError(x instanceof Error?x.message:"Pengguna gagal dihapus.")}}return <><div className={styles.sectionHead}><div><span>INTERNAL ACCOUNTS · RBAC</span><h2>Manajemen pengguna</h2></div>{canCreate&&<button className={styles.createButton} onClick={()=>show("create")}>+ Tambah pengguna</button>}</div><div className={styles.userToolbar}><input value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}} placeholder="Cari nama atau email…"/><select value={role} onChange={e=>setRole(e.target.value)}><option value="all">Semua role</option>{roles.map(item=><option value={item.slug} key={item.id}>{item.name}</option>)}</select><select value={status} onChange={e=>setStatus(e.target.value)}><option value="all">Semua status</option><option value="active">Aktif</option><option value="suspended">Diblokir</option><option value="inactive">Nonaktif</option></select></div>{error&&<div className={styles.alert}>{error}</div>}{success&&<div className={styles.success}>{success}</div>}<section className={`${styles.panel} ${styles.userTable}`}><div className={styles.tableWrap}><table><thead><tr><th>Pengguna</th><th>Role</th><th>Status</th><th>Registrasi</th><th>Aksi</th></tr></thead><tbody>{rows.map(user=><tr key={user.id}><td><div className={styles.userIdentity}><i>{user.name.slice(0,2).toUpperCase()}</i><div><b>{user.name}</b><small>{user.email}</small></div></div></td><td>{user.role.replaceAll("_"," ")}</td><td>{user.status}</td><td>{new Date(user.created_at).toLocaleDateString("id-ID")}</td><td><div className={styles.userActions}><button onClick={()=>show("detail",user)}>Detail</button>{canUpdate&&<><button onClick={()=>show("edit",user)}>Edit</button><button onClick={()=>show("reset",user)}>Reset password</button></>}{canSuspend&&<button onClick={()=>void toggle(user)}>{user.status==="active"?"Blokir":"Aktifkan"}</button>}{canDelete&&<button className={styles.deleteButton} onClick={()=>void remove(user)}>Hapus</button>}</div></td></tr>)}</tbody></table></div>{loading&&<div className={styles.empty}>Memuat pengguna…</div>}<div className={styles.pagination}><button disabled={page<=1} onClick={()=>setPage(p=>p-1)}>Sebelumnya</button><span>Halaman {page} dari {pages}</span><button disabled={page>=pages} onClick={()=>setPage(p=>p+1)}>Berikutnya</button></div></section>{modal&&<div className={styles.modalBackdrop}><section className={styles.modal} role="dialog" aria-modal="true"><button className={styles.modalClose} onClick={()=>setModal(null)}>×</button><h2>{modal==="create"?"Tambah pengguna":selected?.name}</h2>{modal==="detail"&&selected?<div><p><b>Email:</b> {selected.email}</p><p><b>Role:</b> {selected.role}</p><p><b>Status:</b> {selected.status}</p><div className={styles.chips}>{selected.permissions.map(item=><small key={item}>{item}</small>)}</div></div>:modal==="reset"?<form onSubmit={resetPassword}><label>Password baru<input type="password" required minLength={10} value={reset.password} onChange={e=>setReset({...reset,password:e.target.value})}/></label><label>Konfirmasi password<input type="password" required minLength={10} value={reset.confirm_password} onChange={e=>setReset({...reset,confirm_password:e.target.value})}/></label><label><input type="checkbox" checked={reset.must_change_password} onChange={e=>setReset({...reset,must_change_password:e.target.checked})}/> Wajib ganti password</label><button>Reset password</button></form>:<form onSubmit={submit}><label>Nama<input required value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})}/></label><label>Email<input required type="email" value={draft.email} onChange={e=>setDraft({...draft,email:e.target.value})}/></label>{modal==="create"&&<><label>Password awal<input required minLength={10} type="password" value={draft.password} onChange={e=>setDraft({...draft,password:e.target.value})}/></label><label>Konfirmasi<input required minLength={10} type="password" value={draft.confirm_password} onChange={e=>setDraft({...draft,confirm_password:e.target.value})}/></label></>}<label>Role<select value={draft.role} onChange={e=>setDraft({...draft,role:e.target.value})}>{roles.map(item=><option value={item.slug} key={item.id}>{item.name}</option>)}</select></label><label>Status<select value={draft.status} onChange={e=>setDraft({...draft,status:e.target.value})}><option>active</option><option>suspended</option><option>inactive</option></select></label><button>Simpan</button></form>}</section></div>}</>}
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { Ban, CheckCircle2, Eye, KeyRound, Pencil, Trash2 } from "lucide-react";
+import { adminFetch, AdminUser, Role } from "./admin-api";
+import { usePermission } from "./admin-context";
+import styles from "./admin.module.css";
+type Draft = {
+  name: string;
+  email: string;
+  password: string;
+  confirm_password: string;
+  role: string;
+  status: string;
+  must_change_password: boolean;
+};
+const empty: Draft = {
+  name: "",
+  email: "",
+  password: "",
+  confirm_password: "",
+  role: "user",
+  status: "active",
+  must_change_password: true,
+};
+export default function UsersPage() {
+  const [users, setUsers] = useState<AdminUser[]>([]),
+    [roles, setRoles] = useState<Role[]>([]),
+    [query, setQuery] = useState(""),
+    [role, setRole] = useState("all"),
+    [status, setStatus] = useState("all"),
+    [modal, setModal] = useState<"create" | "edit" | "reset" | "detail" | null>(null),
+    [selected, setSelected] = useState<AdminUser | null>(null),
+    [draft, setDraft] = useState<Draft>(empty),
+    [reset, setReset] = useState({
+      password: "",
+      confirm_password: "",
+      must_change_password: true,
+    }),
+    [error, setError] = useState(""),
+    [success, setSuccess] = useState(""),
+    [loading, setLoading] = useState(true),
+    [page, setPage] = useState(1),
+    canCreate = usePermission("users.create"),
+    canUpdate = usePermission("users.update"),
+    canSuspend = usePermission("users.suspend"),
+    canDelete = usePermission("users.delete");
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      setUsers(await adminFetch<AdminUser[]>("/api/admin/users"));
+      const catalog = await adminFetch<{ roles: Role[] }>("/api/admin/roles/assignable");
+      setRoles(catalog.roles);
+    } catch (x) {
+      setError(x instanceof Error ? x.message : "Data pengguna gagal dimuat.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
+  const filtered = useMemo(
+      () =>
+        users.filter(
+          (user) =>
+            (!query || `${user.name} ${user.email}`.toLowerCase().includes(query.toLowerCase())) &&
+            (role === "all" || user.role === role) &&
+            (status === "all" || user.status === status),
+        ),
+      [users, query, role, status],
+    ),
+    pages = Math.max(Math.ceil(filtered.length / 10), 1),
+    rows = filtered.slice((page - 1) * 10, page * 10);
+  function show(kind: typeof modal, user?: AdminUser) {
+    setSelected(user ?? null);
+    setDraft(
+      user
+        ? {
+            name: user.name,
+            email: user.email,
+            password: "",
+            confirm_password: "",
+            role: user.role,
+            status: user.status,
+            must_change_password: user.must_change_password,
+          }
+        : empty,
+    );
+    setModal(kind);
+    setError("");
+  }
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    if (draft.password !== draft.confirm_password) {
+      setError("Konfirmasi password tidak sama.");
+      return;
+    }
+    try {
+      const body =
+        modal === "create"
+          ? draft
+          : {
+              name: draft.name,
+              email: draft.email,
+              role: draft.role,
+              status: draft.status,
+              must_change_password: draft.must_change_password,
+            };
+      await adminFetch(
+        modal === "create" ? "/api/admin/users" : `/api/admin/users/${selected?.id}`,
+        { method: modal === "create" ? "POST" : "PATCH", body: JSON.stringify(body) },
+      );
+      setModal(null);
+      setSuccess("Data pengguna berhasil disimpan.");
+      await load();
+    } catch (x) {
+      setError(x instanceof Error ? x.message : "Data pengguna gagal disimpan.");
+    }
+  }
+  async function resetPassword(e: FormEvent) {
+    e.preventDefault();
+    if (!selected) return;
+    try {
+      await adminFetch(`/api/admin/users/${selected.id}/reset-password`, {
+        method: "POST",
+        body: JSON.stringify(reset),
+      });
+      setModal(null);
+      setSuccess("Password berhasil direset dan sesi lama dicabut.");
+    } catch (x) {
+      setError(x instanceof Error ? x.message : "Password gagal direset.");
+    }
+  }
+  async function toggle(user: AdminUser) {
+    const next = user.status === "active" ? "suspended" : "active";
+    if (!confirm(`${next === "suspended" ? "Blokir" : "Aktifkan"} akun ${user.email}?`)) return;
+    try {
+      await adminFetch(`/api/admin/users/${user.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: next,
+          suspension_reason: next === "suspended" ? "Diblokir administrator" : null,
+        }),
+      });
+      await load();
+    } catch (x) {
+      setError(x instanceof Error ? x.message : "Status gagal diperbarui.");
+    }
+  }
+  async function remove(user: AdminUser) {
+    if (!confirm(`Hapus akun ${user.email} secara lunak?`)) return;
+    try {
+      await adminFetch(`/api/admin/users/${user.id}`, { method: "DELETE" });
+      await load();
+    } catch (x) {
+      setError(x instanceof Error ? x.message : "Pengguna gagal dihapus.");
+    }
+  }
+  return (
+    <>
+      <div className={styles.sectionHead}>
+        <div>
+          <span>INTERNAL ACCOUNTS · RBAC</span>
+          <h2>Manajemen pengguna</h2>
+        </div>
+        {canCreate && (
+          <button className={styles.createButton} onClick={() => show("create")}>
+            + Tambah pengguna
+          </button>
+        )}
+      </div>
+      <div className={styles.userToolbar}>
+        <input
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setPage(1);
+          }}
+          placeholder="Cari nama atau email…"
+        />
+        <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="all">Semua role</option>
+          {roles.map((item) => (
+            <option value={item.slug} key={item.id}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="all">Semua status</option>
+          <option value="active">Aktif</option>
+          <option value="suspended">Diblokir</option>
+          <option value="inactive">Nonaktif</option>
+        </select>
+      </div>
+      {error && <div className={styles.alert}>{error}</div>}
+      {success && <div className={styles.success}>{success}</div>}
+      <section className={`${styles.panel} ${styles.userTable}`}>
+        <div className={styles.tableWrap}>
+          <table>
+            <thead>
+              <tr>
+                <th>Pengguna</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Registrasi</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((user) => (
+                <tr key={user.id}>
+                  <td>
+                    <div className={styles.userIdentity}>
+                      <i>{user.name.slice(0, 2).toUpperCase()}</i>
+                      <div>
+                        <b>{user.name}</b>
+                        <small>{user.email}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{user.role.replaceAll("_", " ")}</td>
+                  <td>
+                    <span className={`${styles.userStatus} ${styles[`status_${user.status}`]}`}>
+                      {user.status === "active"
+                        ? "Aktif"
+                        : user.status === "suspended"
+                          ? "Diblokir"
+                          : "Nonaktif"}
+                    </span>
+                  </td>
+                  <td>{new Date(user.created_at).toLocaleDateString("id-ID")}</td>
+                  <td>
+                    <div className={styles.userActions}>
+                      <button
+                        title="Lihat detail"
+                        aria-label="Lihat detail"
+                        onClick={() => show("detail", user)}
+                      >
+                        <Eye aria-hidden="true" />
+                      </button>
+                      {canUpdate && (
+                        <>
+                          <button
+                            title="Edit pengguna"
+                            aria-label="Edit pengguna"
+                            onClick={() => show("edit", user)}
+                          >
+                            <Pencil aria-hidden="true" />
+                          </button>
+                          <button
+                            title="Reset password"
+                            aria-label="Reset password"
+                            onClick={() => show("reset", user)}
+                          >
+                            <KeyRound aria-hidden="true" />
+                          </button>
+                        </>
+                      )}
+                      {canSuspend && (
+                        <button
+                          title={user.status === "active" ? "Blokir pengguna" : "Aktifkan pengguna"}
+                          aria-label={
+                            user.status === "active" ? "Blokir pengguna" : "Aktifkan pengguna"
+                          }
+                          onClick={() => void toggle(user)}
+                        >
+                          {user.status === "active" ? (
+                            <Ban aria-hidden="true" />
+                          ) : (
+                            <CheckCircle2 aria-hidden="true" />
+                          )}
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          title="Hapus pengguna"
+                          aria-label="Hapus pengguna"
+                          className={styles.deleteButton}
+                          onClick={() => void remove(user)}
+                        >
+                          <Trash2 aria-hidden="true" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {loading && <div className={styles.empty}>Memuat pengguna…</div>}
+        <div className={styles.pagination}>
+          <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            Sebelumnya
+          </button>
+          <span>
+            Halaman {page} dari {pages}
+          </span>
+          <button disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
+            Berikutnya
+          </button>
+        </div>
+      </section>
+      {modal && (
+        <div className={styles.modalBackdrop}>
+          <section className={styles.modal} role="dialog" aria-modal="true">
+            <button className={styles.modalClose} onClick={() => setModal(null)}>
+              ×
+            </button>
+            <h2>{modal === "create" ? "Tambah pengguna" : selected?.name}</h2>
+            {modal === "detail" && selected ? (
+              <div>
+                <p>
+                  <b>Email:</b> {selected.email}
+                </p>
+                <p>
+                  <b>Role:</b> {selected.role}
+                </p>
+                <p>
+                  <b>Status:</b> {selected.status}
+                </p>
+                <div className={styles.chips}>
+                  {selected.permissions.map((item) => (
+                    <small key={item}>{item}</small>
+                  ))}
+                </div>
+              </div>
+            ) : modal === "reset" ? (
+              <form onSubmit={resetPassword}>
+                <label>
+                  Password baru
+                  <input
+                    type="password"
+                    required
+                    minLength={10}
+                    value={reset.password}
+                    onChange={(e) => setReset({ ...reset, password: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Konfirmasi password
+                  <input
+                    type="password"
+                    required
+                    minLength={10}
+                    value={reset.confirm_password}
+                    onChange={(e) => setReset({ ...reset, confirm_password: e.target.value })}
+                  />
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={reset.must_change_password}
+                    onChange={(e) => setReset({ ...reset, must_change_password: e.target.checked })}
+                  />{" "}
+                  Wajib ganti password
+                </label>
+                <button>Reset password</button>
+              </form>
+            ) : (
+              <form onSubmit={submit}>
+                <label>
+                  Nama
+                  <input
+                    required
+                    value={draft.name}
+                    onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Email
+                  <input
+                    required
+                    type="email"
+                    value={draft.email}
+                    onChange={(e) => setDraft({ ...draft, email: e.target.value })}
+                  />
+                </label>
+                {modal === "create" && (
+                  <>
+                    <label>
+                      Password awal
+                      <input
+                        required
+                        minLength={10}
+                        type="password"
+                        value={draft.password}
+                        onChange={(e) => setDraft({ ...draft, password: e.target.value })}
+                      />
+                    </label>
+                    <label>
+                      Konfirmasi
+                      <input
+                        required
+                        minLength={10}
+                        type="password"
+                        value={draft.confirm_password}
+                        onChange={(e) => setDraft({ ...draft, confirm_password: e.target.value })}
+                      />
+                    </label>
+                  </>
+                )}
+                <label>
+                  Role
+                  <select
+                    value={draft.role}
+                    onChange={(e) => setDraft({ ...draft, role: e.target.value })}
+                  >
+                    {roles.map((item) => (
+                      <option value={item.slug} key={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Status
+                  <select
+                    value={draft.status}
+                    onChange={(e) => setDraft({ ...draft, status: e.target.value })}
+                  >
+                    <option>active</option>
+                    <option>suspended</option>
+                    <option>inactive</option>
+                  </select>
+                </label>
+                <button>Simpan</button>
+              </form>
+            )}
+          </section>
+        </div>
+      )}
+    </>
+  );
+}

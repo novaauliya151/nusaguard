@@ -1,0 +1,13 @@
+﻿system,category,precision,recall,f1_score,support
+IndoBERT,Aman,1.0,0.9889,0.9944,90
+IndoBERT,Penipuan Investasi,1.0,1.0,1.0,90
+IndoBERT,Penipuan Rekrutmen,1.0,1.0,1.0,90
+IndoBERT,Penipuan Romansa,1.0,1.0,1.0,90
+IndoBERT,Phishing/Link Berbahaya,1.0,1.0,1.0,90
+IndoBERT,Social Engineering,0.989,1.0,0.9945,90
+IndoBERT + N-SEAE,Aman,0.6667,1.0,0.8,90
+IndoBERT + N-SEAE,Penipuan Investasi,1.0,0.7222,0.8387,90
+IndoBERT + N-SEAE,Penipuan Rekrutmen,1.0,0.7444,0.8535,90
+IndoBERT + N-SEAE,Penipuan Romansa,1.0,0.9556,0.9773,90
+IndoBERT + N-SEAE,Phishing/Link Berbahaya,1.0,1.0,1.0,90
+IndoBERT + N-SEAE,Social Engineering,0.9278,1.0,0.9626,90

@@ -1,0 +1,541 @@
+﻿source_id,expected,indobert_prediction,fusion_prediction,indobert_correct,fusion_correct,fusion_applied,model_confidence,fusion_confidence,indobert_time_ms,fusion_time_ms
+REK-4,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9993,1.0,13765.46,97.26
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9538,104.96,103.9
+AMN-8,Aman,Aman,Aman,True,True,False,0.9987,0.9987,95.15,94.15
+AMN-5,Aman,Aman,Aman,True,True,False,0.9988,0.9988,106.18,89.39
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8492,122.04,103.85
+AMN-5,Aman,Aman,Aman,True,True,False,0.9988,0.9988,97.01,89.83
+ROM-8,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8897,99.2,88.68
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8649,97.46,100.78
+SOC-5,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,91.59,90.05
+INV-5,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9981,0.8612,98.41,82.74
+INV-10,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8587,77.52,88.82
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,84.88,95.33
+REK-6,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,99.45,86.02
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9228,81.85,90.1
+AMN-1,Aman,Aman,Aman,True,True,False,0.9988,0.9988,87.16,80.48
+REK-5,Penipuan Rekrutmen,Penipuan Rekrutmen,Social Engineering,True,False,True,0.9992,0.2363,119.8,104.07
+SOC-6,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8657,98.42,103.77
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9388,91.34,158.69
+ROM-3,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,100.02,94.93
+ROM-H9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.999,0.8937,70.84,68.6
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,93.24,85.04
+REK-7,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8578,78.98,82.28
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9991,0.8834,118.96,106.73
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,103.88,94.89
+SOC-5,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,108.21,94.18
+REK-6,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,118.56,110.01
+ROM-5,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8919,134.69,132.7
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9726,113.97,109.59
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8566,115.08,122.44
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8563,109.38,107.75
+AMN-6,Aman,Aman,Aman,True,True,False,0.9984,0.9984,106.07,100.55
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8583,103.88,122.34
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,105.31,98.74
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8566,104.14,82.73
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,100.33,114.44
+AMN-6,Aman,Aman,Aman,True,True,False,0.9985,0.9985,90.64,72.56
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9985,1.0,96.28,83.97
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9991,101.45,92.57
+AMN-7,Aman,Aman,Aman,True,True,False,0.9989,0.9989,96.47,87.33
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8563,81.51,87.02
+REK-9,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,85.96,84.98
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9613,92.7,86.07
+AMN-2,Aman,Aman,Aman,True,True,False,0.9987,0.9987,94.39,94.93
+AMN-8,Aman,Aman,Aman,True,True,False,0.9987,0.9987,90.63,80.48
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8563,105.02,93.78
+AMN-8,Aman,Aman,Aman,True,True,False,0.9987,0.9987,89.41,89.25
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8919,112.84,110.52
+REK-9,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,90.98,90.12
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,87.14,89.66
+INV-5,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9981,0.8611,101.86,86.4
+SOC-5,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8563,97.31,92.67
+INV-5,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9981,0.8657,89.44,79.84
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9991,0.8564,76.39,88.28
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.9589,98.79,111.58
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,118.33,110.85
+ROM-2,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,97.03,91.9
+ROM-2,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8566,103.37,129.11
+REK-10,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9992,1.0,81.74,76.4
+INV-6,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8661,90.87,75.32
+AMN-4,Aman,Aman,Aman,True,True,False,0.9987,0.9987,85.32,154.82
+AMN-5,Aman,Aman,Aman,True,True,False,0.9988,0.9988,82.27,83.02
+REK-6,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,111.09,91.49
+ROM-3,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,96.57,80.42
+AMN-3,Aman,Aman,Aman,True,True,False,0.9989,0.9989,89.62,96.39
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8565,86.43,91.3
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,91.14,92.13
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9991,95.45,91.78
+REK-7,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8578,77.06,83.52
+PHI-2,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.895,101.49,88.58
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8564,83.98,85.03
+SOC-2,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8562,82.84,90.65
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9651,92.18,80.82
+AMN-9,Aman,Aman,Aman,True,True,False,0.9986,0.9986,82.77,81.98
+REK-10,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9993,1.0,75.28,75.11
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,87.35,89.39
+INV-6,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8661,95.21,86.92
+ROM-7,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9991,0.8493,111.25,78.2
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9227,72.58,79.82
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.895,107.55,98.34
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,118.51,111.72
+AMN-1,Aman,Aman,Aman,True,True,False,0.9989,0.9989,94.87,84.6
+AMN-3,Aman,Aman,Aman,True,True,False,0.9989,0.9989,90.35,98.33
+AMN-2,Aman,Aman,Aman,True,True,False,0.9986,0.9986,99.94,87.97
+REK-4,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9992,1.0,77.08,81.38
+SOC-6,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8994,78.48,74.55
+ROM-2,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,88.89,91.15
+AMN-2,Aman,Aman,Aman,True,True,False,0.9988,0.9988,103.22,85.63
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,91.99,101.97
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8836,95.2,87.13
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9991,92.08,91.77
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9991,0.8834,82.02,87.41
+AMN-6,Aman,Aman,Aman,True,True,False,0.9985,0.9985,82.48,76.92
+ROM-2,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,92.81,88.88
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,86.15,78.95
+INV-10,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8587,78.35,74.16
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8565,84.86,93.56
+SOC-4,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9834,78.11,77.2
+SOC-2,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,77.76,82.1
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.999,1.0,89.08,85.46
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9228,83.31,78.4
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9539,102.22,87.31
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8666,86.6,86.44
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,78.62,101.89
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,95.31,100.57
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,96.18,102.39
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9988,0.974,96.97,92.85
+AMN-8,Aman,Aman,Aman,True,True,False,0.9987,0.9987,82.0,90.36
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9986,0.8842,88.3,93.39
+REK-9,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,82.34,77.89
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9992,0.865,107.27,90.33
+AMN-7,Aman,Aman,Aman,True,True,False,0.9988,0.9988,83.76,84.68
+AMN-10,Aman,Aman,Aman,True,True,False,0.9988,0.9988,88.02,72.81
+ROM-4,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8602,100.9,83.92
+REK-9,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,82.11,84.11
+INV-1,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8704,88.14,87.15
+ROM-3,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,89.91,87.57
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9695,83.82,87.48
+ROM-8,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8897,80.88,77.0
+PHI-4,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,99.14,99.43
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9967,85.05,83.4
+ROM-2,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,95.99,94.89
+SOC-7,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8648,88.78,91.65
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9991,96.26,83.5
+ROM-3,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,88.85,85.28
+SOC-4,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9834,76.5,84.78
+SOC-H7,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9988,0.8773,83.66,93.2
+ROM-7,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9991,0.8493,94.31,84.09
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,92.42,76.74
+AMN-9,Aman,Aman,Aman,True,True,False,0.9986,0.9986,109.78,102.34
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,99.09,101.6
+REK-4,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9992,1.0,88.43,84.53
+INV-4,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8637,119.18,127.84
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,123.74,120.04
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9991,100.8,97.28
+ROM-6,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9992,0.8583,110.92,88.22
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8649,100.78,82.18
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,87.12,79.59
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,80.2,79.07
+ROM-7,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9991,0.8492,91.0,76.21
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,84.3,97.46
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.9538,101.96,100.26
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8563,89.66,105.05
+INV-10,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8587,82.65,75.89
+REK-9,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,78.61,85.17
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8565,75.85,86.51
+AMN-1,Aman,Aman,Aman,True,True,False,0.9989,0.9989,80.78,82.88
+INV-1,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8704,77.7,76.52
+INV-6,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9991,0.8662,77.69,70.94
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,106.57,106.85
+INV-4,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8637,89.67,92.6
+ROM-4,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8602,111.11,98.33
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,79.33,81.64
+ROM-3,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8566,84.35,101.09
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,114.17,113.13
+REK-9,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,101.13,91.0
+SOC-4,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9834,86.75,85.64
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9992,1.0,83.9,90.19
+PHI-5,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.8926,101.69,87.6
+AMN-5,Aman,Aman,Aman,True,True,False,0.9988,0.9988,81.47,90.87
+ROM-6,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8584,99.98,97.71
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,87.98,98.68
+REK-6,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,78.51,80.36
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9658,81.08,86.68
+REK-9,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,81.57,82.14
+INV-4,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8637,98.01,99.0
+AMN-7,Aman,Aman,Aman,True,True,False,0.9988,0.9988,86.72,84.32
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9986,0.8925,83.74,78.58
+AMN-2,Aman,Aman,Aman,True,True,False,0.9988,0.9988,92.75,92.39
+PHI-1,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,92.37,84.98
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9343,76.62,78.08
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,78.38,95.11
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8919,109.79,100.86
+ROM-6,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8651,80.38,78.73
+ROM-4,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8602,84.1,87.57
+AMN-8,Aman,Aman,Aman,True,True,False,0.9987,0.9987,71.03,69.15
+AMN-1,Aman,Aman,Aman,True,True,False,0.9988,0.9988,101.52,105.56
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9538,80.65,85.85
+INV-6,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8661,86.18,77.61
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,90.42,89.47
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9985,0.8879,83.42,90.73
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,102.48,92.56
+REK-7,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8578,94.54,98.57
+AMN-4,Aman,Aman,Aman,True,True,False,0.9986,0.9986,85.93,75.02
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.8648,99.06,92.12
+INV-5,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9982,1.0,91.59,91.74
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8621,82.1,85.37
+REK-6,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,105.71,83.29
+REK-6,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,79.27,75.87
+AMN-6,Aman,Aman,Aman,True,True,False,0.9985,0.9985,83.41,79.36
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,87.3,80.94
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9588,92.62,88.42
+ROM-4,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8602,84.09,90.37
+PHI-5,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9988,0.8925,103.16,104.39
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,88.86,103.2
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8565,94.03,87.18
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,79.65,80.11
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8837,85.42,104.77
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,83.01,88.12
+ROM-8,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8897,81.01,78.62
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9992,0.8583,115.76,111.01
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,100.6,87.62
+AMN-5,Aman,Aman,Aman,True,True,False,0.9988,0.9988,76.03,89.79
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9985,0.8571,86.27,95.92
+INV-1,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8704,101.04,93.89
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.865,100.62,103.6
+AMN-10,Aman,Aman,Aman,True,True,False,0.9988,0.9988,90.43,96.04
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,92.61,91.05
+SOC-4,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9834,83.18,76.95
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9538,89.86,95.71
+SOC-2,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8562,86.28,79.29
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9725,79.5,77.78
+SOC-7,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8648,83.21,86.9
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.8648,92.49,86.83
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,89.0,89.95
+SOC-2,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,81.27,89.6
+INV-6,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9991,0.8661,77.69,91.47
+SOC-6,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8657,89.15,112.06
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,91.37,77.61
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,94.94,88.33
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8493,119.98,94.09
+AMN-8,Aman,Aman,Aman,True,True,False,0.9986,0.9986,73.02,73.75
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9991,1.0,76.94,83.37
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.8648,90.02,98.69
+INV-1,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8704,89.27,90.04
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9603,88.11,88.7
+ROM-2,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,122.58,131.88
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9538,81.15,84.78
+REK-7,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8578,93.16,94.78
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9228,95.73,87.44
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8582,124.97,120.32
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,98.81,98.73
+INV-5,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9981,0.8574,88.42,91.88
+REK-5,Penipuan Rekrutmen,Penipuan Rekrutmen,Social Engineering,True,False,True,0.9992,0.2363,80.44,77.91
+AMN-4,Aman,Aman,Aman,True,True,False,0.9987,0.9987,81.3,74.66
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.8648,95.65,94.29
+AMN-1,Aman,Aman,Aman,True,True,False,0.9989,0.9989,82.25,80.46
+AMN-6,Aman,Aman,Aman,True,True,False,0.9985,0.9985,90.36,79.26
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,94.45,129.14
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8566,95.09,94.31
+AMN-2,Aman,Aman,Aman,True,True,False,0.9987,0.9987,87.83,96.23
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9992,83.61,86.6
+AMN-9,Aman,Aman,Aman,True,True,False,0.9987,0.9987,76.6,78.45
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,98.38,92.35
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8565,92.95,94.06
+PHI-1,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,83.38,86.92
+INV-6,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9991,0.8661,85.58,71.06
+INV-10,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8587,80.45,83.9
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9991,0.8564,83.73,87.72
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,85.4,93.74
+AMN-9,Aman,Aman,Aman,True,True,False,0.9985,0.9985,92.14,84.82
+REK-4,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9992,1.0,87.44,83.34
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9343,89.65,78.39
+ROM-3,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,81.94,95.04
+ROM-5,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8919,90.91,102.24
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8874,104.97,103.86
+SOC-6,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8657,96.35,86.7
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,89.35,91.47
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8563,100.0,92.21
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9388,80.23,77.91
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9538,79.38,83.62
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8651,83.49,82.84
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8649,103.07,108.55
+SOC-4,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9834,74.52,75.0
+ROM-2,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,101.03,95.78
+ROM-6,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8621,86.68,88.62
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9227,83.1,83.03
+ROM-4,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8602,85.03,93.47
+PHI-9,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8492,101.73,86.62
+PHI-5,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.8925,94.97,93.38
+PHI-4,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,102.95,111.23
+REK-5,Penipuan Rekrutmen,Penipuan Rekrutmen,Social Engineering,True,False,True,0.9993,0.2363,84.83,83.33
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9991,86.19,85.7
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,84.79,82.44
+PHI-4,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.895,90.8,103.91
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,86.01,106.18
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,100.77,104.18
+PHI-9,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8492,103.29,141.0
+REK-7,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8578,139.25,94.59
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9657,90.57,100.35
+AMN-9,Aman,Aman,Aman,True,True,False,0.9988,0.9988,97.46,99.25
+INV-1,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8704,127.19,100.17
+SOC-5,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8563,92.66,83.24
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9726,71.96,72.86
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9227,111.25,87.07
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8493,120.1,127.76
+REK-6,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,108.8,99.41
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,104.53,100.38
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,94.16,104.74
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8651,73.68,71.07
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.999,1.0,83.85,83.52
+AMN-10,Aman,Aman,Aman,True,True,False,0.9987,0.9987,80.09,92.32
+ROM-6,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9992,0.8621,97.28,91.05
+AMN-1,Aman,Aman,Aman,True,True,False,0.9988,0.9988,88.18,85.92
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.9588,77.04,93.08
+ROM-5,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8919,95.02,84.66
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.999,1.0,74.84,94.35
+AMN-1,Aman,Aman,Aman,True,True,False,0.9989,0.9989,85.7,89.63
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.865,116.73,84.3
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.999,1.0,98.99,102.25
+ROM-4,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8602,128.07,89.64
+ROM-7,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9991,0.8492,98.91,95.16
+PHI-4,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,98.11,91.37
+AMN-1,Aman,Aman,Aman,True,True,False,0.9988,0.9988,89.88,88.19
+ROM-8,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8897,84.41,95.69
+AMN-4,Aman,Aman,Aman,True,True,False,0.9987,0.9987,113.79,123.93
+PHI-1,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,103.83,103.63
+INV-6,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9991,0.8662,91.02,94.48
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9696,85.13,78.81
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.999,1.0,74.36,80.61
+REK-4,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9992,1.0,99.04,91.52
+SOC-6,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8656,97.71,85.65
+AMN-9,Aman,Aman,Aman,True,True,False,0.9987,0.9987,87.85,84.45
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9388,88.55,71.05
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.9538,84.79,86.96
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8649,95.07,80.04
+PHI-2,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.895,90.59,89.78
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9681,80.5,84.25
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.952,100.97,109.25
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9227,79.43,81.76
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8836,120.96,116.48
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9991,0.8917,79.49,90.51
+AMN-1,Aman,Aman,Aman,True,True,False,0.9988,0.9988,81.53,77.52
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9227,79.02,75.65
+AMN-1,Aman,Aman,Aman,True,True,False,0.9989,0.9989,78.16,80.57
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9696,74.5,81.37
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9539,102.63,98.68
+AMN-2,Aman,Aman,Aman,True,True,False,0.9987,0.9987,96.29,105.91
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9343,86.49,108.79
+ROM-6,Penipuan Romansa,Penipuan Romansa,Aman,True,False,True,0.9992,1.0,96.95,102.73
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,103.34,103.86
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,108.71,118.9
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9991,122.12,132.08
+SOC-7,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8648,112.07,107.41
+REK-7,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8578,100.41,108.43
+AMN-1,Aman,Aman,Aman,True,True,False,0.9989,0.9989,102.36,133.58
+ROM-8,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8897,131.5,126.01
+AMN-2,Aman,Aman,Aman,True,True,False,0.9987,0.9987,160.95,243.55
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9985,0.8571,120.12,145.74
+PHI-5,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9988,0.8925,167.57,251.37
+REK-10,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9993,1.0,140.68,128.03
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9992,1.0,146.22,115.27
+AMN-3,Aman,Aman,Aman,True,True,False,0.9989,0.9989,128.86,158.13
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,205.9,173.07
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8565,143.92,158.35
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.865,118.89,104.19
+INV-1,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8704,132.33,138.23
+PHI-1,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,142.66,128.54
+PHI-5,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.8926,127.92,137.38
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9985,0.8909,119.89,123.64
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,124.44,128.79
+AMN-2,Aman,Aman,Aman,True,True,False,0.9988,0.9988,147.93,143.44
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8649,132.8,146.43
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,172.67,153.84
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9991,0.8565,161.3,181.65
+AMN-5,Aman,Aman,Aman,True,True,False,0.9988,0.9988,206.91,115.44
+ROM-6,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8584,105.43,110.62
+INV-1,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8704,104.09,102.52
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8492,126.87,137.03
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9991,0.8565,117.76,107.88
+AMN-5,Aman,Aman,Aman,True,True,False,0.9987,0.9987,93.89,103.06
+AMN-5,Aman,Aman,Aman,True,True,False,0.9988,0.9988,87.37,130.49
+PHI-4,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,159.88,136.64
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9538,123.77,88.37
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8563,100.03,80.82
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.9538,90.71,95.96
+AMN-7,Aman,Aman,Aman,True,True,False,0.9988,0.9988,100.68,101.43
+PHI-4,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,108.0,95.63
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,108.92,123.03
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8563,116.89,108.3
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8564,92.26,87.36
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8583,127.46,108.12
+PHI-2,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.8949,108.01,107.88
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,105.19,93.36
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,88.02,79.42
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8493,158.92,143.14
+AMN-H15,Aman,Social Engineering,Aman,False,True,True,0.9487,1.0,86.48,82.21
+ROM-7,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9991,0.8493,114.16,108.6
+REK-9,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,104.95,93.1
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.865,110.59,117.96
+AMN-1,Aman,Aman,Aman,True,True,False,0.9989,0.9989,110.57,120.43
+AMN-4,Aman,Aman,Aman,True,True,False,0.9987,0.9987,99.32,98.11
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,103.88,96.34
+PHI-9,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8492,108.44,97.85
+AMN-1,Aman,Aman,Aman,True,True,False,0.9987,0.9987,88.74,84.35
+REK-5,Penipuan Rekrutmen,Penipuan Rekrutmen,Social Engineering,True,False,True,0.9992,0.2363,89.61,88.21
+AMN-10,Aman,Aman,Aman,True,True,False,0.9987,0.9987,98.37,83.01
+ROM-7,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9992,0.8493,91.72,91.0
+REK-6,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,92.79,95.3
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,101.0,100.05
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,98.68,103.02
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9985,0.8572,85.69,97.85
+AMN-1,Aman,Aman,Aman,True,True,False,0.9989,0.9989,93.85,79.49
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,93.43,95.36
+SOC-7,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8648,72.72,83.33
+PHI-8,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9539,101.09,89.89
+AMN-2,Aman,Aman,Aman,True,True,False,0.9986,0.9986,107.68,117.53
+PHI-H4,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9985,0.8487,93.08,92.09
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9388,96.79,94.53
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,121.97,111.38
+ROM-5,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8919,94.19,89.45
+REK-7,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8578,106.94,99.43
+INV-5,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9981,1.0,89.98,100.53
+ROM-6,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9991,0.8665,99.25,102.99
+PHI-2,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.895,109.85,119.58
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.865,114.79,124.65
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,119.44,127.14
+REK-6,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,101.18,99.16
+SOC-5,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8562,108.54,106.84
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9986,0.891,89.25,103.84
+ROM-8,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8897,113.51,103.15
+INV-5,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9981,0.8657,115.49,113.2
+PHI-1,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,118.94,123.89
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,87.74,116.9
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9991,1.0,142.38,121.81
+REK-4,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9993,1.0,108.77,110.36
+INV-5,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9981,1.0,106.56,111.7
+INV-10,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8587,100.41,110.92
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.9589,134.3,113.15
+AMN-4,Aman,Aman,Aman,True,True,False,0.9986,0.9986,91.23,98.05
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8665,102.45,105.96
+AMN-9,Aman,Aman,Aman,True,True,False,0.9987,0.9987,108.89,96.43
+SOC-2,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9988,0.8562,99.86,100.84
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.999,1.0,99.22,99.84
+PHI-2,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.895,117.55,109.43
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.999,1.0,100.53,99.89
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8563,108.7,103.85
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,87.74,88.33
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9992,0.8565,123.38,121.56
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9991,107.33,112.53
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9991,105.75,104.94
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9986,0.8879,107.62,108.97
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9986,0.8925,104.46,101.77
+SOC-2,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,106.18,103.68
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,104.87,109.84
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,102.31,106.4
+ROM-4,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8602,110.21,110.68
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9991,0.8564,103.25,119.96
+SOC-2,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,106.79,99.96
+ROM-8,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8897,93.2,102.57
+SOC-7,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8648,98.92,95.03
+ROM-5,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8919,117.14,106.25
+AMN-10,Aman,Aman,Aman,True,True,False,0.9988,0.9988,94.04,94.74
+ROM-6,Penipuan Romansa,Penipuan Romansa,Aman,True,False,True,0.9992,1.0,99.99,101.08
+AMN-9,Aman,Aman,Aman,True,True,False,0.9986,0.9986,103.13,101.22
+ROM-5,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8919,113.83,104.1
+REK-5,Penipuan Rekrutmen,Penipuan Rekrutmen,Social Engineering,True,False,True,0.9993,0.2363,107.85,102.36
+PHI-10,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.862,131.36,121.41
+REK-5,Penipuan Rekrutmen,Penipuan Rekrutmen,Social Engineering,True,False,True,0.9992,0.2363,97.65,101.7
+AMN-5,Aman,Aman,Aman,True,True,False,0.9987,0.9987,100.7,111.07
+REK-10,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9993,1.0,102.69,107.19
+SOC-4,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9834,100.69,91.47
+AMN-2,Aman,Aman,Aman,True,True,False,0.9987,0.9987,121.14,112.06
+INV-4,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8637,109.01,101.45
+SOC-7,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8648,95.24,98.44
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,105.73,112.41
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9651,99.64,113.95
+AMN-6,Aman,Aman,Aman,True,True,False,0.9986,0.9986,101.01,83.05
+SOC-6,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8657,87.11,92.4
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9227,87.81,97.94
+SOC-2,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8563,81.11,83.77
+AMN-5,Aman,Aman,Aman,True,True,False,0.9987,0.9987,109.26,101.08
+AMN-6,Aman,Aman,Aman,True,True,False,0.9986,0.9986,89.89,86.34
+AMN-H3,Aman,Aman,Aman,True,True,True,0.9957,0.65,58.28,0.13
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9986,0.8924,91.85,96.53
+AMN-6,Aman,Aman,Aman,True,True,False,0.9985,0.9985,80.47,90.41
+ROM-3,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,86.8,97.24
+ROM-1,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8874,118.97,103.36
+ROM-6,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9992,0.8651,93.7,80.38
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,84.52,86.37
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8566,84.71,97.09
+PHI-2,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.895,111.02,96.67
+INV-10,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8587,82.76,93.4
+AMN-1,Aman,Aman,Aman,True,True,False,0.9987,0.9987,81.57,84.17
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.8563,94.39,105.34
+PHI-1,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.895,109.65,113.36
+AMN-2,Aman,Aman,Aman,True,True,False,0.9987,0.9987,110.76,109.83
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.9604,115.78,104.43
+INV-5,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9981,1.0,87.87,100.74
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.999,1.0,102.5,91.83
+ROM-6,Penipuan Romansa,Penipuan Romansa,Aman,True,False,True,0.9992,1.0,105.87,117.33
+AMN-9,Aman,Aman,Aman,True,True,False,0.9987,0.9987,105.18,105.89
+PHI-9,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8492,117.88,124.74
+AMN-8,Aman,Aman,Aman,True,True,False,0.9986,0.9986,91.37,95.55
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8621,121.4,107.57
+INV-4,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8637,107.83,93.15
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,104.43,99.2
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9227,80.81,76.3
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.9604,93.8,100.77
+INV-3,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9986,0.8909,95.07,88.08
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8563,107.48,108.58
+SOC-7,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8648,87.04,81.31
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,96.33,104.08
+SOC-10,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9725,80.67,80.81
+REK-5,Penipuan Rekrutmen,Penipuan Rekrutmen,Social Engineering,True,False,True,0.9992,0.2363,92.81,84.21
+INV-9,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.999,1.0,70.86,82.12
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8951,109.42,105.61
+AMN-7,Aman,Aman,Aman,True,True,False,0.9988,0.9988,96.71,102.17
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9227,79.42,88.96
+REK-4,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9992,1.0,84.48,93.27
+INV-1,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8704,104.46,102.92
+PHI-6,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9989,0.8649,111.12,105.17
+AMN-5,Aman,Aman,Aman,True,True,False,0.9988,0.9988,92.99,87.54
+PHI-7,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8951,97.95,102.55
+PHI-2,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.895,115.66,108.7
+AMN-8,Aman,Aman,Aman,True,True,False,0.9986,0.9986,87.75,81.04
+ROM-9,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8567,100.83,97.38
+PHI-9,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.8492,118.66,111.1
+INV-4,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8637,93.75,104.63
+REK-9,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,88.72,85.02
+INV-4,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8637,97.26,109.04
+AMN-3,Aman,Aman,Aman,True,True,False,0.9988,0.9988,105.19,98.86
+AMN-8,Aman,Aman,Aman,True,True,False,0.9986,0.9986,80.62,82.72
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9994,0.8566,100.27,107.48
+AMN-3,Aman,Aman,Aman,True,True,False,0.9988,0.9988,87.74,98.35
+SOC-8,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8563,104.15,99.88
+AMN-1,Aman,Aman,Aman,True,True,False,0.9987,0.9987,78.76,80.91
+INV-7,Penipuan Investasi,Penipuan Investasi,Aman,True,False,True,0.9986,1.0,90.99,93.54
+AMN-9,Aman,Aman,Aman,True,True,False,0.9987,0.9987,94.39,103.47
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8872,94.25,105.57
+REK-2,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9991,0.8872,104.05,111.76
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,163.01,93.01
+SOC-3,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9343,109.75,98.97
+AMN-7,Aman,Aman,Aman,True,True,False,0.9989,0.9989,87.49,76.91
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,112.99,116.71
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.9991,0.9603,107.65,97.61
+SOC-9,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.9227,93.09,89.2
+REK-8,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9992,1.0,93.52,92.67
+INV-8,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.9989,0.8563,81.87,95.94
+PHI-3,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.9521,113.01,101.62
+PHI-9,Phishing/Link Berbahaya,Phishing/Link Berbahaya,Phishing/Link Berbahaya,True,True,False,0.999,0.8492,134.56,117.45
+REK-10,Penipuan Rekrutmen,Penipuan Rekrutmen,Aman,True,False,True,0.9993,1.0,87.27,95.5
+ROM-10,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9993,0.8566,102.55,136.19
+ROM-6,Penipuan Romansa,Penipuan Romansa,Aman,True,False,True,0.9992,1.0,121.56,110.41
+SOC-1,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.999,0.9967,134.94,132.1
+REK-3,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9993,0.8566,121.14,112.04
+ROM-7,Penipuan Romansa,Penipuan Romansa,Penipuan Romansa,True,True,False,0.9991,0.8492,103.25,103.92
+INV-2,Penipuan Investasi,Penipuan Investasi,Penipuan Investasi,True,True,False,0.999,0.8563,108.26,109.29
+SOC-7,Social Engineering,Social Engineering,Social Engineering,True,True,False,0.9989,0.8648,93.36,91.61
+REK-1,Penipuan Rekrutmen,Penipuan Rekrutmen,Penipuan Rekrutmen,True,True,False,0.9992,0.8566,109.64,109.06
+AMN-3,Aman,Aman,Aman,True,True,False,0.9988,0.9988,116.97,117.44

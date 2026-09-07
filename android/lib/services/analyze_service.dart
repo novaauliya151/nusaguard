@@ -9,6 +9,11 @@ class AnalyzeService {
     final r = await http.post(
       Uri.parse('$_apiUrl/api/analyze'),
       headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'text': text, 'source': source}),
+    ).timeout(const Duration(seconds: 60));
+    if (r.statusCode != 200) {
+      throw Exception('Analisis gagal (status ${r.statusCode})');
+    }
       body: jsonEncode({'message': text, 'source': source}),
     );
     final data = jsonDecode(r.body) as Map<String, dynamic>;

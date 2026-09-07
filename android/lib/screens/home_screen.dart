@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import '../models/analyze_result.dart';
+import '../models/history_entry.dart';
+import '../services/analyze_service.dart';
+import '../services/history_service.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -17,10 +22,13 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   AnalyzeResult? _result;
+  final AnalyzeService _analyzeService = AnalyzeService();
+  int _requestId = 0;
 
   Future<void> _handleAnalyze() async {
     final message = _controller.text.trim();
     if (message.isEmpty) return;
+    final requestId = ++_requestId;
 
     setState(() {
       _isLoading = true;
@@ -29,6 +37,39 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
+      final result = await _analyzeService.analyzeMessage(message, source: 'manual');
+      if (!mounted || requestId != _requestId) return;
+      setState(() => _result = result);
+
+      try {
+        await HistoryService.add(
+          HistoryEntry(
+            message: message,
+            result: result,
+            source: HistorySource.manual,
+          ),
+        );
+        if (mounted && requestId == _requestId) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Hasil tersimpan di Riwayat.')),
+          );
+        }
+      } catch (_) {
+        if (mounted && requestId == _requestId) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Hasil tampil, tetapi gagal disimpan ke Riwayat.'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() => _errorMessage = 'Tidak dapat terhubung ke server: $e');
+    } finally {
+      if (mounted && requestId == _requestId) {
+        setState(() => _isLoading = false);
+      }
       final r = await http.post(
         Uri.parse('$_apiUrl/api/analyze'),
         headers: {'Content-Type': 'application/json'},
@@ -100,6 +141,9 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             _header(result, scheme),
             const SizedBox(height: 16),
+            _riskSection(result, scheme),
+            const SizedBox(height: 16),
+            _explainableSection(result.nseaeScores, scheme),
             _scoreSection(result, scheme),
             const SizedBox(height: 16),
             _nseaeChips(result.nseaeScores),
@@ -139,6 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
+                _riskLabel(result.riskLevel),
                 'Kategori: ${result.kategoriDasar} · Risiko: ${result.riskLevel}',
                 style: TextStyle(color: scheme.onSurfaceVariant),
               ),
@@ -149,6 +194,124 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _riskSection(AnalyzeResult result, ColorScheme scheme) {
+    final percent = (result.riskScore.clamp(0, 1) * 100).round();
+    final color = _riskColor(result.riskLevel, scheme);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$percent%',
+            style: TextStyle(
+              fontSize: 34,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+          const Text(
+            'Perkiraan tingkat bahaya',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Semakin tinggi angkanya, semakin banyak tanda bahaya yang ditemukan.',
+            style: TextStyle(color: scheme.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _explainableSection(NseaeScores scores, ColorScheme scheme) {
+    final entries = <String, double>{
+      'Ada desakan untuk segera bertindak.': scores.urgency,
+      'Pesan mengatasnamakan pihak berwenang.': scores.authority,
+      'Pesan menggunakan ancaman atau rasa takut.': scores.fear,
+      'Pesan menawarkan hadiah atau keuntungan.': scores.reward,
+      'Pengirim mungkin menyamar sebagai orang lain.': scores.impersonation,
+      'Pesan meminta data rahasia atau informasi pribadi.':
+          scores.credentialRequest,
+    };
+
+    final visible = entries.entries.where((e) => e.value > 0).toList();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.psychology_alt_outlined, size: 22),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Mengapa hasilnya seperti ini?',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (visible.isEmpty)
+            Text(
+              'Tidak ditemukan tanda manipulasi yang kuat.',
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            )
+          else
+            ...visible.map(
+              (entry) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 18, color: scheme.primary),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(entry.key)),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _riskLabel(String riskLevel) {
+    switch (riskLevel) {
+      case 'HIGH':
+        return 'Risiko tinggi';
+      case 'MEDIUM':
+        return 'Risiko sedang';
+      default:
+        return 'Risiko rendah';
+    }
+  }
+
+  Color _riskColor(String riskLevel, ColorScheme scheme) {
+    switch (riskLevel) {
+      case 'HIGH':
+        return scheme.error;
+      case 'MEDIUM':
+        return Colors.orange.shade800;
+      default:
+        return Colors.green.shade700;
+    }
   // CATATAN: risk_score dan confidence dari backend sudah dalam skala
   // 0-100 (bukan 0-1), jadi TIDAK dikali 100 lagi di sini.
   Widget _scoreSection(AnalyzeResult result, ColorScheme scheme) {
@@ -236,6 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+                  'Yang sebaiknya kamu lakukan',
                   'Saran Tindakan:',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -253,4 +417,5 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 }

@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/history_entry.dart';
 
 class HistoryService {
   static const String _storageKey = 'nusaguard_history';
   static const int _maxEntries = 100;
+  static final ValueNotifier<int> changes = ValueNotifier<int>(0);
 
   static Future<List<HistoryEntry>> getAll() async {
     final prefs = await SharedPreferences.getInstance();
@@ -30,11 +32,13 @@ class HistoryService {
       _storageKey,
       existing.map((e) => jsonEncode(e.toJson())).toList(),
     );
+    changes.value++;
   }
 
   static Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_storageKey);
+    changes.value++;
   }
 
   static Future<void> deleteEntry(String id) async {
@@ -45,5 +49,6 @@ class HistoryService {
       _storageKey,
       existing.map((e) => jsonEncode(e.toJson())).toList(),
     );
+    changes.value++;
   }
 }

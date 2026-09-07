@@ -52,6 +52,24 @@ Buat akun admin awal dari terminal backend:
 .venv/Scripts/python -m scripts.create_admin
 ```
 
+Isi statistik demo lima kategori penipuan (tanpa kategori Aman):
+
+```powershell
+cd backend
+.\.venv\Scripts\python.exe -m scripts.seed_statistics
+```
+
+Seeder bersifat idempoten, memakai sumber `demo_seed`, dan menempatkan Phishing sebagai modus terbanyak tanpa menghapus statistik yang sudah ada.
+
+Isi contoh dataset komunitas anonim untuk kebutuhan demo lokal:
+
+```powershell
+cd backend
+.\.venv\Scripts\python.exe -m scripts.seed_community_dataset
+```
+
+Contoh seed memakai provenance `synthetic_community_seed` agar tidak disalahartikan sebagai laporan masyarakat nyata.
+
 User dan admin masuk melalui halaman yang sama, `http://localhost:3000/login`. Backend membaca role dari database: user diarahkan ke `/dashboard`, sedangkan admin diarahkan ke `/admin`. Tidak ada pilihan role pada formulir login dan seluruh endpoint `/api/admin/*` memverifikasi bearer token serta role admin pada setiap permintaan. Dashboard hanya menampilkan statistik agregat dan laporan yang dikirim pengguna dengan persetujuan; isi analisis biasa tetap tidak disimpan.
 
 Seluruh fitur admin berada pada `/admin` dan kode tiap fiturnya dipisahkan sebagai file datar, misalnya `admin.dashboard.tsx` dan `admin.manajemen-pengguna.tsx`. Manajemen pengguna menyediakan pencarian, filter, pembuatan melalui modal, edit profil/password/role, aktivasi atau pemblokiran, dan penghapusan akun.
