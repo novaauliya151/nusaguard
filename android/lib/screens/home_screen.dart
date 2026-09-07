@@ -3,6 +3,12 @@ import '../models/analyze_result.dart';
 import '../models/history_entry.dart';
 import '../services/analyze_service.dart';
 import '../services/history_service.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../models/analyze_result.dart';
+
+const _apiUrl = String.fromEnvironment('API_URL', defaultValue: 'http://10.0.2.2:8000');
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,6 +70,22 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted && requestId == _requestId) {
         setState(() => _isLoading = false);
       }
+      final r = await http.post(
+        Uri.parse('$_apiUrl/api/analyze'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'message': message, 'source': 'manual'}),
+      ).timeout(const Duration(seconds: 60));
+
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body) as Map<String, dynamic>;
+        setState(() => _result = AnalyzeResult.fromJson(data));
+      } else {
+        setState(() => _errorMessage = 'Gagal menganalisis (status ${r.statusCode}): ${r.body}');
+      }
+    } catch (e) {
+      setState(() => _errorMessage = 'Tidak dapat terhubung ke server: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -122,6 +144,11 @@ class _HomeScreenState extends State<HomeScreen> {
             _riskSection(result, scheme),
             const SizedBox(height: 16),
             _explainableSection(result.nseaeScores, scheme),
+            _scoreSection(result, scheme),
+            const SizedBox(height: 16),
+            _nseaeChips(result.nseaeScores),
+            const SizedBox(height: 16),
+            Text(result.explanation),
             const SizedBox(height: 16),
             _recommendedAction(result.recommendedAction, scheme),
           ],
@@ -157,6 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Text(
                 _riskLabel(result.riskLevel),
+                'Kategori: ${result.kategoriDasar} · Risiko: ${result.riskLevel}',
                 style: TextStyle(color: scheme.onSurfaceVariant),
               ),
             ],
@@ -284,6 +312,74 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return Colors.green.shade700;
     }
+  // CATATAN: risk_score dan confidence dari backend sudah dalam skala
+  // 0-100 (bukan 0-1), jadi TIDAK dikali 100 lagi di sini.
+  Widget _scoreSection(AnalyzeResult result, ColorScheme scheme) {
+    return Row(
+      children: [
+        _scoreChip('Risiko', result.riskScore, scheme),
+        const SizedBox(width: 8),
+        _scoreChip('Confidence', result.confidence, scheme),
+      ],
+    );
+  }
+
+  Widget _scoreChip(String label, double value, ColorScheme scheme) {
+    final percent = value.round();
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Text(
+              '$percent%',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: scheme.onSurface,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // CATATAN: nseae_scores juga skala 0-100, threshold disesuaikan jadi >30
+  // (bukan >0.3), dan tidak dikali 100 lagi.
+  Widget _nseaeChips(NseaeScores scores) {
+    final entries = <String, double>{
+      'Urgency': scores.urgency,
+      'Authority': scores.authority,
+      'Fear': scores.fear,
+      'Reward': scores.reward,
+      'Impersonation': scores.impersonation,
+      'Credential Request': scores.credentialRequest,
+    };
+
+    final visible = entries.entries.where((e) => e.value > 30).toList();
+
+    if (visible.isEmpty) return const SizedBox.shrink();
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: visible.map((e) {
+        final percent = e.value.round();
+        return Chip(
+          label: Text('${e.key}: $percent%'),
+          visualDensity: VisualDensity.compact,
+        );
+      }).toList(),
+    );
   }
 
   Widget _recommendedAction(String action, ColorScheme scheme) {
@@ -304,6 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   'Yang sebaiknya kamu lakukan',
+                  'Saran Tindakan:',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: scheme.onPrimaryContainer,
@@ -320,4 +417,5 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 }

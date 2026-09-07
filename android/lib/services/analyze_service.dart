@@ -14,6 +14,8 @@ class AnalyzeService {
     if (r.statusCode != 200) {
       throw Exception('Analisis gagal (status ${r.statusCode})');
     }
+      body: jsonEncode({'message': text, 'source': source}),
+    );
     final data = jsonDecode(r.body) as Map<String, dynamic>;
     return AnalyzeResult.fromJson(data);
   }

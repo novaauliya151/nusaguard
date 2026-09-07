@@ -29,6 +29,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _loadHistory() async {
     final entries = await HistoryService.getAll();
     if (!mounted) return;
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final entries = await HistoryService.getAll();
     setState(() {
       _entries = entries;
       _isLoading = false;
@@ -90,6 +95,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             const SizedBox(height: 4),
             Text(
               _riskLabel(result.riskLevel),
+              'Kategori: ${result.kategoriDasar} · Risiko: ${result.riskLevel}',
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
@@ -104,6 +110,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
             _scoreCard('Perkiraan tingkat bahaya', result.riskScore, scheme),
             const SizedBox(height: 16),
             _nseaeSection(scores, scheme),
+            Row(
+              children: [
+                _scoreCard('Risiko', result.riskScore, scheme),
+                const SizedBox(width: 8),
+                _scoreCard('Confidence', result.confidence, scheme),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _nseaeSection(scores),
+            const SizedBox(height: 16),
+            Text(result.explanation),
             const SizedBox(height: 16),
             _actionBanner(result.recommendedAction, scheme),
           ],
@@ -201,6 +218,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
       default:
         return 'Risiko rendah';
     }
+  }
+
+  Widget _nseaeSection(dynamic scores) {
+    final entries = <String, double>{
+      'Urgency': scores.urgency,
+      'Authority': scores.authority,
+      'Fear': scores.fear,
+      'Reward': scores.reward,
+      'Impersonation': scores.impersonation,
+      'Credential Request': scores.credentialRequest,
+    };
+    final visible = entries.entries.where((e) => e.value > 0.3).toList();
+    if (visible.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: visible.map((e) {
+        final percent = (e.value * 100).round();
+        return Chip(
+          label: Text('${e.key}: $percent%'),
+          visualDensity: VisualDensity.compact,
+        );
+      }).toList(),
+    );
   }
 
   Widget _actionBanner(String action, ColorScheme scheme) {
