@@ -36,7 +36,7 @@ def dataset_info() -> DatasetCollectionInfo:
         development_categories=6,
         development_samples_per_category=600,
         public_collection="Laporan sukarela yang telah mendapat persetujuan, ditinjau admin, dan dianonimkan.",
-        development_collection="Dataset sintetis untuk pelatihan dan evaluasi pengembangan model; bukan laporan masyarakat.",
+        development_collection="Dataset untuk pelatihan dan evaluasi pengembangan model; bukan laporan masyarakat.",
         development_downloadable=False,
     )
 

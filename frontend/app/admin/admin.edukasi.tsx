@@ -1,4 +1,322 @@
 "use client";
-import {ChangeEvent,FormEvent,useCallback,useEffect,useState} from "react";import {adminFetch} from "./admin-api";import {usePermission} from "./admin-context";import styles from "./admin.module.css";
-type Item={id:string;title:string;slug:string;category:string;description:string;summary:string|null;content:string|null;warning_signs:string[];anonymized_example:string|null;prevention:string[];response_steps:string[];thumbnail:string|null;image_alt:string|null;meta_title:string|null;meta_description:string|null;status:"draft"|"scheduled"|"published"|"archived";display_order:number;updated_at:string};const categories=["Aman","Phishing/Link Berbahaya","Social Engineering","Penipuan Investasi","Penipuan Rekrutmen","Penipuan Romansa"],blank:Omit<Item,"id"|"updated_at">={title:"",slug:"",category:categories[0],description:"",summary:"",content:"",warning_signs:[],anonymized_example:"",prevention:[],response_steps:[],thumbnail:"",image_alt:"",meta_title:"",meta_description:"",status:"draft",display_order:0};
-export default function EducationPage(){const[items,setItems]=useState<Item[]>([]),[open,setOpen]=useState(false),[editing,setEditing]=useState<Item|null>(null),[draft,setDraft]=useState(blank),[message,setMessage]=useState(""),canCreate=usePermission("education.create"),canUpdate=usePermission("education.update"),canPublish=usePermission("education.publish"),canDelete=usePermission("education.delete");const load=useCallback(()=>adminFetch<Item[]>("/api/admin/education").then(setItems).catch(e=>setMessage(e.message)),[]);useEffect(()=>{void load()},[load]);function show(item?:Item){setEditing(item??null);setDraft(item??blank);setOpen(true)}async function save(e:FormEvent){e.preventDefault();try{await adminFetch(editing?`/api/admin/education/${editing.id}`:"/api/admin/education",{method:editing?"PATCH":"POST",body:JSON.stringify({...draft,is_published:draft.status==="published"})});setOpen(false);setMessage("Konten berhasil disimpan.");await load()}catch(x){setMessage(x instanceof Error?x.message:"Konten gagal disimpan.")}}async function status(item:Item,next:Item["status"]){try{await adminFetch(`/api/admin/education/${item.id}`,{method:"PATCH",body:JSON.stringify({...item,status:next,is_published:next==="published"})});await load()}catch(x){setMessage(x instanceof Error?x.message:"Status gagal diubah.")}}async function archive(id:string){if(!confirm("Arsipkan konten ini?"))return;try{await adminFetch(`/api/admin/education/${id}`,{method:"DELETE"});await load()}catch(x){setMessage(x instanceof Error?x.message:"Arsip gagal.")}}async function upload(event:ChangeEvent<HTMLInputElement>){const file=event.target.files?.[0];if(!file)return;if(file.size>2_000_000){setMessage("Ukuran gambar maksimal 2 MB.");return}const reader=new FileReader();reader.onload=async()=>{try{const result=await adminFetch<{url:string}>("/api/admin/education/upload",{method:"POST",body:JSON.stringify({data_url:String(reader.result),alt_text:draft.image_alt||draft.title||"Ilustrasi edukasi"})});setDraft(current=>({...current,thumbnail:result.url}));setMessage("Gambar berhasil diunggah.")}catch(x){setMessage(x instanceof Error?x.message:"Unggah gagal.")}};reader.readAsDataURL(file)}return <><div className={styles.sectionHead}><div><span>PUBLIC EDUCATION CMS</span><h2>Konten edukasi</h2></div>{canCreate&&<button className={styles.createButton} onClick={()=>show()}>+ Tambah konten</button>}</div>{message&&<div className={message.includes("berhasil")?styles.success:styles.alert}>{message}</div>}<section className={`${styles.panel} ${styles.userTable}`}><div className={styles.tableWrap}><table><thead><tr><th>Judul</th><th>Kategori</th><th>Status</th><th>Diperbarui</th><th>Aksi</th></tr></thead><tbody>{items.map(item=><tr key={item.id}><td><b>{item.title}</b><small>/{item.slug}</small></td><td>{item.category}</td><td>{item.status}</td><td>{new Date(item.updated_at).toLocaleString("id-ID")}</td><td><div className={styles.userActions}>{canUpdate&&<button onClick={()=>show(item)}>Edit</button>}{canPublish&&<button onClick={()=>void status(item,item.status==="published"?"draft":"published")}>{item.status==="published"?"Batalkan publikasi":"Publikasikan"}</button>}{canDelete&&<button onClick={()=>void archive(item.id)}>Arsipkan</button>}</div></td></tr>)}</tbody></table></div></section>{open&&<div className={styles.modalBackdrop}><section className={`${styles.modal} ${styles.wideModal}`}><button className={styles.modalClose} onClick={()=>setOpen(false)}>×</button><h2>{editing?"Edit edukasi":"Konten edukasi baru"}</h2><form onSubmit={save}><div className={styles.formColumns}><label>Judul<input required value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value,slug:draft.slug||e.target.value.toLowerCase().replace(/[^a-z0-9]+/g,"-")})}/></label><label>Slug<input required value={draft.slug} onChange={e=>setDraft({...draft,slug:e.target.value})}/></label><label>Kategori<select value={draft.category} onChange={e=>setDraft({...draft,category:e.target.value})}>{categories.map(x=><option key={x}>{x}</option>)}</select></label><label>Status<select value={draft.status} onChange={e=>setDraft({...draft,status:e.target.value as Item["status"]})}><option>draft</option><option>scheduled</option><option>published</option><option>archived</option></select></label></div><label>Ringkasan<textarea value={draft.summary??""} onChange={e=>setDraft({...draft,summary:e.target.value})}/></label><label>Penjelasan utama<textarea required minLength={10} value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value,content:e.target.value})}/></label><label>Ciri-ciri (satu per baris)<textarea value={draft.warning_signs.join("\n")} onChange={e=>setDraft({...draft,warning_signs:e.target.value.split("\n").filter(Boolean)})}/></label><label>Pencegahan (satu per baris)<textarea value={draft.prevention.join("\n")} onChange={e=>setDraft({...draft,prevention:e.target.value.split("\n").filter(Boolean)})}/></label><label>Alt text<input value={draft.image_alt??""} onChange={e=>setDraft({...draft,image_alt:e.target.value})}/></label><label>Unggah thumbnail<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>void upload(e)}/></label>{draft.thumbnail&&<small>Thumbnail: {draft.thumbnail}</small>}<div className={styles.modalActions}><button type="button" onClick={()=>setOpen(false)}>Batal</button><button>Simpan konten</button></div></form></section></div>}</>}
+import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
+import { adminFetch } from "./admin-api";
+import { usePermission } from "./admin-context";
+import styles from "./admin.module.css";
+type Item = {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  description: string;
+  summary: string | null;
+  content: string | null;
+  warning_signs: string[];
+  anonymized_example: string | null;
+  prevention: string[];
+  response_steps: string[];
+  thumbnail: string | null;
+  image_alt: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  status: "draft" | "scheduled" | "published" | "archived";
+  display_order: number;
+  updated_at: string;
+};
+const categories = [
+    "Aman",
+    "Phishing/Link Berbahaya",
+    "Social Engineering",
+    "Penipuan Investasi",
+    "Penipuan Rekrutmen",
+    "Penipuan Romansa",
+  ],
+  blank: Omit<Item, "id" | "updated_at"> = {
+    title: "",
+    slug: "",
+    category: categories[0],
+    description: "",
+    summary: "",
+    content: "",
+    warning_signs: [],
+    anonymized_example: "",
+    prevention: [],
+    response_steps: [],
+    thumbnail: "",
+    image_alt: "",
+    meta_title: "",
+    meta_description: "",
+    status: "draft",
+    display_order: 0,
+  };
+export default function EducationPage() {
+  const [items, setItems] = useState<Item[]>([]),
+    [open, setOpen] = useState(false),
+    [editing, setEditing] = useState<Item | null>(null),
+    [draft, setDraft] = useState(blank),
+    [message, setMessage] = useState(""),
+    canCreate = usePermission("education.create"),
+    canUpdate = usePermission("education.update"),
+    canPublish = usePermission("education.publish"),
+    canDelete = usePermission("education.delete");
+  const load = useCallback(
+    () =>
+      adminFetch<Item[]>("/api/admin/education")
+        .then(setItems)
+        .catch((e) => setMessage(e.message)),
+    [],
+  );
+  useEffect(() => {
+    void load();
+  }, [load]);
+  function show(item?: Item) {
+    setEditing(item ?? null);
+    setDraft(item ?? blank);
+    setOpen(true);
+  }
+  async function save(e: FormEvent) {
+    e.preventDefault();
+    try {
+      await adminFetch(editing ? `/api/admin/education/${editing.id}` : "/api/admin/education", {
+        method: editing ? "PATCH" : "POST",
+        body: JSON.stringify({ ...draft, is_published: draft.status === "published" }),
+      });
+      setOpen(false);
+      setMessage("Konten berhasil disimpan.");
+      await load();
+    } catch (x) {
+      setMessage(x instanceof Error ? x.message : "Konten gagal disimpan.");
+    }
+  }
+  async function status(item: Item, next: Item["status"]) {
+    try {
+      await adminFetch(`/api/admin/education/${item.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ ...item, status: next, is_published: next === "published" }),
+      });
+      await load();
+    } catch (x) {
+      setMessage(x instanceof Error ? x.message : "Status gagal diubah.");
+    }
+  }
+  async function archive(id: string) {
+    if (!confirm("Arsipkan konten ini?")) return;
+    try {
+      await adminFetch(`/api/admin/education/${id}`, { method: "DELETE" });
+      await load();
+    } catch (x) {
+      setMessage(x instanceof Error ? x.message : "Arsip gagal.");
+    }
+  }
+  async function upload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2_000_000) {
+      setMessage("Ukuran gambar maksimal 2 MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const result = await adminFetch<{ url: string }>("/api/admin/education/upload", {
+          method: "POST",
+          body: JSON.stringify({
+            data_url: String(reader.result),
+            alt_text: draft.image_alt || draft.title || "Ilustrasi edukasi",
+          }),
+        });
+        setDraft((current) => ({ ...current, thumbnail: result.url }));
+        setMessage("Gambar berhasil diunggah.");
+      } catch (x) {
+        setMessage(x instanceof Error ? x.message : "Unggah gagal.");
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+  return (
+    <>
+      <div className={styles.sectionHead}>
+        <div>
+          <span>PUBLIC EDUCATION CMS</span>
+          <h2>Konten edukasi</h2>
+        </div>
+        {canCreate && (
+          <button className={styles.createButton} onClick={() => show()}>
+            + Tambah konten
+          </button>
+        )}
+      </div>
+      {message && (
+        <div className={message.includes("berhasil") ? styles.success : styles.alert}>
+          {message}
+        </div>
+      )}
+      <section className={`${styles.panel} ${styles.userTable}`}>
+        <div className={styles.tableWrap}>
+          <table>
+            <thead>
+              <tr>
+                <th>Judul</th>
+                <th>Kategori</th>
+                <th>Status</th>
+                <th>Diperbarui</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <b>{item.title}</b>
+                    <small>/{item.slug}</small>
+                  </td>
+                  <td>{item.category}</td>
+                  <td>{item.status}</td>
+                  <td>{new Date(item.updated_at).toLocaleString("id-ID")}</td>
+                  <td>
+                    <div className={styles.userActions}>
+                      {canUpdate && <button onClick={() => show(item)}>Edit</button>}
+                      {canPublish && (
+                        <button
+                          onClick={() =>
+                            void status(item, item.status === "published" ? "draft" : "published")
+                          }
+                        >
+                          {item.status === "published" ? "Batalkan publikasi" : "Publikasikan"}
+                        </button>
+                      )}
+                      {canDelete && <button onClick={() => void archive(item.id)}>Arsipkan</button>}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {open && (
+        <div className={styles.modalBackdrop}>
+          <section className={`${styles.modal} ${styles.wideModal}`}>
+            <button className={styles.modalClose} onClick={() => setOpen(false)}>
+              ×
+            </button>
+            <h2>{editing ? "Edit edukasi" : "Konten edukasi baru"}</h2>
+            <form onSubmit={save}>
+              <div className={styles.formColumns}>
+                <label>
+                  Judul
+                  <input
+                    required
+                    value={draft.title}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        title: e.target.value,
+                        slug:
+                          draft.slug || e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                      })
+                    }
+                  />
+                </label>
+                <label>
+                  Slug
+                  <input
+                    required
+                    value={draft.slug}
+                    onChange={(e) => setDraft({ ...draft, slug: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Kategori
+                  <select
+                    value={draft.category}
+                    onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+                  >
+                    {categories.map((x) => (
+                      <option key={x}>{x}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Status
+                  <select
+                    value={draft.status}
+                    onChange={(e) =>
+                      setDraft({ ...draft, status: e.target.value as Item["status"] })
+                    }
+                  >
+                    <option>draft</option>
+                    <option>scheduled</option>
+                    <option>published</option>
+                    <option>archived</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                Ringkasan
+                <textarea
+                  value={draft.summary ?? ""}
+                  onChange={(e) => setDraft({ ...draft, summary: e.target.value })}
+                />
+              </label>
+              <label>
+                Penjelasan utama
+                <textarea
+                  required
+                  minLength={10}
+                  value={draft.description}
+                  onChange={(e) =>
+                    setDraft({ ...draft, description: e.target.value, content: e.target.value })
+                  }
+                />
+              </label>
+              <label>
+                Ciri-ciri (satu per baris)
+                <textarea
+                  value={draft.warning_signs.join("\n")}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      warning_signs: e.target.value.split("\n").filter(Boolean),
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Pencegahan (satu per baris)
+                <textarea
+                  value={draft.prevention.join("\n")}
+                  onChange={(e) =>
+                    setDraft({ ...draft, prevention: e.target.value.split("\n").filter(Boolean) })
+                  }
+                />
+              </label>
+              <label>
+                Alt text
+                <input
+                  value={draft.image_alt ?? ""}
+                  onChange={(e) => setDraft({ ...draft, image_alt: e.target.value })}
+                />
+              </label>
+              <label>
+                Unggah thumbnail
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) => void upload(e)}
+                />
+              </label>
+              {draft.thumbnail && <small>Thumbnail: {draft.thumbnail}</small>}
+              <div className={styles.modalActions}>
+                <button type="button" onClick={() => setOpen(false)}>
+                  Batal
+                </button>
+                <button>Simpan konten</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+    </>
+  );
+}

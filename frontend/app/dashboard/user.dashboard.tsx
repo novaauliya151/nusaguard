@@ -1,3 +1,63 @@
-"use client";import {useEffect,useState} from "react";import {userFetch} from "./user-api";import styles from "./dashboard.module.css";
-type Data={total_analyses:number;risk_counts:Record<string,number>;total_reports:number;saved_guides:number;recent_histories:{id:string;safe_title:string;category:string;risk_level:string;risk_score:number;created_at:string}[];recent_reports:{id:string;category_suggested:string;status:string;created_at:string}[];privacy:{history_storage_mode:string;retention_period:string}};
-export default function UserDashboard({openAnalyze}:{openAnalyze:()=>void}){const[data,setData]=useState<Data|null>(null),[error,setError]=useState("");useEffect(()=>{userFetch<Data>("/api/user/dashboard").then(setData).catch(e=>setError(e.message))},[]);return <>{error&&<div className={styles.state}>{error}</div>}<div className={styles.hero}><div><p className={styles.kicker}>BERHENTI · PERIKSA · LINDUNGI</p><h2>Periksa kembali.<br/><em>Tetap pegang kendali.</em></h2><p>Riwayat hanya disimpan sesuai pilihan privasimu. Teks sensitif dianonimkan lebih dulu.</p><button onClick={openAnalyze}>Analisis Pesan Baru</button></div><div className={styles.shield}>N</div></div><div className={styles.metrics}>{[["Total analisis",data?.total_analyses??0],["Risiko tinggi",data?.risk_counts.HIGH??0],["Risiko sedang",data?.risk_counts.MEDIUM??0],["Risiko rendah",data?.risk_counts.LOW??0],["Laporan",data?.total_reports??0],["Panduan",data?.saved_guides??0]].map(([label,value])=><article key={label}><small>{label}</small><strong>{value}</strong></article>)}</div><div className={styles.columns}><section><h3>Riwayat terbaru</h3>{data?.recent_histories.length?data.recent_histories.map(row=><div className={styles.compact} key={row.id}><div><b>{row.safe_title}</b><small>{row.category} · {row.risk_level}</small></div><span>{Math.round(row.risk_score*100)}</span></div>):<div className={styles.state}>Belum ada aktivitas analisis.</div>}</section><section><h3>Status privasi</h3><div className={styles.privacyCard}><b>{data?.privacy.history_storage_mode==="ask"?"Selalu minta persetujuan":data?.privacy.history_storage_mode??"Memuat…"}</b><p>Retensi: {data?.privacy.retention_period.replaceAll("_"," ")??"—"}</p><p>Teks asli tidak disimpan dalam riwayat.</p></div><h3>Tips keamanan</h3><p>Jangan berikan OTP, periksa alamat tautan, dan jangan membuka APK dari pengirim tidak dikenal.</p></section></div></>}
+"use client";
+import { useEffect, useState } from "react";
+import { userFetch } from "./user-api";
+import styles from "./dashboard.module.css";
+type Data = {
+  total_analyses: number;
+  total_reports: number;
+};
+
+type UserDashboardProps = {
+  openAnalyze: () => void;
+  openReport: () => void;
+};
+
+export default function UserDashboard({ openAnalyze, openReport }: UserDashboardProps) {
+  const [data, setData] = useState<Data | null>(null),
+    [error, setError] = useState("");
+  useEffect(() => {
+    userFetch<Data>("/api/user/dashboard")
+      .then(setData)
+      .catch((e) => setError(e.message));
+  }, []);
+  return (
+    <section className={styles.userDashboard}>
+      {error && <div className={styles.state}>{error}</div>}
+      <div className={styles.pageHead}>
+        <div>
+          <p className={styles.kicker}>RINGKASAN AKTIVITAS</p>
+          <h2>Aktivitas akunmu</h2>
+          <p>Pantau jumlah analisis dan laporan yang sudah kamu buat.</p>
+        </div>
+      </div>
+      <div className={styles.dashboardMetrics}>
+        {[
+          {
+            label: "Total analisis",
+            value: data?.total_analyses ?? 0,
+            description: "Pesan yang telah kamu periksa",
+          },
+          {
+            label: "Total laporan",
+            value: data?.total_reports ?? 0,
+            description: "Laporan penipuan yang kamu kirim",
+          },
+        ].map((metric) => (
+          <article key={metric.label}>
+            <small>{metric.label}</small>
+            <strong>{metric.value}</strong>
+            <p>{metric.description}</p>
+          </article>
+        ))}
+      </div>
+      <div className={styles.quickActions}>
+        <div>
+          <p className={styles.kicker}>AKSI CEPAT</p>
+          <h3>Apa yang ingin kamu lakukan?</h3>
+        </div>
+        <button onClick={openAnalyze}>Analisis pesan</button>
+        <button onClick={openReport}>Buat laporan</button>
+      </div>
+    </section>
+  );
+}

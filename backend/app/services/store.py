@@ -61,7 +61,7 @@ class Store:
         total, counts = self.stats()
         month_prefix = datetime.now(timezone.utc).strftime("%Y-%m")
         with self.engine.connect() as db:
-            month_rows = db.execute(text("SELECT category,SUM(count) AS count FROM stats_daily WHERE day LIKE :month GROUP BY category ORDER BY count DESC"), {"month": f"{month_prefix}%"}).mappings().all()
+            month_rows = db.execute(text("SELECT category,SUM(count) AS count FROM stats_daily WHERE day LIKE :month AND category <> 'Aman' GROUP BY category ORDER BY count DESC"), {"month": f"{month_prefix}%"}).mappings().all()
             daily_rows = db.execute(text("SELECT day,SUM(count) AS count FROM stats_daily GROUP BY day ORDER BY day DESC LIMIT 14")).mappings().all()
         month_counts = {row["category"]: row["count"] for row in month_rows}
         return {"total": total, "counts": counts, "month_total": sum(month_counts.values()), "month_counts": month_counts, "top_category": month_rows[0]["category"] if month_rows else None, "daily": list(reversed([dict(row) for row in daily_rows])), "updated_at": datetime.now(timezone.utc)}
@@ -79,7 +79,7 @@ class Store:
             rows = db.execute(text("SELECT id,COALESCE(anonymized_text,'[BELUM DIANONIMKAN]') AS text,category_suggested,status,created_at FROM reports WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT :limit"), {"limit": limit}).mappings().all()
             daily = db.execute(text("SELECT day,SUM(count) AS count FROM stats_daily GROUP BY day ORDER BY day DESC LIMIT 14")).mappings().all()
             sources = db.execute(text("SELECT source,SUM(count) AS count FROM stats_daily GROUP BY source ORDER BY count DESC")).mappings().all()
-            reports_reviewed = db.execute(text("SELECT COUNT(*) FROM reports WHERE status IN ('reviewed','approved','dataset_candidate')")).scalar_one()
+            reports_reviewed = db.execute(text("SELECT COUNT(*) FROM reports WHERE status IN ('approved','dataset_candidate','published')")).scalar_one()
             candidates_total = db.execute(text("SELECT COUNT(*) FROM dataset_candidates WHERE is_archived=FALSE")).scalar_one()
             education_published = db.execute(text("SELECT COUNT(*) FROM education_items WHERE is_published=TRUE")).scalar_one()
             today = datetime.now(timezone.utc).date().isoformat()
