@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/analyze_result.dart';
-
-const _apiUrl = String.fromEnvironment('API_URL', defaultValue: 'http://10.0.2.2:8000');
+import 'api_config.dart';
 
 class AnalyzeService {
+  AnalyzeService() {
+    ensureProductionApiConfigured();
+  }
+
   Future<AnalyzeResult> analyzeMessage(String text, {String? source}) async {
     final r = await http.post(
-      Uri.parse('$_apiUrl/api/analyze'),
+      Uri.parse('$apiUrl/api/analyze'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'text': text, 'source': source}),
     ).timeout(const Duration(seconds: 60));

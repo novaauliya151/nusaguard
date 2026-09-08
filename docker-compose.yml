@@ -2,8 +2,11 @@ services:
   backend:
     build: ./backend
     environment:
+      APP_ENV: development
+      PORT: 8000
       DATABASE_URL: sqlite:////data/nusaguard.db
       CORS_ORIGINS: http://localhost:3000
+      ALLOWED_HOSTS: localhost,127.0.0.1
       NUSAGUARD_MODEL_REPO: ${NUSAGUARD_MODEL_REPO:-}
       NUSAGUARD_MODEL_REVISION: ${NUSAGUARD_MODEL_REVISION:-}
     ports: ["8000:8000"]

@@ -3,17 +3,20 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
 import '../models/user.dart';
-
-const _apiUrl = String.fromEnvironment('API_URL', defaultValue: 'http://10.0.2.2:8000');
+import 'api_config.dart';
 
 class AuthService {
   static const String _tokenKey = 'nusaguard_access_token';
   static const String _userKey = 'nusaguard_user';
 
+  AuthService() {
+    ensureProductionApiConfigured();
+  }
+
   Future<AuthResponse> register(String name, String email, String password) async {
     try {
       final r = await http.post(
-        Uri.parse('$_apiUrl/api/auth/register'),
+        Uri.parse('$apiUrl/api/auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'name': name, 'email': email, 'password': password}),
       );
@@ -35,7 +38,7 @@ class AuthService {
   Future<AuthResponse> login(String email, String password) async {
     try {
       final r = await http.post(
-        Uri.parse('$_apiUrl/api/auth/login'),
+        Uri.parse('$apiUrl/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
@@ -93,7 +96,7 @@ class AuthService {
     final token = await getToken();
     try {
       final r = await http.get(
-        Uri.parse('$_apiUrl/api/auth/me'),
+        Uri.parse('$apiUrl/api/auth/me'),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (r.statusCode == 200) {

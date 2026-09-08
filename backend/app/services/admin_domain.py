@@ -143,6 +143,9 @@ class AdminDomain:
         email, password = os.getenv("INITIAL_ADMIN_EMAIL"), os.getenv("INITIAL_ADMIN_PASSWORD")
         if not email or not password or self.store.get_user_by_email(email):
             return
+        strong = len(password) >= 14 and all((re.search(r"[a-z]", password), re.search(r"[A-Z]", password), re.search(r"\d", password), re.search(r"[^A-Za-z0-9]", password)))
+        if not strong:
+            raise RuntimeError("INITIAL_ADMIN_PASSWORD tidak memenuhi kebijakan kata sandi kuat.")
         self.store.create_user(os.getenv("INITIAL_ADMIN_NAME", "Super Admin"), email, password, "super_admin")
 
     def permissions_for(self, role: str) -> list[str]:
