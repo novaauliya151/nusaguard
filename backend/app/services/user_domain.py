@@ -66,7 +66,7 @@ class UserDomain:
     def privacy(self, user_id: str) -> dict:
         now = datetime.now(timezone.utc)
         with self.engine.begin() as db:
-            db.execute(text("INSERT INTO user_privacy_settings(id,user_id,created_at,updated_at) SELECT :id,:user,:now,:now WHERE NOT EXISTS(SELECT 1 FROM user_privacy_settings WHERE user_id=:user)"),{"id":str(uuid.uuid4()),"user":user_id,"now":now})
+            db.execute(text("INSERT INTO user_privacy_settings(id,user_id,created_at,updated_at) SELECT :id,CAST(:user AS VARCHAR(36)),:now,:now WHERE NOT EXISTS(SELECT 1 FROM user_privacy_settings WHERE user_id=:user)"),{"id":str(uuid.uuid4()),"user":user_id,"now":now})
             row=db.execute(text("SELECT * FROM user_privacy_settings WHERE user_id=:user"),{"user":user_id}).mappings().one()
         return dict(row)
 

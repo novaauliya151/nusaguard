@@ -46,7 +46,7 @@ class Store:
                 for column, definition in additions.items(): db.execute(text(f"ALTER TABLE reports ADD COLUMN IF NOT EXISTS {column} {definition}"))
             now = datetime.now(timezone.utc)
             for item_id, title, category, description, signs, prevention in DEFAULT_EDUCATION:
-                db.execute(text("INSERT INTO education_items(id,title,category,description,warning_signs,prevention,is_published,created_at,updated_at) SELECT :id,:title,:category,:description,:signs,:prevention,TRUE,:now,:now WHERE NOT EXISTS (SELECT 1 FROM education_items WHERE id=:id)"), {"id":item_id,"title":title,"category":category,"description":description,"signs":json.dumps(signs),"prevention":json.dumps(prevention),"now":now})
+                db.execute(text("INSERT INTO education_items(id,title,category,description,warning_signs,prevention,is_published,created_at,updated_at) VALUES (:id,:title,:category,:description,:signs,:prevention,TRUE,:now,:now) ON CONFLICT(id) DO NOTHING"), {"id":item_id,"title":title,"category":category,"description":description,"signs":json.dumps(signs),"prevention":json.dumps(prevention),"now":now})
     def increment(self, category: str, source: str = "unknown") -> None:
         day = datetime.now(timezone.utc).date().isoformat()
         safe_source = source[:30] if source else "unknown"

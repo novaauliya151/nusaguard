@@ -40,7 +40,12 @@ def _pipeline():
     default_path = Path(__file__).resolve().parents[2] / "model" / "indobert"
     model_path = Path(os.getenv("NUSAGUARD_MODEL_PATH", str(default_path)))
     if not (model_path / "config.json").exists():
-        model_repo = os.getenv("NUSAGUARD_MODEL_REPO", "indobenchmark/indobert-base-p1")
+        model_repo = os.getenv("NUSAGUARD_MODEL_REPO")
+        if not model_repo:
+            logging.getLogger(__name__).info(
+                "Model lokal tidak tersedia dan NUSAGUARD_MODEL_REPO belum dikonfigurasi; menggunakan fallback aturan."
+            )
+            return None
         try:
             from huggingface_hub import snapshot_download
             snapshot_download(
