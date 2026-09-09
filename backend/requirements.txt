@@ -8,4 +8,5 @@ psycopg[binary]
 scikit-learn
 torch
 transformers
+huggingface_hub
 

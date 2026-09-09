@@ -6,6 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request, Response
 from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from app.api.routes import admin, analyze, auth, content, report, statistics, user
@@ -24,8 +25,21 @@ async def lifespan(_: FastAPI):
         logger.info("model_warmup source=%s duration_ms=%.1f", source, (time.perf_counter()-started)*1000)
     yield
 
+app_env = os.getenv("APP_ENV", "development").casefold()
+origins = [item.strip().rstrip("/") for item in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if item.strip()]
+allowed_hosts = [item.strip() for item in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",") if item.strip()]
+database_url = os.getenv("DATABASE_URL", "sqlite:///nusaguard.db")
+
+if app_env == "production":
+    if not database_url.startswith(("postgresql://", "postgresql+psycopg://", "postgres://")):
+        raise RuntimeError("Production wajib menggunakan DATABASE_URL PostgreSQL.")
+    if not origins or "*" in origins or any(not origin.startswith("https://") for origin in origins):
+        raise RuntimeError("CORS_ORIGINS production harus berisi origin HTTPS eksplisit tanpa wildcard.")
+    if not allowed_hosts or "*" in allowed_hosts:
+        raise RuntimeError("ALLOWED_HOSTS production harus berisi hostname eksplisit.")
+
 app = FastAPI(title="NusaGuard API", version="1.0.0", description="Analisis pesan ephemeral: isi pesan tidak dicatat dalam log atau histori analisis.", lifespan=lifespan)
-origins = [item.strip() for item in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if item.strip()]
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"], allow_headers=["Content-Type", "Authorization"])
 os.makedirs("uploads/education", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")

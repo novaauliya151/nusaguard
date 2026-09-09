@@ -6,7 +6,17 @@ backend/.cache/
 backend/__pycache__/
 backend/**/__pycache__/
 backend/.env
+backend/.env.*
+!backend/.env.example
 backend/*.db
+backend/**/*.db
+*.sqlite
+*.sqlite3
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.*
 backend/*.pyc
 backend/uploads/*
 !backend/uploads/.gitkeep
@@ -28,6 +38,9 @@ dataset/training/*
 frontend/node_modules/
 frontend/.next/
 frontend/.env.local
+frontend/.env.*
+!frontend/.env.example
+!frontend/.env.production.example
 frontend/npm-debug.log*
 frontend/.npm-cache/
 
@@ -44,6 +57,10 @@ android/.flutter-plugins-dependencies
 android/.packages
 android/.pub-cache/
 android/.pub/
+android/.env*
+android/**/key.properties
+android/**/*.jks
+android/**/*.keystore
 
 # Platform yang nggak kepake
 android/ios/
