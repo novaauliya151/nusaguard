@@ -319,3 +319,17 @@
     flex-direction: column;
   }
 }
+
+/* Fix mobile drawer stacking and viewport height */
+@media (max-width: 900px) {
+  .header {
+    z-index: 102;
+    backdrop-filter: none;
+    background: var(--public-bg);
+  }
+  .nav {
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
