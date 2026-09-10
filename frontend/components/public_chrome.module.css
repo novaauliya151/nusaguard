@@ -97,6 +97,14 @@
   background: #173c32;
   color: #edf4ef !important;
 }
+.download {
+  padding: 11px 17px;
+  border: 1px solid #173c32;
+  border-radius: 7px;
+  color: #173c32 !important;
+  text-align: center;
+  white-space: nowrap;
+}
 .menuButton,
 .backdrop {
   display: none;
@@ -265,9 +273,11 @@
     background: var(--public-surface);
     transform: translateX(105%);
     transition: transform 0.22s ease;
+    pointer-events: none;
   }
   .navOpen {
     transform: translateX(0);
+    pointer-events: auto;
   }
   .nav a {
     padding: 13px 10px;
@@ -277,7 +287,8 @@
     bottom: 5px;
   }
   .nav .register,
-  .nav .login {
+  .nav .login,
+  .nav .download {
     margin-top: 6px;
     text-align: center;
   }
@@ -290,7 +301,7 @@
     display: block;
     position: fixed;
     inset: 0;
-    z-index: 101;
+    z-index: 100;
     border: 0;
     background: rgba(7, 25, 21, 0.58);
   }

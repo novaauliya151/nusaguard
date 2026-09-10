@@ -29,6 +29,14 @@ export default function HeaderBeranda() {
 
   return (
     <>
+      {open && (
+        <button
+          className={styles.backdrop}
+          type="button"
+          aria-label="Tutup menu"
+          onClick={() => setOpen(false)}
+        />
+      )}
       <header className={styles.header}>
         <Link className={styles.brand} href="/" onClick={() => setOpen(false)}>
           <Image
@@ -71,19 +79,19 @@ export default function HeaderBeranda() {
           <Link className={styles.login} href="/login" onClick={() => setOpen(false)}>
             Masuk
           </Link>
+          <a
+            className={styles.download}
+            href="/downloads/NusaGuard.apk"
+            download="NusaGuard.apk"
+            onClick={() => setOpen(false)}
+          >
+            Unduh Aplikasi
+          </a>
           <div className={styles.themeControl}>
             <AccessibilityControls compact />
           </div>
         </nav>
       </header>
-      {open && (
-        <button
-          className={styles.backdrop}
-          type="button"
-          aria-label="Tutup menu"
-          onClick={() => setOpen(false)}
-        />
-      )}
     </>
   );
 }
