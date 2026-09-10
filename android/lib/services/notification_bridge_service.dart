@@ -33,59 +33,79 @@ class NotificationBridgeService {
     });
     await startListenerService();
     _isInitialized = true;
-    developer.log('[NotificationBridge] Initialized successfully', name: 'NusaGuard');
+    developer.log('[NotificationBridge] Initialized successfully',
+        name: 'NusaGuard');
   }
 
   static Future<void> startListenerService() async {
     try {
-      developer.log('[NotificationBridge] Starting foreground listener service...', name: 'NusaGuard');
+      developer.log(
+          '[NotificationBridge] Starting foreground listener service...',
+          name: 'NusaGuard');
       await _channel.invokeMethod('startListenerService');
-      developer.log('[NotificationBridge] Foreground listener service started', name: 'NusaGuard');
+      developer.log('[NotificationBridge] Foreground listener service started',
+          name: 'NusaGuard');
     } catch (e) {
-      developer.log('[NotificationBridge] Failed to start listener service: $e', name: 'NusaGuard');
+      developer.log('[NotificationBridge] Failed to start listener service: $e',
+          name: 'NusaGuard');
     }
   }
 
   static Future<void> requestBatteryOptimizationExemption() async {
     try {
-      developer.log('[NotificationBridge] Requesting battery optimization exemption...', name: 'NusaGuard');
+      developer.log(
+          '[NotificationBridge] Requesting battery optimization exemption...',
+          name: 'NusaGuard');
       await _channel.invokeMethod('requestBatteryOptimizationExemption');
     } catch (e) {
-      developer.log('[NotificationBridge] Failed to request battery exemption: $e', name: 'NusaGuard');
+      developer.log(
+          '[NotificationBridge] Failed to request battery exemption: $e',
+          name: 'NusaGuard');
     }
   }
 
   static Future<bool> isBatteryOptimizationExempt() async {
     try {
-      final result = await _channel.invokeMethod<bool>('isBatteryOptimizationExempt');
+      final result =
+          await _channel.invokeMethod<bool>('isBatteryOptimizationExempt');
       return result ?? false;
     } catch (e) {
-      developer.log('[NotificationBridge] Failed to check battery exemption: $e', name: 'NusaGuard');
+      developer.log(
+          '[NotificationBridge] Failed to check battery exemption: $e',
+          name: 'NusaGuard');
       return false;
     }
   }
 
   static Future<void> _handleNotificationText(String payload) async {
-    developer.log('[NotificationBridge] Received notification payload: $payload', name: 'NusaGuard');
+    developer.log(
+        '[NotificationBridge] Received notification payload: $payload',
+        name: 'NusaGuard');
 
     final parts = payload.split('|');
     if (parts.length < 2) {
-      developer.log('[NotificationBridge] Invalid payload format (missing sender|text)', name: 'NusaGuard');
+      developer.log(
+          '[NotificationBridge] Invalid payload format (missing sender|text)',
+          name: 'NusaGuard');
       return;
     }
 
     final sender = parts[0].trim();
     final text = parts.sublist(1).join('|').trim();
 
-    developer.log('[NotificationBridge] Parsed - Sender: "$sender", Text length: ${text.length}', name: 'NusaGuard');
+    developer.log(
+        '[NotificationBridge] Parsed - Sender: "$sender", Text length: ${text.length}',
+        name: 'NusaGuard');
 
     if (text.isEmpty || text.length < 10) {
-      developer.log('[NotificationBridge] Text too short, skipping analysis', name: 'NusaGuard');
+      developer.log('[NotificationBridge] Text too short, skipping analysis',
+          name: 'NusaGuard');
       return;
     }
 
     try {
-      developer.log('[NotificationBridge] Sending to backend /api/analyze...', name: 'NusaGuard');
+      developer.log('[NotificationBridge] Sending to backend /api/analyze...',
+          name: 'NusaGuard');
       final result = await _analyzeService.analyzeMessage(
         text,
         source: 'android_notification',
@@ -111,10 +131,14 @@ class NotificationBridgeService {
             : 'Perhatian: Pesan Mencurigakan';
         final body = 'Dari: $sender\n${result.explanation}';
 
-        developer.log('[NotificationBridge] Showing warning notification: $title', name: 'NusaGuard');
+        developer.log(
+            '[NotificationBridge] Showing warning notification: $title',
+            name: 'NusaGuard');
         await _showWarningNotification(title, body, result);
       } else {
-        developer.log('[NotificationBridge] Risk level LOW - saved to history only, no notification', name: 'NusaGuard');
+        developer.log(
+            '[NotificationBridge] Risk level LOW - saved to history only, no notification',
+            name: 'NusaGuard');
       }
     } catch (e, stackTrace) {
       developer.log(
@@ -142,14 +166,18 @@ class NotificationBridgeService {
         'riskLevel': result.riskLevel,
         'sender': result.kategoriNusaGuard,
       });
-      developer.log('[NotificationBridge] Warning notification sent (id=$notificationId)', name: 'NusaGuard');
+      developer.log(
+          '[NotificationBridge] Warning notification sent (id=$notificationId)',
+          name: 'NusaGuard');
     } catch (e) {
-      developer.log('[NotificationBridge] Failed to show warning: $e', name: 'NusaGuard');
+      developer.log('[NotificationBridge] Failed to show warning: $e',
+          name: 'NusaGuard');
     }
   }
 
   static Future<void> openNotificationSettings() async {
-    developer.log('[NotificationBridge] Opening notification access settings', name: 'NusaGuard');
+    developer.log('[NotificationBridge] Opening notification access settings',
+        name: 'NusaGuard');
     await _channel.invokeMethod('openNotificationAccess');
   }
 }

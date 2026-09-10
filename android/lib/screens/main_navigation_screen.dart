@@ -29,18 +29,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (i) => setState(() => _selectedIndex = i),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.shield_outlined),
-            selectedIcon: Icon(Icons.shield),
+            icon: Image.asset('assets/images/logo_nusaguard.png',
+                width: 25, height: 25),
+            selectedIcon: Image.asset('assets/images/logo_nusaguard.png',
+                width: 29, height: 29),
             label: 'Analisis',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.history_outlined),
             selectedIcon: Icon(Icons.history),
             label: 'Riwayat',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.settings_outlined),
             selectedIcon: Icon(Icons.settings),
             label: 'Pengaturan',

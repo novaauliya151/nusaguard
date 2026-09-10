@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
 import '../services/notification_bridge_service.dart';
-import '../utils/seed_dummy_history.dart';
 import 'login_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -133,7 +132,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         _currentUser!.name,
@@ -190,12 +190,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.notifications_active_outlined, color: scheme.primary),
+                      Icon(Icons.notifications_active_outlined,
+                          color: scheme.primary),
                       const SizedBox(width: 12),
                       const Expanded(
                         child: Text(
                           'Deteksi Otomatis WhatsApp',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -236,28 +238,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Framework deteksi social engineering berbahasa Indonesia',
-                  style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+                  style:
+                      TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
-          const Divider(height: 16),
-          TextButton(
-            onPressed: () async {
-              final messenger = ScaffoldMessenger.of(context);
-              await seedDummyHistory();
-              if (mounted) {
-                messenger.showSnackBar(
-                  const SnackBar(content: Text('Data demo berhasil ditambahkan ke Riwayat')),
-                );
-              }
-            },
-            child: Text(
-              'Isi Data Demo (Testing)',
-              style: TextStyle(color: scheme.primary, fontWeight: FontWeight.w500),
-            ),
-          ),
         ],
       ),
     );

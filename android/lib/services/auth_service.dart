@@ -13,7 +13,8 @@ class AuthService {
     ensureProductionApiConfigured();
   }
 
-  Future<AuthResponse> register(String name, String email, String password) async {
+  Future<AuthResponse> register(
+      String name, String email, String password) async {
     try {
       final r = await http.post(
         Uri.parse('$apiUrl/api/auth/register'),
@@ -21,7 +22,8 @@ class AuthService {
         body: jsonEncode({'name': name, 'email': email, 'password': password}),
       );
       if (r.statusCode == 201) {
-        final auth = AuthResponse.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
+        final auth =
+            AuthResponse.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
         await _saveSession(auth);
         return auth;
       }
@@ -43,7 +45,8 @@ class AuthService {
         body: jsonEncode({'email': email, 'password': password}),
       );
       if (r.statusCode == 200) {
-        final auth = AuthResponse.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
+        final auth =
+            AuthResponse.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
         await _saveSession(auth);
         return auth;
       }

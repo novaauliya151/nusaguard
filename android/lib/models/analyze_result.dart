@@ -23,12 +23,6 @@ class NseaeScores {
       reward: (json['reward'] as num?)?.toDouble() ?? 0,
       impersonation: (json['impersonation'] as num?)?.toDouble() ?? 0,
       credentialRequest: (json['credential_request'] as num?)?.toDouble() ?? 0,
-      urgency: (json['urgency'] as num).toDouble(),
-      authority: (json['authority'] as num).toDouble(),
-      fear: (json['fear'] as num).toDouble(),
-      reward: (json['reward'] as num).toDouble(),
-      impersonation: (json['impersonation'] as num).toDouble(),
-      credentialRequest: (json['credential_request'] as num).toDouble(),
     );
   }
 
@@ -78,17 +72,8 @@ class AnalyzeResult {
       ),
       explanation: json['explanation'] as String? ?? '',
       recommendedAction:
-          (json['recommendation'] ?? json['recommended_action']) as String? ?? '',
-      kategoriDasar: json['kategori_dasar'] as String,
-      kategoriNusaGuard: json['kategori_nusaguard'] as String,
-      riskLevel: json['risk_level'] as String,
-      riskScore: (json['risk_score'] as num).toDouble(),
-      confidence: (json['confidence'] as num).toDouble(),
-      nseaeScores: NseaeScores.fromJson(
-        json['nseae_scores'] as Map<String, dynamic>,
-      ),
-      explanation: json['explanation'] as String,
-      recommendedAction: json['recommended_action'] as String,
+          (json['recommendation'] ?? json['recommended_action']) as String? ??
+              '',
     );
   }
 

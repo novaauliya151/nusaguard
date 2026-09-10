@@ -70,7 +70,12 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.shield_outlined, size: 72, color: scheme.primary),
+              Image.asset(
+                'assets/images/logo_nusaguard.png',
+                width: 88,
+                height: 88,
+                fit: BoxFit.contain,
+              ),
               const SizedBox(height: 16),
               Text(
                 'NusaGuard',

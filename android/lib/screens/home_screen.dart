@@ -3,12 +3,6 @@ import '../models/analyze_result.dart';
 import '../models/history_entry.dart';
 import '../services/analyze_service.dart';
 import '../services/history_service.dart';
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../models/analyze_result.dart';
-
-const _apiUrl = String.fromEnvironment('API_URL', defaultValue: 'http://10.0.2.2:8000');
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,7 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      final result = await _analyzeService.analyzeMessage(message, source: 'manual');
+      final result =
+          await _analyzeService.analyzeMessage(message, source: 'manual');
       if (!mounted || requestId != _requestId) return;
       setState(() => _result = result);
 
@@ -70,22 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted && requestId == _requestId) {
         setState(() => _isLoading = false);
       }
-      final r = await http.post(
-        Uri.parse('$_apiUrl/api/analyze'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'message': message, 'source': 'manual'}),
-      ).timeout(const Duration(seconds: 60));
-
-      if (r.statusCode == 200) {
-        final data = jsonDecode(r.body) as Map<String, dynamic>;
-        setState(() => _result = AnalyzeResult.fromJson(data));
-      } else {
-        setState(() => _errorMessage = 'Gagal menganalisis (status ${r.statusCode}): ${r.body}');
-      }
-    } catch (e) {
-      setState(() => _errorMessage = 'Tidak dapat terhubung ke server: $e');
-    } finally {
-      setState(() => _isLoading = false);
     }
   }
 
@@ -123,7 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
             if (_errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: Text(_errorMessage!, style: TextStyle(color: scheme.error)),
+                child:
+                    Text(_errorMessage!, style: TextStyle(color: scheme.error)),
               ),
             if (_result != null) _buildResultCard(_result!, scheme),
           ],
@@ -180,11 +160,11 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 result.kategoriNusaGuard,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
                 _riskLabel(result.riskLevel),
-                'Kategori: ${result.kategoriDasar} · Risiko: ${result.riskLevel}',
                 style: TextStyle(color: scheme.onSurfaceVariant),
               ),
             ],
@@ -280,7 +260,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.check_circle_outline, size: 18, color: scheme.primary),
+                    Icon(Icons.check_circle_outline,
+                        size: 18, color: scheme.primary),
                     const SizedBox(width: 8),
                     Expanded(child: Text(entry.key)),
                   ],
@@ -312,6 +293,8 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return Colors.green.shade700;
     }
+  }
+
   // CATATAN: risk_score dan confidence dari backend sudah dalam skala
   // 0-100 (bukan 0-1), jadi TIDAK dikali 100 lagi di sini.
   Widget _scoreSection(AnalyzeResult result, ColorScheme scheme) {
@@ -400,7 +383,6 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   'Yang sebaiknya kamu lakukan',
-                  'Saran Tindakan:',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: scheme.onPrimaryContainer,
@@ -417,5 +399,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
 }
