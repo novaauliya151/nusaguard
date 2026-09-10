@@ -29,11 +29,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _loadHistory() async {
     final entries = await HistoryService.getAll();
     if (!mounted) return;
-    _loadHistory();
-  }
-
-  Future<void> _loadHistory() async {
-    final entries = await HistoryService.getAll();
     setState(() {
       _entries = entries;
       _isLoading = false;
@@ -95,7 +90,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
             const SizedBox(height: 4),
             Text(
               _riskLabel(result.riskLevel),
-              'Kategori: ${result.kategoriDasar} · Risiko: ${result.riskLevel}',
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
@@ -110,15 +104,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
             _scoreCard('Perkiraan tingkat bahaya', result.riskScore, scheme),
             const SizedBox(height: 16),
             _nseaeSection(scores, scheme),
-            Row(
-              children: [
-                _scoreCard('Risiko', result.riskScore, scheme),
-                const SizedBox(width: 8),
-                _scoreCard('Confidence', result.confidence, scheme),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _nseaeSection(scores),
             const SizedBox(height: 16),
             Text(result.explanation),
             const SizedBox(height: 16),
@@ -131,29 +116,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _scoreCard(String label, double value, ColorScheme scheme) {
     final percent = (value * 100).round();
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Text(
-              '$percent%',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: scheme.onSurface,
-              ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '$percent%',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: scheme.onSurface,
             ),
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
-            ),
-          ],
-        ),
+          ),
+          Text(
+            label,
+            style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+          ),
+        ],
       ),
     );
   }
@@ -220,30 +203,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  Widget _nseaeSection(dynamic scores) {
-    final entries = <String, double>{
-      'Urgency': scores.urgency,
-      'Authority': scores.authority,
-      'Fear': scores.fear,
-      'Reward': scores.reward,
-      'Impersonation': scores.impersonation,
-      'Credential Request': scores.credentialRequest,
-    };
-    final visible = entries.entries.where((e) => e.value > 0.3).toList();
-    if (visible.isEmpty) return const SizedBox.shrink();
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: visible.map((e) {
-        final percent = (e.value * 100).round();
-        return Chip(
-          label: Text('${e.key}: $percent%'),
-          visualDensity: VisualDensity.compact,
-        );
-      }).toList(),
-    );
-  }
-
   Widget _actionBanner(String action, ColorScheme scheme) {
     return Container(
       width: double.infinity,
@@ -268,7 +227,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(action, style: TextStyle(color: scheme.onPrimaryContainer)),
+                Text(action,
+                    style: TextStyle(color: scheme.onPrimaryContainer)),
               ],
             ),
           ),
@@ -293,10 +253,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Hapus Semua Riwayat?'),
-                    content: const Text('Semua riwayat analisis akan dihapus secara permanen.'),
+                    content: const Text(
+                        'Semua riwayat analisis akan dihapus secara permanen.'),
                     actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
-                      TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Ya, Hapus')),
+                      TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Batal')),
+                      TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('Ya, Hapus')),
                     ],
                   ),
                 );
@@ -315,7 +280,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.history, size: 64, color: scheme.onSurfaceVariant.withValues(alpha: 0.4)),
+                      Icon(Icons.history,
+                          size: 64,
+                          color:
+                              scheme.onSurfaceVariant.withValues(alpha: 0.4)),
                       const SizedBox(height: 12),
                       Text(
                         'Belum ada riwayat analisis',
@@ -334,21 +302,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         : entry.message;
 
                     return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 4),
                       child: ListTile(
                         leading: Icon(
                           entry.source == HistorySource.notification
                               ? Icons.notifications
                               : Icons.edit_note,
                         ),
-                        title: Text(msg, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        title: Text(msg,
+                            maxLines: 2, overflow: TextOverflow.ellipsis),
                         subtitle: Text(
                           '${result.kategoriNusaGuard} · ${_formatTimestamp(entry.timestamp)}',
                         ),
                         trailing: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _riskColor(result.riskLevel).withValues(alpha: 0.15),
+                            color: _riskColor(result.riskLevel)
+                                .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(

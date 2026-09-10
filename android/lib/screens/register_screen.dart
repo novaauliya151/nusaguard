@@ -78,7 +78,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.shield_outlined, size: 72, color: scheme.primary),
+              Image.asset(
+                'assets/images/logo_nusaguard.png',
+                width: 88,
+                height: 88,
+                fit: BoxFit.contain,
+              ),
               const SizedBox(height: 16),
               Text(
                 'NusaGuard',
@@ -128,7 +133,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Minimal 8 karakter',
-                  style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+                  style:
+                      TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
                 ),
               ),
               if (_errorMessage != null) ...[

@@ -9,16 +9,16 @@ class AnalyzeService {
   }
 
   Future<AnalyzeResult> analyzeMessage(String text, {String? source}) async {
-    final r = await http.post(
-      Uri.parse('$apiUrl/api/analyze'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'text': text, 'source': source}),
-    ).timeout(const Duration(seconds: 60));
+    final r = await http
+        .post(
+          Uri.parse('$apiUrl/api/analyze'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'message': text, 'source': source}),
+        )
+        .timeout(const Duration(seconds: 60));
     if (r.statusCode != 200) {
       throw Exception('Analisis gagal (status ${r.statusCode})');
     }
-      body: jsonEncode({'message': text, 'source': source}),
-    );
     final data = jsonDecode(r.body) as Map<String, dynamic>;
     return AnalyzeResult.fromJson(data);
   }
